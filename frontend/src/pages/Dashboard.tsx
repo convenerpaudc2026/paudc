@@ -64,7 +64,12 @@ function TrophyIllustration({ className }: { className?: string }) {
 }
 
 /* ─── Animated Number Helper (Scroll-Triggered) ─── */
-function AnimatedNumber({ end, prefix = "", suffix = "", duration = 2000 }) {
+function AnimatedNumber({ end, prefix = "", suffix = "", duration = 2000 }: {
+    end: number;
+    prefix?: string;
+    suffix?: string;
+    duration?: number;
+}) {
     const [count, setCount] = useState(0);
     const [isVisible, setIsVisible] = useState(false);
     const numberRef = useRef(null);
@@ -93,8 +98,8 @@ function AnimatedNumber({ end, prefix = "", suffix = "", duration = 2000 }) {
     useEffect(() => {
         if (!isVisible) return; // Wait until it's on screen
 
-        let startTime = null;
-        const animate = (currentTime) => {
+        let startTime: number | null = null;
+        const animate = (currentTime: number) => {
             if (!startTime) startTime = currentTime;
             const progress = Math.min((currentTime - startTime) / duration, 1);
             // Smooth deceleration (cubic ease-out)

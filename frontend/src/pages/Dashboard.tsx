@@ -20,6 +20,9 @@ import continent from "../assets/continent.jpg";
 import heroThree from "../assets/hero-three.jpg";
 import heroFour from "../assets/hero-four.jpg";
 import LOGO_URL from "../assets/paudc.png";
+import vunalogo from "../assets/vunalogo.jpg";
+import vuef from "../assets/vuef.jpg";
+import kakaki from "../assets/kakaki.png";
 
 /* ─── simple SVG trophy illustration ─── */
 function TrophyIllustration({ className }: { className?: string }) {
@@ -211,7 +214,7 @@ export default function Dashboard() {
 
                             <a href="/register">
                                 <Button className="bg-[#C8A046] hover:bg-[#b08c3e] text-[#022512] font-bold shadow-sm rounded-xl px-6">
-                                    Register
+                                    Request an Invite
                                 </Button>
                             </a>
                         </div>
@@ -326,7 +329,7 @@ export default function Dashboard() {
                         <div className="flex flex-wrap justify-center gap-4 md:gap-6">
                             <Link to="/register">
                                 <button className="bg-[#C8A046] hover:bg-[#b08c3e] text-[#022512] rounded-full px-10 h-14 text-lg font-bold shadow-xl transition-colors">
-                                    Register Now
+                                    Request an invite
                                 </button>
                             </Link>
 
@@ -435,7 +438,7 @@ export default function Dashboard() {
                             A Continental Homecoming of Thought
                         </h2>
                         <p className="text-lg text-[#022512]/80 mb-6 leading-relaxed">
-                            PAUDC 2026 is more than a tournament — it is a continental
+                            PAUDC 2026 is more than a tournament, it is a continental
                             homecoming of thought. It represents a revival of Africa&apos;s
                             intellectual identity, where youth gather not only to debate but
                             to define the moral and civic fabric of the continent.
@@ -446,7 +449,7 @@ export default function Dashboard() {
                                 The Republic of Reason
                             </span>{" "}
                             captures the idea of an Africa governed by intellect rather than
-                            impulse — a place where dialogue shapes destiny.
+                            impulse , a place where dialogue shapes destiny.
                         </p>
                         <Link to="/about">
                             <button className="px-8 py-3 bg-[#1B5E3B] text-[#F6F0E1] rounded-full font-bold hover:bg-[#A4372C] transition-colors shadow-lg">
@@ -559,7 +562,7 @@ export default function Dashboard() {
                 <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center gap-16">
                     <div className="w-full md:w-5/12">
                         <img
-                            src="https://images.unsplash.com/photo-1511192336575-5a79af67a629?q=80&w=2064&auto=format&fit=crop"
+                            src={kakaki}
                             alt="Trumpet / Kakaki placeholder"
                             className="rounded-3xl shadow-2xl w-full object-cover h-[450px]"
                         />
@@ -569,16 +572,15 @@ export default function Dashboard() {
                             The Kakaki: Our Symbol
                         </h2>
                         <p className="text-lg opacity-90 mb-6 leading-relaxed">
-                            The Kakaki — the long royal trumpet of Northern Nigeria —
-                            traditionally played to herald kings, announce victories, and
-                            summon communities. It is both sound and statement — a call that
-                            commands attention and conveys dignity.
+                            The Kakaki, the long royal trumpet of Northern Nigeria, has historically been used to
+                            herald kings, announce victories, and summon communities. It is both sound and
+                            statement, a call that commands attention and conveys dignity
                         </p>
                         <p className="text-lg opacity-90 mb-8 leading-relaxed">
-                            Its inclusion as the central emblem connects deeply with the
-                            spirit of debate itself. The Kakaki does not whisper; it declares.
-                            It carries both grace and power, echoing across distance to unite
-                            the people it calls.
+                            Its place as the central emblem of PAUDC 2026 connects deeply with the spirit of
+                            debate itself. The Kakaki does not whisper; it declares. It carries both grace and
+                            power, its voice traveling across distance to gather people, unite them, and remind
+                            them that something meaningful is unfolding.
                         </p>
                         <blockquote className="border-l-4 border-[#C8A046] pl-6 py-2 text-2xl font-semibold italic text-[#C8A046]">
                             "When the Kakaki sounds in Abuja, it will awaken a generation."
@@ -600,59 +602,54 @@ export default function Dashboard() {
                     <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#f6f0e1] to-transparent z-10 pointer-events-none" />
                     <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#f6f0e1] to-transparent z-10 pointer-events-none" />
 
-                    <div className="flex items-center gap-16 animate-marquee w-max px-8">
-                        {[...Array(2)].map((_, setIdx) => (
-                            <div key={setIdx} className="flex items-center gap-16 shrink-0">
-                                <div className="flex items-center gap-3 font-bold text-xl text-[#022512] opacity-60 hover:opacity-100 transition-opacity">
-                                    <Building className="w-6 h-6" /> Institution One
-                                </div>
-                                <div className="flex items-center gap-3 font-bold text-xl text-[#022512] opacity-60 hover:opacity-100 transition-opacity">
-                                    <Globe className="w-6 h-6" /> Global Org
-                                </div>
-                                <div className="flex items-center gap-3 font-bold text-xl text-[#022512] opacity-60 hover:opacity-100 transition-opacity">
-                                    <Trophy className="w-6 h-6" /> Debate Union
-                                </div>
-                                <div className="flex items-center gap-3 font-bold text-xl text-[#022512] opacity-60 hover:opacity-100 transition-opacity">
-                                    <GraduationCap className="w-6 h-6" /> University Partner
-                                </div>
-                                <div className="flex items-center gap-3 font-bold text-xl text-[#022512] opacity-60 hover:opacity-100 transition-opacity">
-                                    <Mic className="w-6 h-6" /> Media Sponsor
-                                </div>
-                            </div>
-                        ))}
+                    <div className="flex items-center justify-center gap-16 px-8">
+                        <div className="flex items-center gap-16 shrink-0">
+
+                            {/* Partner 1 */}
+                            <div className="flex items-center gap-3 font-bold text-xl text-[#022512] opacity-100 hover:opacity-100 transition-opacity">
+                                <img
+                                    src={vuef}
+                                    alt="University Partner Logo"
+                                    className="w-10 h-auto object-contain"
+                                />
+                                Veritas University Endowment Fund                            </div>
+
+                            {/* Partner 2 */}
+                            <div className="flex items-center gap-3 font-bold text-xl text-[#022512] opacity-100 hover:opacity-100 transition-opacity">
+                                <img
+                                    src={vunalogo}
+                                    alt="Media Sponsor Logo"
+                                    className="w-10 h-auto object-contain"
+                                />
+                                Veritas University                            </div>
+
+                        </div>
+
                     </div>
                 </div>
-            </section>
+            </section >
 
             {/* ─── CTA SECTION ─── */}
-            <section className="relative z-10 bg-white py-24 text-center px-6">
+            < section className="relative z-10 bg-white py-24 text-center px-6" >
                 <h2 className="text-4xl md:text-5xl font-black mb-4 text-[#022512]">
                     Join the Republic of Reason
                 </h2>
                 <p className="text-lg text-[#022512]/70 max-w-2xl mx-auto mb-10">
                     Be part of Africa&apos;s most prestigious intellectual gathering.
-                    Register now to secure your place in history as we build Africa&apos;s
+                    Request an invite to secure your place in history as we build Africa&apos;s
                     future through debate.
                 </p>
                 <div className="flex flex-wrap justify-center gap-6 mb-6">
                     <a href="/register">
                         <button className="px-8 py-3 bg-[#C8A046] text-[#022512] rounded-full font-bold hover:bg-[#b08c3e] transition shadow-lg">
-                            Register Your Team
-                        </button>
-                    </a>
-                    <a href="/register">
-                        <button className="px-8 py-3 bg-white border border-[#A4372C] text-[#A4372C] rounded-full font-bold hover:bg-[#A4372C] hover:text-white transition shadow-sm">
-                            Register as Adjudicator
+                            Request an Invite
                         </button>
                     </a>
                 </div>
-                <p className="text-sm font-medium text-[#022512]/60 uppercase tracking-wide">
-                    Registration: $200 USD per participant
-                </p>
-            </section>
+            </section >
 
             {/* ─── FOOTER ─── */}
-            <Footer />
-        </div>
+            < Footer />
+        </div >
     );
 }

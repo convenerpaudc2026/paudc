@@ -108,59 +108,58 @@ export default function Schedule() {
       {/* Hero Section */}
       <section className="pt-32 pb-16 bg-gradient-to-br from-[#185E3B] to-[#124a2e]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6">
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6">
             Tournament Schedule
           </h1>
-          <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto">
+          <p className="text-base md:text-xl lg:text-2xl text-white/90 max-w-3xl mx-auto">
             December 5-13, 2026 • Veritas University, Abuja
           </p>
         </div>
       </section>
 
       {/* Schedule Content */}
-      <section className="py-20 bg-white">
+      <section className="py-12 md:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="space-y-12">
+          <div className="space-y-8 md:space-y-12">
             {scheduleData.map((daySchedule) => (
               <div key={daySchedule.date} className="relative pl-4 md:pl-0">
-                <div className="flex flex-col md:flex-row gap-6">
+                <div className="flex flex-col md:flex-row gap-4 md:gap-6">
                   {/* Date Sidebar */}
                   <div className="md:w-48 flex-shrink-0">
-                    <div className="sticky top-24 bg-white py-4">
-                      <h2 className="text-2xl font-bold text-gray-900">{daySchedule.day}</h2>
-                      <p className="text-gray-600">{daySchedule.date}</p>
+                    <div className="sticky top-24 bg-white py-2 md:py-4">
+                      <h2 className="text-xl md:text-2xl font-bold text-gray-900">{daySchedule.day}</h2>
+                      <p className="text-sm md:text-base text-gray-600">{daySchedule.date}</p>
                     </div>
                   </div>
 
                   {/* Events List */}
-                  <div className="flex-1 space-y-6">
+                  <div className="flex-1 space-y-4 md:space-y-6">
                     {daySchedule.events.map((event) => (
                       <Card key={event.id} className="border-l-4 border-l-[#C84B46] hover:shadow-md transition-shadow">
-                        <CardContent className="p-6">
-                          <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                            <div className="space-y-2">
-                              <h3 className="text-xl font-bold text-gray-900">{event.title}</h3>
-                              <p className="text-gray-600">{event.description}</p>
-                              
-                              <div className="flex flex-wrap gap-4 mt-4 text-sm text-gray-600">
-                                <div className="flex items-center gap-2">
-                                  <Clock className="h-4 w-4 text-[#C84B46]" />
+                        <CardContent className="p-4 md:p-6">
+                          <div className="flex flex-col md:flex-row md:items-start justify-between gap-3 md:gap-4">
+                            <div className="space-y-1 md:space-y-2">
+                              <h3 className="text-lg md:text-xl font-bold text-gray-900">{event.title}</h3>
+                              <p className="text-sm md:text-base text-gray-600">{event.description}</p>
+
+                              <div className="flex flex-wrap gap-3 md:gap-4 mt-3 md:mt-4 text-xs md:text-sm text-gray-600">
+                                <div className="flex items-center gap-1.5 md:gap-2">
+                                  <Clock className="h-3.5 w-3.5 md:h-4 md:w-4 text-[#C84B46]" />
                                   <span>{event.start_time} - {event.end_time}</span>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                  <MapPin className="h-4 w-4 text-[#C84B46]" />
+                                <div className="flex items-center gap-1.5 md:gap-2">
+                                  <MapPin className="h-3.5 w-3.5 md:h-4 md:w-4 text-[#C84B46]" />
                                   <span>{event.location}</span>
                                 </div>
                               </div>
                             </div>
-                            
+
                             <div className="flex-shrink-0">
-                              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                event.category === 'debate' ? 'bg-blue-100 text-blue-800' :
-                                event.category === 'academy' ? 'bg-purple-100 text-purple-800' :
-                                event.category === 'speaking' ? 'bg-green-100 text-green-800' :
-                                'bg-gray-100 text-gray-800'
-                              }`}>
+                              <span className={`px-2 md:px-3 py-1 rounded-full text-[10px] md:text-xs font-semibold ${event.category === 'debate' ? 'bg-blue-100 text-blue-800' :
+                                  event.category === 'academy' ? 'bg-purple-100 text-purple-800' :
+                                    event.category === 'speaking' ? 'bg-green-100 text-green-800' :
+                                      'bg-gray-100 text-gray-800'
+                                }`}>
                                 {event.category.toUpperCase()}
                               </span>
                             </div>

@@ -56,7 +56,7 @@ export default function Navbar() {
 
                         <a href="/register">
                             <Button className="bg-[#C8A046] hover:bg-[#b08c3e] text-[#022512] font-bold shadow-sm rounded-xl px-6">
-                                Register
+                                Request an invite
                             </Button>
                         </a>
                     </div>
@@ -90,11 +90,15 @@ export default function Navbar() {
                                 {link.name}
                             </Link>
                         ))}
-
                         <div className="pt-2 px-3">
                             <a href="/login" onClick={() => setIsOpen(false)}>
-                                <Button className="w-full bg-[#C8A046] hover:bg-[#b08c3e] text-[#022512] font-bold shadow-sm rounded-full">
+                                <Button className="w-full bg-[#F6F0E1] border-[0.5px] border-[#022512] text-[#022512] hover:bg-[#022512] hover:text-[#F6F0E1] transition-colors duration-300 font-bold shadow-sm rounded-xl mb-2">
                                     LMS Portal
+                                </Button>
+                            </a>
+                            <a href="/register" onClick={() => setIsOpen(false)}>
+                                <Button className="w-full bg-[#C8A046] hover:bg-[#b08c3e] text-[#022512] font-bold shadow-sm rounded-xl">
+                                    Request an Invite
                                 </Button>
                             </a>
                         </div>

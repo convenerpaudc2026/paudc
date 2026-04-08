@@ -32,36 +32,36 @@ export default function Resources() {
             <Navbar />
 
             {/* Hero Section */}
-            <section className="bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white pt-32 pb-20">
+            <section className="bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white pt-24 md:pt-32 pb-12 md:pb-20">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h1 className="text-5xl md:text-6xl font-bold mb-6">Resources & Training</h1>
-                    <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+                    <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6">Resources & Training</h1>
+                    <p className="text-base md:text-xl text-gray-300 max-w-2xl mx-auto">
                         Everything you need to prepare for PAUDC 2026, from comprehensive LMS courses to downloadable materials.
                     </p>
                 </div>
             </section>
 
-            <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="grid md:grid-cols-2 gap-8">
+            <section className="py-12 md:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="grid md:grid-cols-2 gap-6 md:gap-8">
                     {resourceCategories.map((category, idx) => (
                         <Card key={idx} className="border-2 border-gray-100 shadow-md">
-                            <CardHeader className="flex flex-row items-center gap-4 pb-2">
-                                <div className="p-3 bg-gray-50 rounded-lg">
+                            <CardHeader className="flex flex-row items-center gap-3 md:gap-4 pb-2">
+                                <div className="p-2 md:p-3 bg-gray-50 rounded-lg">
                                     {category.icon}
                                 </div>
                                 <div>
-                                    <CardTitle className="text-2xl font-bold text-gray-900">{category.title}</CardTitle>
-                                    <CardDescription className="text-gray-600">{category.description}</CardDescription>
+                                    <CardTitle className="text-lg md:text-2xl font-bold text-gray-900">{category.title}</CardTitle>
+                                    <CardDescription className="text-sm md:text-base text-gray-600">{category.description}</CardDescription>
                                 </div>
                             </CardHeader>
-                            <CardContent className="pt-6 space-y-4">
+                            <CardContent className="pt-4 md:pt-6 space-y-3 md:space-y-4">
                                 {category.items.map((item, itemIdx) => (
-                                    <div key={itemIdx} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                                        <div className="flex items-center gap-3">
-                                            {item.type === 'PDF' && <FileText className="h-5 w-5 text-red-500" />}
-                                            {item.type === 'XLSX' && <FileText className="h-5 w-5 text-green-600" />}
-                                            {item.type === 'LMS' && <Video className="h-5 w-5 text-blue-500" />}
-                                            <span className="font-semibold text-gray-800">{item.name}</span>
+                                    <div key={itemIdx} className="flex items-center justify-between p-3 md:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                        <div className="flex items-center gap-2 md:gap-3">
+                                            {item.type === 'PDF' && <FileText className="h-4 w-4 md:h-5 md:w-5 text-red-500" />}
+                                            {item.type === 'XLSX' && <FileText className="h-4 w-4 md:h-5 md:w-5 text-green-600" />}
+                                            {item.type === 'LMS' && <Video className="h-4 w-4 md:h-5 md:w-5 text-blue-500" />}
+                                            <span className="font-semibold text-sm md:text-base text-gray-800">{item.name}</span>
                                         </div>
 
                                         {item.type === 'LMS' ? (

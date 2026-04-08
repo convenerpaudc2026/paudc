@@ -123,43 +123,43 @@ export default function Register() {
             </div>
 
             {/* Hero Section */}
-            <section className="pt-32 pb-24 bg-[#1B5E3B] border-b-4 border-[#C8A046] relative z-10">
+            <section className="pt-24 md:pt-32 pb-16 md:pb-24 bg-[#1B5E3B] border-b-4 border-[#C8A046] relative z-10">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-[#F6F0E1]">
-                    <h1 className="text-5xl md:text-7xl font-extrabold mb-6 drop-shadow-sm">
+                    <h1 className="text-3xl md:text-5xl lg:text-7xl font-extrabold mb-4 md:mb-6 drop-shadow-sm">
                         Registration
                     </h1>
-                    <p className="text-xl md:text-2xl text-[#F6F0E1]/90 max-w-3xl mx-auto font-medium">
+                    <p className="text-base md:text-xl lg:text-2xl text-[#F6F0E1]/90 max-w-3xl mx-auto font-medium">
                         Join Africa's most prestigious debate championship
                     </p>
                 </div>
             </section>
 
             {/* Policy Section */}
-            <section className="py-24 relative z-10">
+            <section className="py-12 md:py-24 relative z-10">
                 <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-center gap-4 mb-12">
-                        <FileText className="w-10 h-10 text-[#A4372C]" />
-                        <h2 className="text-4xl font-bold text-[#1B5E3B]">Registration Policy</h2>
+                    <div className="flex items-center justify-center gap-3 md:gap-4 mb-8 md:mb-12">
+                        <FileText className="w-8 h-8 md:w-10 md:h-10 text-[#A4372C]" />
+                        <h2 className="text-2xl md:text-4xl font-bold text-[#1B5E3B]">Registration Policy</h2>
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-8">
+                    <div className="grid md:grid-cols-2 gap-6 md:gap-8">
                         <Card className="border border-[#1B5E3B]/20 shadow-lg bg-white/80 backdrop-blur-sm hover:border-[#1B5E3B] transition-colors">
-                            <CardContent className="p-8">
-                                <h3 className="text-2xl font-bold text-[#1B5E3B] mb-6 flex items-center gap-3">
-                                    <div className="p-2 bg-[#1B5E3B]/10 rounded-lg"><Building className="w-6 h-6" /></div>
+                            <CardContent className="p-6 md:p-8">
+                                <h3 className="text-lg md:text-2xl font-bold text-[#1B5E3B] mb-4 md:mb-6 flex items-center gap-2 md:gap-3">
+                                    <div className="p-1.5 md:p-2 bg-[#1B5E3B]/10 rounded-lg"><Building className="w-5 h-5 md:w-6 md:h-6" /></div>
                                     Team Eligibility
                                 </h3>
-                                <ul className="space-y-4 text-[#1B5E3B]/80 text-lg">
-                                    <li className="flex items-start gap-4">
-                                        <CheckCircle2 className="w-6 h-6 text-[#1B5E3B] flex-shrink-0 mt-0.5" />
+                                <ul className="space-y-3 md:space-y-4 text-[#1B5E3B]/80 text-sm md:text-lg">
+                                    <li className="flex items-start gap-3 md:gap-4">
+                                        <CheckCircle2 className="w-5 h-5 md:w-6 md:h-6 text-[#1B5E3B] flex-shrink-0 mt-0.5" />
                                         <span><strong>Composition:</strong> Each team must consist of exactly two speakers.</span>
                                     </li>
-                                    <li className="flex items-start gap-4">
-                                        <CheckCircle2 className="w-6 h-6 text-[#1B5E3B] flex-shrink-0 mt-0.5" />
+                                    <li className="flex items-start gap-3 md:gap-4">
+                                        <CheckCircle2 className="w-5 h-5 md:w-6 md:h-6 text-[#1B5E3B] flex-shrink-0 mt-0.5" />
                                         <span><strong>Institution:</strong> Both speakers must be registered students of the same university.</span>
                                     </li>
-                                    <li className="flex items-start gap-4">
-                                        <CheckCircle2 className="w-6 h-6 text-[#1B5E3B] flex-shrink-0 mt-0.5" />
+                                    <li className="flex items-start gap-3 md:gap-4">
+                                        <CheckCircle2 className="w-5 h-5 md:w-6 md:h-6 text-[#1B5E3B] flex-shrink-0 mt-0.5" />
                                         <span><strong>Age Limit:</strong> Participants must be 18 years or older.</span>
                                     </li>
                                 </ul>
@@ -167,17 +167,17 @@ export default function Register() {
                         </Card>
 
                         <Card className="border border-[#A4372C]/20 shadow-lg bg-white/80 backdrop-blur-sm hover:border-[#A4372C] transition-colors">
-                            <CardContent className="p-8">
-                                <h3 className="text-2xl font-bold text-[#A4372C] mb-6 flex items-center gap-3">
-                                    <div className="p-2 bg-[#A4372C]/10 rounded-lg"><User className="w-6 h-6" /></div>
+                            <CardContent className="p-6 md:p-8">
+                                <h3 className="text-lg md:text-2xl font-bold text-[#A4372C] mb-4 md:mb-6 flex items-center gap-2 md:gap-3">
+                                    <div className="p-1.5 md:p-2 bg-[#A4372C]/10 rounded-lg"><User className="w-5 h-5 md:w-6 md:h-6" /></div>
                                     Adjudicator Eligibility
                                 </h3>
-                                <ul className="space-y-4 text-[#1B5E3B]/80 text-lg">
-                                    <li className="flex items-start gap-4">
-                                        <CheckCircle2 className="w-6 h-6 text-[#A4372C] flex-shrink-0 mt-0.5" />
+                                <ul className="space-y-3 md:space-y-4 text-[#1B5E3B]/80 text-sm md:text-lg">
+                                    <li className="flex items-start gap-3 md:gap-4">
+                                        <CheckCircle2 className="w-5 h-5 md:w-6 md:h-6 text-[#A4372C] flex-shrink-0 mt-0.5" />
                                         <span><strong>Experience Level:</strong> Minimum 2 years of competitive debate experience.</span>
                                     </li>
-                                    <li className="flex items-start gap-4">
+                                    <li className="flex items-start gap-3 md:gap-4">
                                         <CheckCircle2 className="w-6 h-6 text-[#A4372C] flex-shrink-0 mt-0.5" />
                                         <span><strong>Training:</strong> All adjudicators must complete the pre-tournament certification.</span>
                                     </li>

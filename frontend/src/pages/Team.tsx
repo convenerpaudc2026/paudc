@@ -110,26 +110,26 @@ export default function Team() {
             <Navbar />
 
             {/* Hero Section */}
-            <section className="bg-gradient-to-br from-[#1B5E3B] to-[#0d301e] text-[#F6F0E1] pt-32 pb-24">
+            <section className="bg-gradient-to-br from-[#1B5E3B] to-[#0d301e] text-[#F6F0E1] pt-24 md:pt-32 pb-16 md:pb-24">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <div className="flex justify-center mb-8">
-                        <div className="p-5 bg-[#F6F0E1]/10 rounded-full border border-[#C8A046]/30 backdrop-blur-sm">
-                            <Shield className="h-14 w-14 text-[#C8A046]" />
+                    <div className="flex justify-center mb-6 md:mb-8">
+                        <div className="p-4 md:p-5 bg-[#F6F0E1]/10 rounded-full border border-[#C8A046]/30 backdrop-blur-sm">
+                            <Shield className="h-10 w-10 md:h-14 md:w-14 text-[#C8A046]" />
                         </div>
                     </div>
-                    <h1 className="text-5xl md:text-6xl font-extrabold mb-6">Meet the Team</h1>
-                    <p className="text-xl md:text-2xl text-[#F6F0E1]/80 max-w-3xl mx-auto font-medium">
+                    <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold mb-4 md:mb-6">Meet the Team</h1>
+                    <p className="text-base md:text-xl lg:text-2xl text-[#F6F0E1]/80 max-w-3xl mx-auto font-medium">
                         The dedicated professionals bringing PAUDC 2026 to life
                     </p>
                 </div>
             </section>
 
             {/* Advisory Leadership Section (Gold Accent) */}
-            <section className="py-24 bg-white">
+            <section className="py-12 md:py-24 bg-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-16">
-                        <h2 className="text-4xl font-bold text-[#1B5E3B] mb-6">Advisory Leadership</h2>
-                        <div className="w-24 h-1.5 bg-[#C8A046] mx-auto rounded-full"></div>
+                    <div className="text-center mb-10 md:mb-16">
+                        <h2 className="text-2xl md:text-4xl font-bold text-[#1B5E3B] mb-4 md:mb-6">Advisory Leadership</h2>
+                        <div className="w-16 md:w-24 h-1 md:h-1.5 bg-[#C8A046] mx-auto rounded-full"></div>
                     </div>
 
                     <div className="relative max-w-3xl mx-auto">
@@ -151,18 +151,18 @@ export default function Team() {
                             <ChevronRight className="h-8 w-8" />
                         </Button>
 
-                        <Card className="border border-[#C8A046]/30 shadow-xl max-w-2xl mx-auto bg-[#F6F0E1]/30 rounded-3xl overflow-hidden">
-                            <CardContent className="p-8 md:p-12">
-                                <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-8">
+                        <Card className="border border-[#C8A046]/30 shadow-xl max-w-2xl mx-auto bg-[#F6F0E1]/30 rounded-2xl md:rounded-3xl overflow-hidden">
+                            <CardContent className="p-6 md:p-8 lg:p-12">
+                                <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-6 md:gap-8">
                                     <img
                                         src={advisoryLeadership[advisoryIndex].image}
                                         alt={advisoryLeadership[advisoryIndex].name}
-                                        className="w-36 h-36 shrink-0 rounded-full object-cover border-4 border-[#C8A046] shadow-lg"
+                                        className="w-28 h-28 md:w-36 md:h-36 shrink-0 rounded-full object-cover border-4 border-[#C8A046] shadow-lg"
                                     />
                                     <div>
-                                        <h3 className="text-2xl font-bold text-[#1B5E3B] mb-2">{advisoryLeadership[advisoryIndex].name}</h3>
-                                        <p className="text-lg text-[#A4372C] font-bold mb-4">{advisoryLeadership[advisoryIndex].role}</p>
-                                        <p className="text-[#1B5E3B]/80 text-lg leading-relaxed">{advisoryLeadership[advisoryIndex].bio}</p>
+                                        <h3 className="text-lg md:text-2xl font-bold text-[#1B5E3B] mb-2">{advisoryLeadership[advisoryIndex].name}</h3>
+                                        <p className="text-sm md:text-lg text-[#A4372C] font-bold mb-3 md:mb-4">{advisoryLeadership[advisoryIndex].role}</p>
+                                        <p className="text-[#1B5E3B]/80 text-sm md:text-lg leading-relaxed">{advisoryLeadership[advisoryIndex].bio}</p>
                                     </div>
                                 </div>
                             </CardContent>
@@ -183,12 +183,12 @@ export default function Team() {
             </section>
 
             {/* Core Adjudication Panel Section (Green Accent) */}
-            <section className="py-24 bg-[#F6F0E1]">
+            <section className="py-12 md:py-24 bg-[#F6F0E1]">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-16">
-                        <h2 className="text-4xl font-bold text-[#1B5E3B] mb-6">Core Adjudication Panel (CAP)</h2>
-                        <div className="w-24 h-1.5 bg-[#1B5E3B] mx-auto rounded-full mb-8"></div>
-                        <p className="text-xl text-[#1B5E3B]/80 max-w-3xl mx-auto font-medium">
+                    <div className="text-center mb-10 md:mb-16">
+                        <h2 className="text-2xl md:text-4xl font-bold text-[#1B5E3B] mb-4 md:mb-6">Core Adjudication Panel (CAP)</h2>
+                        <div className="w-16 md:w-24 h-1 md:h-1.5 bg-[#1B5E3B] mx-auto rounded-full mb-6 md:mb-8"></div>
+                        <p className="text-base md:text-xl text-[#1B5E3B]/80 max-w-3xl mx-auto font-medium">
                             World-class adjudicators ensuring fairness, excellence, and educational value
                         </p>
                     </div>
@@ -309,12 +309,12 @@ export default function Team() {
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                     <h2 className="text-4xl font-black mb-6">Join us at PAUDC 2026</h2>
                     <p className="text-xl text-[#F6F0E1]/80 mb-10 leading-relaxed max-w-2xl mx-auto">
-                        Be part of Africa's most prestigious debate championship, guided by professionals committed to excellence and educational impact.
+                        Be part of Africa's most prestigious debate championship. Updated tournament schedule will be shared soon.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-6 justify-center">
                         <a href="/register" className="inline-block">
                             <button className="px-10 py-4 bg-[#C8A046] hover:bg-[#b08c3e] text-[#022512] font-bold rounded-full shadow-lg transition-transform hover:-translate-y-1">
-                                Register Now
+                                Request an Invite
                             </button>
                         </a>
                         <a href="/contact" className="inline-block">

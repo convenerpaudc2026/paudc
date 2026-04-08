@@ -7,8 +7,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+
 export default function Contact() {
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitStatus, setSubmitStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -19,13 +22,36 @@ export default function Contact() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
+        setSubmitStatus(null);
 
-        // Simulating API request
-        setTimeout(() => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/v1/contact/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                setSubmitStatus({ type: 'success', message: data.message });
+                setFormData({ name: '', email: '', subject: '', message: '' });
+            } else {
+                setSubmitStatus({
+                    type: 'error',
+                    message: data.detail || 'Failed to send message. Please try again.'
+                });
+            }
+        } catch (error) {
+            setSubmitStatus({
+                type: 'error',
+                message: 'Network error. Please check your connection and try again.'
+            });
+        } finally {
             setIsSubmitting(false);
-            setFormData({ name: '', email: '', subject: '', message: '' });
-            alert('Message sent successfully!');
-        }, 1500);
+        }
     };
 
     return (
@@ -41,57 +67,57 @@ export default function Contact() {
             {/* Hero Section */}
             <section className="pt-32 pb-24 bg-gradient-to-br from-[#A4372C] to-[#C8A046] relative z-10">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-[#F6F0E1]">
-                    <h1 className="text-5xl md:text-7xl font-extrabold mb-6 drop-shadow-md">
+                    <h1 className="text-3xl md:text-5xl lg:text-7xl font-extrabold mb-4 md:mb-6 drop-shadow-md">
                         Contact Us
                     </h1>
-                    <p className="text-xl md:text-2xl text-[#F6F0E1]/90 font-medium max-w-2xl mx-auto">
+                    <p className="text-base md:text-xl lg:text-2xl text-[#F6F0E1]/90 font-medium max-w-2xl mx-auto">
                         Get in touch with the PAUDC 2026 organizing team
                     </p>
                 </div>
             </section>
 
             {/* Contact Content */}
-            <section className="py-24 relative z-10">
+            <section className="py-12 md:py-24 relative z-10">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid md:grid-cols-2 gap-16">
+                    <div className="grid md:grid-cols-2 gap-10 md:gap-16">
 
                         {/* Contact Information */}
                         <div className="flex flex-col justify-center">
-                            <h2 className="text-4xl font-bold text-[#1B5E3B] mb-8">
+                            <h2 className="text-2xl md:text-4xl font-bold text-[#1B5E3B] mb-6 md:mb-8">
                                 Get in Touch
                             </h2>
-                            <p className="text-lg text-[#1B5E3B]/80 mb-10 leading-relaxed">
+                            <p className="text-sm md:text-lg text-[#1B5E3B]/80 mb-8 md:mb-10 leading-relaxed">
                                 Whether you have questions about registration, scheduling, or sponsorship opportunities, our team is here to help. Reach out to us through any of the channels below.
                             </p>
 
-                            <div className="space-y-8">
-                                <div className="flex items-start gap-5 group">
-                                    <div className="w-14 h-14 rounded-2xl bg-[#1B5E3B]/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#1B5E3B] transition-colors duration-300">
-                                        <Mail className="h-7 w-7 text-[#1B5E3B] group-hover:text-[#F6F0E1] transition-colors duration-300" />
+                            <div className="space-y-6 md:space-y-8">
+                                <div className="flex items-start gap-4 md:gap-5 group">
+                                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-[#1B5E3B]/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#1B5E3B] transition-colors duration-300">
+                                        <Mail className="h-6 w-6 md:h-7 md:w-7 text-[#1B5E3B] group-hover:text-[#F6F0E1] transition-colors duration-300" />
                                     </div>
                                     <div>
-                                        <h3 className="text-xl font-bold text-[#1B5E3B] mb-1">Email</h3>
-                                        <p className="text-[#1B5E3B]/80 text-lg">info@paudc2026.com</p>
+                                        <h3 className="text-lg md:text-xl font-bold text-[#1B5E3B] mb-1">Email</h3>
+                                        <p className="text-[#1B5E3B]/80 text-sm md:text-lg">info@paudc2026.com</p>
                                     </div>
                                 </div>
 
-                                <div className="flex items-start gap-5 group">
-                                    <div className="w-14 h-14 rounded-2xl bg-[#A4372C]/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#A4372C] transition-colors duration-300">
-                                        <Phone className="h-7 w-7 text-[#A4372C] group-hover:text-[#F6F0E1] transition-colors duration-300" />
+                                <div className="flex items-start gap-4 md:gap-5 group">
+                                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-[#A4372C]/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#A4372C] transition-colors duration-300">
+                                        <Phone className="h-6 w-6 md:h-7 md:w-7 text-[#A4372C] group-hover:text-[#F6F0E1] transition-colors duration-300" />
                                     </div>
                                     <div>
-                                        <h3 className="text-xl font-bold text-[#1B5E3B] mb-1">Phone</h3>
-                                        <p className="text-[#1B5E3B]/80 text-lg">+234 901 199 6325</p>
+                                        <h3 className="text-lg md:text-xl font-bold text-[#1B5E3B] mb-1">Phone</h3>
+                                        <p className="text-[#1B5E3B]/80 text-sm md:text-lg">+234 901 199 6325</p>
                                     </div>
                                 </div>
 
-                                <div className="flex items-start gap-5 group">
-                                    <div className="w-14 h-14 rounded-2xl bg-[#C8A046]/20 flex items-center justify-center flex-shrink-0 group-hover:bg-[#C8A046] transition-colors duration-300">
-                                        <MapPin className="h-7 w-7 text-[#C8A046] group-hover:text-[#1B5E3B] transition-colors duration-300" />
+                                <div className="flex items-start gap-4 md:gap-5 group">
+                                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-[#C8A046]/20 flex items-center justify-center flex-shrink-0 group-hover:bg-[#C8A046] transition-colors duration-300">
+                                        <MapPin className="h-6 w-6 md:h-7 md:w-7 text-[#C8A046] group-hover:text-[#1B5E3B] transition-colors duration-300" />
                                     </div>
                                     <div>
-                                        <h3 className="text-xl font-bold text-[#1B5E3B] mb-1">Location</h3>
-                                        <p className="text-[#1B5E3B]/80 text-lg leading-relaxed">
+                                        <h3 className="text-lg md:text-xl font-bold text-[#1B5E3B] mb-1">Location</h3>
+                                        <p className="text-[#1B5E3B]/80 text-sm md:text-lg leading-relaxed">
                                             Veritas University<br />
                                             Bwari<br />
                                             Abuja, Nigeria
@@ -105,6 +131,15 @@ export default function Contact() {
                         <div>
                             <Card className="border border-[#1B5E3B]/10 shadow-xl rounded-3xl bg-white overflow-hidden">
                                 <CardContent className="p-8 md:p-10">
+                                    {submitStatus && (
+                                        <div className={`mb-6 p-4 rounded-xl ${
+                                            submitStatus.type === 'success' 
+                                                ? 'bg-green-50 border border-green-200 text-green-800' 
+                                                : 'bg-red-50 border border-red-200 text-red-800'
+                                        }`}>
+                                            {submitStatus.message}
+                                        </div>
+                                    )}
                                     <form onSubmit={handleSubmit} className="space-y-6">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div>

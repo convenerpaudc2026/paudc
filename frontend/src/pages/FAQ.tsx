@@ -33,7 +33,7 @@ export default function FAQ() {
             id: 3,
             category: 'general',
             question: 'How much does registration cost?',
-            answer: 'Registration is $200 USD per participant. This fee covers all tournament activities, accommodation, and meals.',
+            answer: 'Registration is $200 USD per speaker and judge. For observers and staff attaches, the cost is $350 USD. These fees cover all tournament activities, accommodation, and meals.',
             is_published: true,
             order_index: 3,
         },
@@ -106,10 +106,10 @@ export default function FAQ() {
             {/* Hero Section */}
             <section className="pt-32 pb-16 bg-gradient-to-br from-[#185E3B] to-[#124a2e]">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
-                    <h1 className="text-5xl md:text-6xl font-bold mb-6">
+                    <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6">
                         Frequently Asked Questions
                     </h1>
-                    <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-8">
+                    <p className="text-base md:text-xl lg:text-2xl text-white/90 max-w-3xl mx-auto mb-6 md:mb-8">
                         Find answers to common questions about PAUDC 2026
                     </p>
 
@@ -137,8 +137,8 @@ export default function FAQ() {
                                 key={cat.id}
                                 onClick={() => setSelectedCategory(cat.id)}
                                 className={`px-6 py-2 rounded-full font-medium transition-colors ${selectedCategory === cat.id
-                                        ? 'bg-[#C84B46] text-white'
-                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    ? 'bg-[#C84B46] text-white'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                     }`}
                             >
                                 {cat.label}
@@ -168,17 +168,17 @@ export default function FAQ() {
             </section>
 
             {/* Contact Section */}
-            <section className="py-20 bg-[#F6F6F6]">
+            <section className="py-12 md:py-20 bg-[#F6F6F6]">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                    <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3 md:mb-4">
                         Still Have Questions?
                     </h2>
-                    <p className="text-lg text-gray-700 mb-8">
+                    <p className="text-sm md:text-lg text-gray-700 mb-6 md:mb-8">
                         Can't find the answer you're looking for? Our support team is here to help.
                     </p>
                     <Button
                         size="lg"
-                        className="bg-[#C84B46] hover:bg-[#A83D39] text-white font-semibold"
+                        className="bg-[#C84B46] hover:bg-[#A83D39] text-white text-sm md:text-base font-semibold"
                         onClick={() => window.location.href = '/contact'}
                     >
                         Contact Us

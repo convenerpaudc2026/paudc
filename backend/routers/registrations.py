@@ -3,7 +3,7 @@ import logging
 from typing import Literal, Optional, List
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status, BackgroundTasks
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,6 +12,7 @@ from core.enums import ParticipantRole
 from dependencies.auth import get_current_user
 from models.auth import User
 from services.registrations import RegistrationsService
+from services.email import send_registration_notification
 
 ParticipantRoleLiteral = Literal["debater", "adjudicator", "observer", "organizer"]
 
@@ -157,6 +158,7 @@ async def get_registration_by_id(
 @router.post("/", response_model=RegistrationsResponse, status_code=201)
 async def create_registrations(
     data: RegistrationsData,
+    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
 ):
     service = RegistrationsService(db)
@@ -169,6 +171,13 @@ async def create_registrations(
         
         if not result:
             raise HTTPException(status_code=400, detail="Failed to create registrations")
+        
+        # Send email notification to convener in the background
+        background_tasks.add_task(
+            send_registration_notification,
+            data.model_dump()
+        )
+        
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")

@@ -41,7 +41,7 @@ const PANELISTS = [
         name: 'Bindé Diabaté',
         title: 'Youth Activist & UN Youth Delegate',
         country: "Côte d'Ivoire",
-        bio: 'Prominent youth voice on climate, governance, and the role of young people in shaping Africa\'s political landscape.',
+        bio: "Prominent youth voice on climate, governance, and the role of young people in shaping Africa's political landscape.",
         theme: 'Youth & Democracy',
         initials: 'BD',
     },
@@ -246,7 +246,7 @@ export default function Speakers() {
             <section className="py-16 md:py-20 bg-[#1B5E3B] text-[#F6F0E1] text-center px-4">
                 <div className="max-w-4xl mx-auto">
                     <blockquote className="text-2xl md:text-4xl font-black italic leading-snug mb-6">
-                        "The continent will not be built by those who stay silent.<br />
+                        "The continent will not be built by those who stay silent.{' '}
                         It will be built by those who dare to reason aloud."
                     </blockquote>
                     <p className="text-[#C8A046] font-semibold text-sm md:text-base uppercase tracking-widest">

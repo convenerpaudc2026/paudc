@@ -8,8 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "postinstall": "chmod +x node_modules/.bin/*",
-    "build": "tsc -b && vite build"
+    "postinstall": "chmod +x node_modules/.bin/*"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.2.8",

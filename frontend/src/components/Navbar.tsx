@@ -123,7 +123,7 @@ export default function Navbar() {
                             </Link>
                         ))}
                         <div className="pt-4 flex flex-col space-y-3">
-                            <a href="/login" onClick={() => setIsOpen(false)}>
+                            <a href="/lms" onClick={() => setIsOpen(false)}>
                                 <Button className="w-full bg-transparent border border-[#022512]/20 text-[#022512] hover:bg-[#022512] hover:text-white transition-colors duration-300 font-semibold shadow-none rounded-full h-11">
                                     LMS Portal
                                 </Button>

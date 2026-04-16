@@ -114,7 +114,7 @@ export default function Dashboard() {
               captures the idea of an Africa governed by intellect rather than impulse — a place where dialogue shapes destiny.
             </p>
             <Link to="/about">
-              <button className="px-8 py-3 bg-[#1B5E3B] text-[#F6F0E1] rounded-full font-bold hover:bg-[#A4372C] transition-colors shadow-lg">
+              <button className="px-5 py-2 md:px-8 md:py-3 bg-[#1B5E3B] text-[#F6F0E1] rounded-full font-bold hover:bg-[#A4372C] transition-colors shadow-lg">
                 Discover Our Vision
               </button>
             </Link>

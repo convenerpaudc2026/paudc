@@ -18,6 +18,7 @@ import Register from '@/pages/Register';
 import Login from '@/pages/Login';
 import LogoutCallback from '@/pages/LogoutCallback';
 import Dashboard from '@/pages/Dashboard';
+import LmsWaitlist from '@/pages/lms/LmsWaitlist';
 import LMSDashboard from '@/pages/lms/LMSDashboard';
 import LMSCourses from '@/pages/lms/LMSCourses';
 import LMSCourseDetail from '@/pages/lms/LMSCourseDetail';
@@ -47,6 +48,8 @@ const App = () => (
             <Route path="/auth/error" element={<AuthError />} />
             <Route path="/login" element={<Login />} />
             <Route path="/logout/callback" element={<LogoutCallback />} />
+            {/* LMS Portal — coming soon page for unauthenticated users */}
+            <Route path="/lms" element={<LmsWaitlist />} />
             {/* LMS Portal — authenticated */}
             <Route path="/dashboard" element={<LMSDashboard />} />
             <Route path="/lms/courses" element={<LMSCourses />} />

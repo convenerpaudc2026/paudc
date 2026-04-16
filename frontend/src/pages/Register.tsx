@@ -8,6 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { User, Building, FileText, CheckCircle2 } from 'lucide-react';
+import { EmailPillInput } from '@/components/EmailPillInput';
+import { submitForm } from '@/lib/googleForms';
 import {
     Select,
     SelectContent,
@@ -28,9 +30,10 @@ export default function Register() {
         // Institution fields
         institution_name: '',
         institution_country: '',
-        number_of_participants: '0',
-        institution_email: '',
-        institution_phone: '',
+        contact_phone: '',
+        your_contact_email: '',
+        addressed_to: '',
+        comments: '',
         // Individual fields
         first_name: '',
         last_name: '',
@@ -38,10 +41,10 @@ export default function Register() {
         phone: '',
         country: '',
         university: '',
-        // Common fields
-        dietary_requirements: '',
-        special_needs: '',
     });
+
+    // Unified styling variable for all text fields
+    const uniformInputClasses = "bg-[#F6F0E1]/50 border-[#1B5E3B]/20 focus-visible:ring-[#C8A046] focus-visible:border-[#C8A046] text-[#1B5E3B] placeholder:text-[#1B5E3B]/50 transition-colors";
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -60,47 +63,32 @@ export default function Register() {
         setIsSubmitting(true);
 
         try {
-            // Format the payload safely accounting for optional values
-            const payload = {
-                registration_type: registrationType,
-                participant_role: formData.participant_role,
-                status: 'pending',
+            const email = registrationType === 'institution' ? formData.your_contact_email : formData.email;
+            const name = registrationType === 'institution' 
+                ? formData.institution_name 
+                : `${formData.first_name} ${formData.last_name}`;
+            const phone = registrationType === 'institution' ? formData.contact_phone : formData.phone;
+            const institution = registrationType === 'individual' ? formData.university : formData.institution_name;
 
-                institution_name: registrationType === 'institution' ? formData.institution_name : null,
-                institution_country: registrationType === 'institution' ? formData.institution_country : null,
-                institution_email: registrationType === 'institution' ? formData.institution_email : null,
-                institution_phone: registrationType === 'institution' ? formData.institution_phone : null,
-                number_of_participants: registrationType === 'institution' ? parseInt(formData.number_of_participants) || null : null,
-
-                first_name: formData.first_name || 'N/A',
-                last_name: formData.last_name || 'N/A',
-                email: formData.email || formData.institution_email,
-                phone: formData.phone || formData.institution_phone || 'N/A',
-                country: formData.country || formData.institution_country || 'N/A',
-                university: formData.university || formData.institution_name || 'N/A',
-
-                dietary_requirements: formData.dietary_requirements || null,
-                special_needs: formData.special_needs || null,
-            };
-
-            const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
-
-            const response = await fetch(`${backendUrl}/api/v1/entities/registrations/`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+            const success = await submitForm({
+                type: 'registration',
+                email,
+                name,
+                phone,
+                institution,
+                team: formData.participant_role,
+                message: formData.comments
             });
 
-            if (!response.ok) {
+            if (success) {
+                toast({
+                    title: "Registration Submitted",
+                    description: "We've sent a confirmation email with further instructions.",
+                });
+                setTimeout(() => navigate('/'), 2000);
+            } else {
                 throw new Error('Failed to submit registration');
             }
-
-            toast({
-                title: "Registration Submitted",
-                description: "We've sent a confirmation email with further instructions.",
-            });
-
-            setTimeout(() => navigate('/'), 2000);
         } catch (error) {
             toast({
                 variant: "destructive",
@@ -158,10 +146,7 @@ export default function Register() {
                                         <CheckCircle2 className="w-5 h-5 md:w-6 md:h-6 text-[#1B5E3B] flex-shrink-0 mt-0.5" />
                                         <span><strong>Institution:</strong> Both speakers must be registered students of the same university.</span>
                                     </li>
-                                    <li className="flex items-start gap-3 md:gap-4">
-                                        <CheckCircle2 className="w-5 h-5 md:w-6 md:h-6 text-[#1B5E3B] flex-shrink-0 mt-0.5" />
-                                        <span><strong>Age Limit:</strong> Participants must be 18 years or older.</span>
-                                    </li>
+
                                 </ul>
                             </CardContent>
                         </Card>
@@ -250,57 +235,41 @@ export default function Register() {
                                             <h3 className="text-2xl font-bold text-[#1B5E3B] border-b border-[#1B5E3B]/10 pb-4">Institution Registration Form</h3>
 
                                             <div>
-                                                <label className="block text-sm font-bold text-[#1B5E3B] mb-2">Participant Role *</label>
-                                                <Select value={formData.participant_role} onValueChange={(val) => handleSelectChange('participant_role', val)}>
-                                                    <SelectTrigger className="bg-[#F6F0E1] border-[#1B5E3B]/20 focus:ring-[#C8A046] h-12">
-                                                        <SelectValue placeholder="Select your role" />
-                                                    </SelectTrigger>
-                                                    <SelectContent className="bg-[#F6F0E1] border-[#1B5E3B]/20">
-                                                        <SelectItem value="debater">Debater</SelectItem>
-                                                        <SelectItem value="adjudicator">Adjudicator</SelectItem>
-                                                        <SelectItem value="observer">Observer</SelectItem>
-                                                        <SelectItem value="organizer">Organizer</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-
-                                            <div>
                                                 <label className="block text-sm font-bold text-[#1B5E3B] mb-2">Institution Name *</label>
-                                                <Input name="institution_name" value={formData.institution_name} onChange={handleChange} required placeholder="University or organization name" className="bg-[#F6F0E1]/50 border-[#1B5E3B]/20 focus-visible:ring-[#C8A046] h-12" />
+                                                <Input name="institution_name" value={formData.institution_name} onChange={handleChange} required placeholder="Name of your institution" className={`${uniformInputClasses} h-12`} />
                                             </div>
 
                                             <div>
                                                 <label className="block text-sm font-bold text-[#1B5E3B] mb-2">Country *</label>
-                                                <Input name="institution_country" value={formData.institution_country} onChange={handleChange} required placeholder="Country" className="bg-[#F6F0E1]/50 border-[#1B5E3B]/20 focus-visible:ring-[#C8A046] h-12" />
+                                                <Input name="institution_country" value={formData.institution_country} onChange={handleChange} required placeholder="Country" className={`${uniformInputClasses} h-12`} />
                                             </div>
 
                                             <div>
-                                                <label className="block text-sm font-bold text-[#1B5E3B] mb-2">Number of Participants *</label>
-                                                <Input name="number_of_participants" type="number" min="0" value={formData.number_of_participants} onChange={handleChange} required placeholder="0" className="bg-[#F6F0E1]/50 border-[#1B5E3B]/20 focus-visible:ring-[#C8A046] h-12" />
-                                            </div>
-
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                <div>
-                                                    <label className="block text-sm font-bold text-[#1B5E3B] mb-2">Contact Email *</label>
-                                                    <Input name="institution_email" type="email" value={formData.institution_email} onChange={handleChange} required placeholder="contact@university.edu" className="bg-[#F6F0E1]/50 border-[#1B5E3B]/20 focus-visible:ring-[#C8A046] h-12" />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-sm font-bold text-[#1B5E3B] mb-2">Contact Phone *</label>
-                                                    <Input name="institution_phone" type="tel" value={formData.institution_phone} onChange={handleChange} required placeholder="+234 xxx xxx xxxx" className="bg-[#F6F0E1]/50 border-[#1B5E3B]/20 focus-visible:ring-[#C8A046] h-12" />
-                                                </div>
+                                                <label className="block text-sm font-bold text-[#1B5E3B] mb-2">Contact Emails *</label>
+                                                <EmailPillInput
+                                                    name="your_contact_email"
+                                                    value={formData.your_contact_email}
+                                                    onChange={(value) => setFormData({ ...formData, your_contact_email: value })}
+                                                    placeholder="Enter email and press Enter..."
+                                                    required
+                                                    className={`${uniformInputClasses} min-h-[48px]`}
+                                                />
                                             </div>
 
                                             <div>
-                                                <label className="block text-sm font-bold text-[#1B5E3B] mb-2">Dietary Requirements</label>
-                                                <Textarea name="dietary_requirements" value={formData.dietary_requirements} onChange={handleTextareaChange} placeholder="Any dietary restrictions or preferences" className="bg-[#F6F0E1]/50 border-[#1B5E3B]/20 focus-visible:ring-[#C8A046] min-h-[80px]" />
+                                                <label className="block text-sm font-bold text-[#1B5E3B] mb-2">Contact Phone (Preferably Whatsapp) *</label>
+                                                <Input name="contact_phone" type="tel" value={formData.contact_phone} onChange={handleChange} required placeholder="+234 xxx xxx xxxx" className={`${uniformInputClasses} h-12`} />
                                             </div>
 
                                             <div>
-                                                <label className="block text-sm font-bold text-[#1B5E3B] mb-2">Special Needs or Accommodations</label>
-                                                <Textarea name="special_needs" value={formData.special_needs} onChange={handleTextareaChange} placeholder="Any special needs or accommodations required" className="bg-[#F6F0E1]/50 border-[#1B5E3B]/20 focus-visible:ring-[#C8A046] min-h-[80px]" />
+                                                <label className="block text-sm font-bold text-[#1B5E3B] mb-2">To Whom Should It Be Addressed *</label>
+                                                <Textarea name="addressed_to" value={formData.addressed_to} onChange={handleTextareaChange} required placeholder={"The Vice Chancellor,\nVeritas University.\nBwari, Abuja"} className={`${uniformInputClasses} min-h-[80px] resize-none`} />
                                             </div>
 
-
+                                            <div>
+                                                <label className="block text-sm font-bold text-[#1B5E3B] mb-2">Any Other Comment</label>
+                                                <Textarea name="comments" value={formData.comments} onChange={handleTextareaChange} placeholder="Any additional information or comments" className={`${uniformInputClasses} min-h-[80px]`} />
+                                            </div>
                                         </div>
                                     )}
 
@@ -308,60 +277,35 @@ export default function Register() {
                                         <div className="space-y-6">
                                             <h3 className="text-2xl font-bold text-[#1B5E3B] border-b border-[#1B5E3B]/10 pb-4">Individual Registration Form</h3>
 
-                                            <div>
-                                                <label className="block text-sm font-bold text-[#1B5E3B] mb-2">Participant Role *</label>
-                                                <Select value={formData.participant_role} onValueChange={(val) => handleSelectChange('participant_role', val)}>
-                                                    <SelectTrigger className="bg-[#F6F0E1] border-[#1B5E3B]/20 focus:ring-[#C8A046] h-12">
-                                                        <SelectValue placeholder="Select your role" />
-                                                    </SelectTrigger>
-                                                    <SelectContent className="bg-[#F6F0E1] border-[#1B5E3B]/20">
-                                                        <SelectItem value="debater">Debater</SelectItem>
-                                                        <SelectItem value="adjudicator">Adjudicator</SelectItem>
-                                                        <SelectItem value="observer">Observer</SelectItem>
-                                                        <SelectItem value="organizer">Organizer</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                 <div>
                                                     <label className="block text-sm font-bold text-[#1B5E3B] mb-2">First Name *</label>
-                                                    <Input name="first_name" value={formData.first_name} onChange={handleChange} required placeholder="First name" className="bg-[#F6F0E1]/50 border-[#1B5E3B]/20 focus-visible:ring-[#C8A046] h-12" />
+                                                    <Input name="first_name" value={formData.first_name} onChange={handleChange} required placeholder="First name" className={`${uniformInputClasses} h-12`} />
                                                 </div>
                                                 <div>
                                                     <label className="block text-sm font-bold text-[#1B5E3B] mb-2">Last Name *</label>
-                                                    <Input name="last_name" value={formData.last_name} onChange={handleChange} required placeholder="Last name" className="bg-[#F6F0E1]/50 border-[#1B5E3B]/20 focus-visible:ring-[#C8A046] h-12" />
+                                                    <Input name="last_name" value={formData.last_name} onChange={handleChange} required placeholder="Last name" className={`${uniformInputClasses} h-12`} />
                                                 </div>
                                             </div>
 
                                             <div>
                                                 <label className="block text-sm font-bold text-[#1B5E3B] mb-2">Email Address *</label>
-                                                <Input name="email" type="email" value={formData.email} onChange={handleChange} required placeholder="your.email@example.com" className="bg-[#F6F0E1]/50 border-[#1B5E3B]/20 focus-visible:ring-[#C8A046] h-12" />
+                                                <Input name="email" type="email" value={formData.email} onChange={handleChange} required placeholder="your.email@example.com" className={`${uniformInputClasses} h-12`} />
                                             </div>
 
                                             <div>
                                                 <label className="block text-sm font-bold text-[#1B5E3B] mb-2">Phone Number *</label>
-                                                <Input name="phone" type="tel" value={formData.phone} onChange={handleChange} required placeholder="+234 xxx xxx xxxx" className="bg-[#F6F0E1]/50 border-[#1B5E3B]/20 focus-visible:ring-[#C8A046] h-12" />
+                                                <Input name="phone" type="tel" value={formData.phone} onChange={handleChange} required placeholder="+234 xxx xxx xxxx" className={`${uniformInputClasses} h-12`} />
                                             </div>
 
                                             <div>
                                                 <label className="block text-sm font-bold text-[#1B5E3B] mb-2">Country *</label>
-                                                <Input name="country" value={formData.country} onChange={handleChange} required placeholder="Country" className="bg-[#F6F0E1]/50 border-[#1B5E3B]/20 focus-visible:ring-[#C8A046] h-12" />
+                                                <Input name="country" value={formData.country} onChange={handleChange} required placeholder="Country" className={`${uniformInputClasses} h-12`} />
                                             </div>
 
                                             <div>
-                                                <label className="block text-sm font-bold text-[#1B5E3B] mb-2">University *</label>
-                                                <Input name="university" value={formData.university} onChange={handleChange} required placeholder="University name" className="bg-[#F6F0E1]/50 border-[#1B5E3B]/20 focus-visible:ring-[#C8A046] h-12" />
-                                            </div>
-
-                                            <div>
-                                                <label className="block text-sm font-bold text-[#1B5E3B] mb-2">Dietary Requirements</label>
-                                                <Textarea name="dietary_requirements" value={formData.dietary_requirements} onChange={handleTextareaChange} placeholder="Any dietary restrictions or preferences" className="bg-[#F6F0E1]/50 border-[#1B5E3B]/20 focus-visible:ring-[#C8A046] min-h-[80px]" />
-                                            </div>
-
-                                            <div>
-                                                <label className="block text-sm font-bold text-[#1B5E3B] mb-2">Special Needs or Accommodations</label>
-                                                <Textarea name="special_needs" value={formData.special_needs} onChange={handleTextareaChange} placeholder="Any special needs or accommodations required" className="bg-[#F6F0E1]/50 border-[#1B5E3B]/20 focus-visible:ring-[#C8A046] min-h-[80px]" />
+                                                <label className="block text-sm font-bold text-[#1B5E3B] mb-2">University</label>
+                                                <Input name="university" value={formData.university} onChange={handleChange} placeholder="University name (optional)" className={`${uniformInputClasses} h-12`} />
                                             </div>
                                         </div>
                                     )}

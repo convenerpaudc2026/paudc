@@ -9,6 +9,11 @@ import elisha from '../assets/adjudicators/elisha.jpeg';
 import umar from '../assets/adjudicators/Umar Buckus.jpeg';
 import feyisayo from '../assets/adjudicators/feyisayo.png';
 import methembe from '../assets/adjudicators/methembe.jpeg';
+import hyacinth from '../assets/advisory_panel/Prof Hyacinth Ichoku.jpg';
+import kukah from '../assets/advisory_panel/Bishop Kukah.png';
+import asemota from '../assets/advisory_panel/Chief Asemota.png';
+import idornigie from '../assets/advisory_panel/Prof Idornigie.png';
+import gokum from '../assets/advisory_panel/Fr Gokum.png';
 
 export default function Team() {
     const [capIndex, setCapIndex] = useState(0);
@@ -20,31 +25,31 @@ export default function Team() {
             name: 'Rev. Fr. Prof. Hyacinth Ichoku',
             role: 'Vice-Chancellor',
             bio: 'Visionary academic leader and administrator, guiding the university and championship with integrity and excellence.',
-            image: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?q=80&w=2000&auto=format&fit=crop'
+            image: hyacinth
         },
         {
             name: 'Most Rev. Dr. Matthew Hassan Kukah',
             role: 'Chief Patron',
             bio: 'Renowned religious leader and advocate for education, serving as the Chief Patron of the tournament.',
-            image: 'https://images.unsplash.com/photo-1511367461989-f85a21fda167?q=80&w=2000&auto=format&fit=crop'
+            image: kukah
         },
         {
             name: 'Chief Solomon Asemota, SAN',
             role: 'Father of the Tournament',
             bio: 'Distinguished legal luminary and foundational supporter, celebrated as the Father of the Tournament.',
-            image: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=2000&auto=format&fit=crop'
+            image: asemota
         },
         {
             name: 'Prof. Paul Obo Idornigie, SAN',
             role: 'Senior Advisor, Adjudicators Academy',
             bio: 'Distinguished legal scholar and debate expert overseeing judge training and certification programs.',
-            image: 'https://mgx-backend-cdn.smedan.gov.ng/generate/images/906150/2026-01-20/ead537cf-995b-4aac-9267-00c1765eba13.png'
+            image: idornigie
         },
         {
             name: 'Rev. Fr. Gokum Richard',
             role: 'Advisor, Funding & Partnerships',
             bio: 'Advisor on funding and partnerships, supporting the championship’s growth and sustainability.',
-            image: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?q=80&w=2000&auto=format&fit=crop'
+            image: gokum
         }
     ];
 

@@ -14,14 +14,14 @@ export default function Navbar() {
     useEffect(() => {
         const handleScroll = () => {
             const currentScrollY = window.scrollY;
-            
+
             // Hide navbar when scrolling down, show when scrolling up
             if (currentScrollY > lastScrollY && currentScrollY > 100) {
                 setIsVisible(false);
             } else {
                 setIsVisible(true);
             }
-            
+
             setLastScrollY(currentScrollY);
         };
 
@@ -78,7 +78,7 @@ export default function Navbar() {
 
                         {/* Existing Buttons retained, height adjusted to h-9 for slimmer navbar */}
                         <div className="flex items-center space-x-4">
-                            <a href="/login">
+                            <a href="/lms">
                                 <Button className="bg-transparent border border-[#022512]/20 text-[#022512] hover:bg-[#022512] hover:text-white transition-colors duration-300 font-semibold shadow-none rounded-full px-5 h-9 text-sm">
                                     LMS Portal
                                 </Button>

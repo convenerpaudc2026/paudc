@@ -1,50 +1,69 @@
 import { useEffect, useState } from 'react';
-import { api } from '@/lib/api';
+import { useNavigate } from 'react-router-dom';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
+import { authApi } from '@/lib/auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Loader2 } from 'lucide-react';
-// Make sure this path matches where you store the logo!
 import LOGO_URL from '../assets/paudc.png';
 
 export default function Login() {
+    const navigate = useNavigate();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [checking, setChecking] = useState(true);
+    const [isSignUp, setIsSignUp] = useState(false);
 
     useEffect(() => {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 5000);
-
         const checkAuth = async () => {
             try {
-                const response = await api.auth.me();
-                if (response && response.data) {
-                    window.location.href = '/dashboard';
+                // Check if user is already logged in with Firebase
+                if (auth.currentUser) {
+                    const idToken = await auth.currentUser.getIdToken();
+                    await authApi.firebaseLogin(idToken);
+                    navigate('/dashboard');
                     return;
                 }
             } catch (err) {
-                console.log("Not logged in.");
+                console.log("Not logged in or Firebase error:", err);
             } finally {
-                clearTimeout(timeout);
                 setChecking(false);
             }
         };
 
         checkAuth();
+    }, [navigate]);
 
-        return () => {
-            controller.abort();
-            clearTimeout(timeout);
-        };
-    }, []);
-
-    const handleAuth = async () => {
+    const handleAuth = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError('');
         setLoading(true);
+
         try {
-            // This endpoint triggers the OIDC flow. 
-            // The provider handles both logging in and creating new accounts.
-            await api.auth.login();
+            let userCredential;
+
+            if (isSignUp) {
+                userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            } else {
+                userCredential = await signInWithEmailAndPassword(auth, email, password);
+            }
+
+            // Get Firebase ID token
+            const idToken = await userCredential.user.getIdToken();
+
+            // Exchange Firebase token for backend JWT
+            await authApi.firebaseLogin(idToken);
+
+            // Redirect to dashboard
+            navigate('/dashboard');
         } catch (err) {
-            console.error('Auth redirect error:', err);
+            const errorMessage = err instanceof Error ? err.message : 'Authentication failed';
+            setError(errorMessage);
+        } finally {
             setLoading(false);
         }
     };
@@ -80,37 +99,82 @@ export default function Login() {
                         LMS Portal
                     </CardTitle>
                     <CardDescription className="text-base font-medium text-[#022512]/60 mt-2">
-                        Welcome to the Pan-African University Debating Championship
+                        {isSignUp ? 'Create your account' : 'Welcome to the Pan-African University Debating Championship'}
                     </CardDescription>
                 </CardHeader>
 
                 <CardContent className="px-8 pb-8 space-y-6">
-                    <div className="space-y-4">
+                    <form onSubmit={handleAuth} className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-bold text-[#1B5E3B] mb-2">Email</label>
+                            <Input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="your@email.com"
+                                className="bg-[#F6F0E1]/50 border-[#1B5E3B]/20 focus-visible:ring-[#C8A046] h-12"
+                                required
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-bold text-[#1B5E3B] mb-2">Password</label>
+                            <Input
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="••••••••"
+                                className="bg-[#F6F0E1]/50 border-[#1B5E3B]/20 focus-visible:ring-[#C8A046] h-12"
+                                required
+                            />
+                        </div>
+
+                        {error && (
+                            <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
+                                {error}
+                            </div>
+                        )}
+
                         <Button
+                            type="submit"
                             className="w-full bg-[#1B5E3B] hover:bg-[#0d301e] text-[#F6F0E1] h-14 text-lg font-bold rounded-xl shadow-md transition-transform hover:-translate-y-0.5"
-                            onClick={handleAuth}
                             disabled={loading}
                         >
                             {loading ? (
                                 <>
                                     <Loader2 className="mr-3 h-5 w-5 animate-spin" />
-                                    Redirecting...
+                                    {isSignUp ? 'Creating account...' : 'Signing in...'}
                                 </>
+                            ) : isSignUp ? (
+                                'Create Account'
                             ) : (
                                 'Sign In'
                             )}
                         </Button>
+                    </form>
 
-                        <div className="relative">
-                            <div className="absolute inset-0 flex items-center">
-                                <span className="w-full border-t border-gray-200" />
-                            </div>
-                            <div className="relative flex justify-center text-xs uppercase font-bold">
-                                <span className="bg-white px-3 text-gray-400">Or</span>
-                            </div>
+                    <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t border-gray-200" />
                         </div>
-
+                        <div className="relative flex justify-center text-xs uppercase font-bold">
+                            <span className="bg-white px-3 text-gray-400">
+                                {isSignUp ? 'Already have an account?' : "Don't have an account?"}
+                            </span>
+                        </div>
                     </div>
+
+                    <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full h-12 border-[#1B5E3B] text-[#1B5E3B] hover:bg-[#1B5E3B] hover:text-[#F6F0E1] font-bold rounded-xl"
+                        onClick={() => {
+                            setIsSignUp(!isSignUp);
+                            setError('');
+                        }}
+                    >
+                        {isSignUp ? 'Sign In Instead' : 'Create Account'}
+                    </Button>
 
                     <p className="text-center text-sm font-medium text-[#022512]/50 leading-relaxed mt-6">
                         Secure access for registered debaters, adjudicators, organizers, and speakers.

@@ -46,8 +46,8 @@ const getAuthHeaders = (): HeadersInit => {
 	const token = localStorage.getItem('auth_token');
 	return token
 		? {
-				Authorization: `Bearer ${token}`,
-			}
+			Authorization: `Bearer ${token}`,
+		}
 		: {};
 };
 
@@ -101,6 +101,13 @@ const toListPath = (entityPath: string, params: QueryParams) => {
 
 export const api = {
 	auth: {
+		firebaseLogin: async (idToken: string): Promise<ApiResponse<{ access_token: string; token_type: string; user: AuthUser }>> => {
+			const data = await request<{ access_token: string; token_type: string; user: AuthUser }>('/api/v1/auth/firebase/login', {
+				method: 'POST',
+				body: JSON.stringify({ id_token: idToken }),
+			});
+			return { data };
+		},
 		login: async (): Promise<void> => {
 			window.location.href = buildUrl('/api/v1/auth/login');
 		},

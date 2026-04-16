@@ -6,8 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+import { submitForm } from '@/lib/googleForms';
 
 export default function Contact() {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -25,23 +24,21 @@ export default function Contact() {
         setSubmitStatus(null);
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/v1/contact/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
+            const success = await submitForm({
+                type: 'contact',
+                email: formData.email,
+                name: formData.name,
+                subject: formData.subject,
+                message: formData.message
             });
 
-            const data = await response.json();
-
-            if (response.ok && data.success) {
-                setSubmitStatus({ type: 'success', message: data.message });
+            if (success) {
+                setSubmitStatus({ type: 'success', message: 'Message sent successfully! We\'ll get back to you soon.' });
                 setFormData({ name: '', email: '', subject: '', message: '' });
             } else {
                 setSubmitStatus({
                     type: 'error',
-                    message: data.detail || 'Failed to send message. Please try again.'
+                    message: 'Failed to send message. Please try again.'
                 });
             }
         } catch (error) {
@@ -132,11 +129,10 @@ export default function Contact() {
                             <Card className="border border-[#1B5E3B]/10 shadow-xl rounded-3xl bg-white overflow-hidden">
                                 <CardContent className="p-8 md:p-10">
                                     {submitStatus && (
-                                        <div className={`mb-6 p-4 rounded-xl ${
-                                            submitStatus.type === 'success' 
-                                                ? 'bg-green-50 border border-green-200 text-green-800' 
+                                        <div className={`mb-6 p-4 rounded-xl ${submitStatus.type === 'success'
+                                                ? 'bg-green-50 border border-green-200 text-green-800'
                                                 : 'bg-red-50 border border-red-200 text-red-800'
-                                        }`}>
+                                            }`}>
                                             {submitStatus.message}
                                         </div>
                                     )}

@@ -17,19 +17,21 @@ const missingFields = requiredFields.filter(
   (field) => !firebaseConfig[field]
 );
 
+let app: any = null;
+let auth: any = null;
+
 if (missingFields.length > 0) {
-  console.error(
-    'Firebase configuration is incomplete. Missing fields:',
-    missingFields,
-    'Please ensure all VITE_FIREBASE_* environment variables are set in your .env file'
+  console.warn(
+    'Firebase configuration is incomplete. Firebase is disabled. Missing fields:',
+    missingFields
   );
+} else {
+  // Initialize Firebase only if all required fields are present
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
 }
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-
-// Get Firebase Auth instance
-export const auth = getAuth(app);
+export { app, auth };
 
 export default app;
 

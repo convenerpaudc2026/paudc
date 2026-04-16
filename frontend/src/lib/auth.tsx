@@ -20,9 +20,11 @@ export const authApi = {
 
 	async logout(): Promise<void> {
 		localStorage.removeItem('auth_token');
-		// Sign out from Firebase
+		// Sign out from Firebase (only if Firebase is initialized)
 		try {
-			await auth.signOut();
+			if (auth) {
+				await auth.signOut();
+			}
 		} catch (error) {
 			console.error('Error signing out from Firebase:', error);
 		}

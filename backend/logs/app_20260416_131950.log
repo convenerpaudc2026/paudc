@@ -1,0 +1,126 @@
+2026-04-16 13:19:50,345 - main - INFO - === Logging system initialized ===
+2026-04-16 13:19:50,346 - main - INFO - Log file: logs\app_20260416_131950.log
+2026-04-16 13:19:50,346 - main - INFO - Environment: dev
+2026-04-16 13:19:50,347 - main - INFO - Timestamp: 20260416_131950
+2026-04-16 13:19:50,371 - main - INFO - Included router from routers.aihub
+2026-04-16 13:19:50,606 - main - WARNING - Failed to import module 'routers.auth': routers.auth
+Traceback (most recent call last):
+  File "C:\Users\Lenovo 10GEN\Desktop\paudc_site\backend\main.py", line 111, in include_routers_from_package
+    module = importlib.import_module(module_name)
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\importlib\__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 1023, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "C:\Users\Lenovo 10GEN\Desktop\paudc_site\backend\routers\auth.py", line 32, in <module>
+    from services.firebase import verify_firebase_token, init_firebase
+  File "C:\Users\Lenovo 10GEN\Desktop\paudc_site\backend\services\firebase.py", line 7, in <module>
+    import firebase_admin
+ModuleNotFoundError: No module named 'firebase_admin'
+2026-04-16 13:19:50,612 - main - INFO - Included router from routers.config
+2026-04-16 13:19:50,630 - main - WARNING - Failed to import module 'routers.contact': routers.contact
+Traceback (most recent call last):
+  File "C:\Users\Lenovo 10GEN\Desktop\paudc_site\backend\.venv\Lib\site-packages\pydantic\networks.py", line 965, in import_email_validator
+    import email_validator
+ModuleNotFoundError: No module named 'email_validator'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Lenovo 10GEN\Desktop\paudc_site\backend\main.py", line 111, in include_routers_from_package
+    module = importlib.import_module(module_name)
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\importlib\__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 1023, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "C:\Users\Lenovo 10GEN\Desktop\paudc_site\backend\routers\contact.py", line 12, in <module>
+    class ContactFormData(BaseModel):
+    ...<4 lines>...
+        message: str
+  File "C:\Users\Lenovo 10GEN\Desktop\paudc_site\backend\.venv\Lib\site-packages\pydantic\_internal\_model_construction.py", line 255, in __new__
+    complete_model_class(
+    ~~~~~~~~~~~~~~~~~~~~^
+        cls,
+        ^^^^
+    ...<3 lines>...
+        create_model_module=_create_model_module,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Lenovo 10GEN\Desktop\paudc_site\backend\.venv\Lib\site-packages\pydantic\_internal\_model_construction.py", line 648, in complete_model_class
+    schema = gen_schema.generate_schema(cls)
+  File "C:\Users\Lenovo 10GEN\Desktop\paudc_site\backend\.venv\Lib\site-packages\pydantic\_internal\_generate_schema.py", line 729, in generate_schema
+    schema = self._generate_schema_inner(obj)
+  File "C:\Users\Lenovo 10GEN\Desktop\paudc_site\backend\.venv\Lib\site-packages\pydantic\_internal\_generate_schema.py", line 1023, in _generate_schema_inner
+    return self._model_schema(obj)
+           ~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Lenovo 10GEN\Desktop\paudc_site\backend\.venv\Lib\site-packages\pydantic\_internal\_generate_schema.py", line 856, in _model_schema
+    {k: self._generate_md_field_schema(k, v, decorators) for k, v in fields.items()},
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo 10GEN\Desktop\paudc_site\backend\.venv\Lib\site-packages\pydantic\_internal\_generate_schema.py", line 1228, in _generate_md_field_schema
+    schema, metadata = self._common_field_schema(name, field_info, decorators)
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo 10GEN\Desktop\paudc_site\backend\.venv\Lib\site-packages\pydantic\_internal\_generate_schema.py", line 1282, in _common_field_schema
+    schema = self._apply_annotations(
+        source_type,
+        annotations + validators_from_decorators,
+    )
+  File "C:\Users\Lenovo 10GEN\Desktop\paudc_site\backend\.venv\Lib\site-packages\pydantic\_internal\_generate_schema.py", line 2227, in _apply_annotations
+    schema = get_inner_schema(source_type)
+  File "C:\Users\Lenovo 10GEN\Desktop\paudc_site\backend\.venv\Lib\site-packages\pydantic\_internal\_schema_generation_shared.py", line 83, in __call__
+    schema = self._handler(source_type)
+  File "C:\Users\Lenovo 10GEN\Desktop\paudc_site\backend\.venv\Lib\site-packages\pydantic\_internal\_generate_schema.py", line 2203, in inner_handler
+    schema = self._generate_schema_from_get_schema_method(obj, source_type)
+  File "C:\Users\Lenovo 10GEN\Desktop\paudc_site\backend\.venv\Lib\site-packages\pydantic\_internal\_generate_schema.py", line 919, in _generate_schema_from_get_schema_method
+    schema = get_schema(
+        source, CallbackGetCoreSchemaHandler(self._generate_schema_inner, self, ref_mode=ref_mode)
+    )
+  File "C:\Users\Lenovo 10GEN\Desktop\paudc_site\backend\.venv\Lib\site-packages\pydantic\networks.py", line 1005, in __get_pydantic_core_schema__
+    import_email_validator()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Lenovo 10GEN\Desktop\paudc_site\backend\.venv\Lib\site-packages\pydantic\networks.py", line 967, in import_email_validator
+    raise ImportError("email-validator is not installed, run `pip install 'pydantic[email]'`") from e
+ImportError: email-validator is not installed, run `pip install 'pydantic[email]'`
+2026-04-16 13:19:50,666 - main - INFO - Included router from routers.content_pages
+2026-04-16 13:19:50,693 - main - INFO - Included router from routers.course_materials
+2026-04-16 13:19:50,716 - main - INFO - Included router from routers.course_modules
+2026-04-16 13:19:50,742 - main - INFO - Included router from routers.courses
+2026-04-16 13:19:50,764 - main - INFO - Included router from routers.enrollments
+2026-04-16 13:19:50,795 - main - INFO - Included router from routers.faqs
+2026-04-16 13:19:50,797 - main - INFO - Included router from routers.health
+2026-04-16 13:19:50,817 - main - INFO - Included router from routers.notifications
+2026-04-16 13:19:50,838 - main - INFO - Included router from routers.progress_tracking
+2026-04-16 13:19:50,855 - main - INFO - Included router from routers.quiz_attempts
+2026-04-16 13:19:50,870 - main - INFO - Included router from routers.quiz_questions
+2026-04-16 13:19:50,888 - main - INFO - Included router from routers.quizzes
+2026-04-16 13:19:50,922 - main - INFO - Included router from routers.registrations
+2026-04-16 13:19:50,947 - main - INFO - Included router from routers.resources
+2026-04-16 13:19:50,971 - main - INFO - Included router from routers.schedules
+2026-04-16 13:19:50,988 - main - INFO - Included router from routers.settings
+2026-04-16 13:19:51,013 - main - INFO - Included router from routers.storage
+2026-04-16 13:19:51,019 - main - INFO - Included router from routers.user
+2026-04-16 13:19:51,019 - main - INFO - Total routers discovered and included: 20
+2026-04-16 13:19:51,021 - main - INFO - === Application startup initiated ===
+2026-04-16 13:19:51,022 - core.database - INFO - Starting database initialization...
+2026-04-16 13:19:51,022 - core.database - INFO - Using QueuePool with connection pooling for non-lambda environment
+2026-04-16 13:19:51,053 - core.database - INFO - Database engine created successfully
+2026-04-16 13:19:51,053 - core.database - INFO - Database connection created successfully
+2026-04-16 13:19:51,054 - core.database - INFO - Starting table creation...
+2026-04-16 13:19:51,054 - core.database - INFO - Starting table creation...
+2026-04-16 13:19:51,087 - core.database - INFO - Tables initialized successfully
+2026-04-16 13:19:51,087 - core.database - INFO - Checking for structural repairs in existing tables...
+2026-04-16 13:19:51,137 - core.database - INFO - Table structure repair completed in 0.0497s
+2026-04-16 13:19:51,273 - main - INFO - === Application startup completed successfully ===
+2026-04-16 13:21:43,181 - main - INFO - === Application shutdown initiated ===
+2026-04-16 13:21:43,181 - core.database - INFO - Closing database connection...
+2026-04-16 13:21:43,183 - core.database - INFO - Database connection closed and engine disposed
+2026-04-16 13:21:43,183 - main - INFO - === Application shutdown completed successfully ===

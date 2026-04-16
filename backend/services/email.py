@@ -89,20 +89,16 @@ async def send_registration_notification(registration_data: dict) -> bool:
                         <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{registration_data.get('phone', 'N/A')}</td>
                     </tr>
                     <tr>
-                        <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold;">Role:</td>
-                        <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{registration_data.get('participant_role', '').title()}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold;">Registration Type:</td>
-                        <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{registration_data.get('registration_type', '').title()}</td>
+                        <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold;">Country:</td>
+                        <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{registration_data.get('country', 'N/A')}</td>
                     </tr>
                     <tr>
                         <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold;">University:</td>
                         <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{registration_data.get('university', 'N/A')}</td>
                     </tr>
                     <tr>
-                        <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold;">Country:</td>
-                        <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{registration_data.get('country', 'N/A')}</td>
+                        <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold;">Registration Type:</td>
+                        <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{registration_data.get('registration_type', '').title()}</td>
                     </tr>
                 </table>
                 
@@ -113,30 +109,31 @@ async def send_registration_notification(registration_data: dict) -> bool:
                         <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{registration_data.get('institution_name', 'N/A')}</td>
                     </tr>
                     <tr>
-                        <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold;">Institution Country:</td>
+                        <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold;">Country:</td>
                         <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{registration_data.get('institution_country', 'N/A')}</td>
                     </tr>
                     <tr>
-                        <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold;">Institution Email:</td>
-                        <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{registration_data.get('institution_email', 'N/A')}</td>
+                        <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold;">University Contact Email:</td>
+                        <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{registration_data.get('university_contact_email', 'N/A')}</td>
                     </tr>
                     <tr>
-                        <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold;">Number of Participants:</td>
-                        <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{registration_data.get('number_of_participants', 'N/A')}</td>
+                        <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold;">Your Contact Email:</td>
+                        <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{registration_data.get('your_contact_email', 'N/A')}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold;">Contact Phone:</td>
+                        <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{registration_data.get('institution_phone', 'N/A')}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold;">To Whom Should It Be Addressed:</td>
+                        <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{registration_data.get('addressed_to', 'N/A')}</td>
                     </tr>
                 </table>
                 
-                <h3 style="color: #1B5E3B; margin-top: 20px;">Additional Information</h3>
-                <table style="width: 100%; border-collapse: collapse;">
-                    <tr>
-                        <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold; width: 40%;">Dietary Requirements:</td>
-                        <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{registration_data.get('dietary_requirements', 'None')}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold;">Special Needs:</td>
-                        <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{registration_data.get('special_needs', 'None')}</td>
-                    </tr>
-                </table>
+                <h3 style="color: #1B5E3B; margin-top: 20px;">Additional Comments</h3>
+                <div style="background: white; padding: 15px; border-radius: 5px; border: 1px solid #eee;">
+                    {registration_data.get('special_needs', 'None')}
+                </div>
             </div>
             
             <p style="text-align: center; color: #666; font-size: 12px; margin-top: 20px;">
@@ -153,13 +150,19 @@ async def send_registration_notification(registration_data: dict) -> bool:
     Name: {registration_data.get('first_name', '')} {registration_data.get('last_name', '')}
     Email: {registration_data.get('email', '')}
     Phone: {registration_data.get('phone', 'N/A')}
-    Role: {registration_data.get('participant_role', '').title()}
-    Registration Type: {registration_data.get('registration_type', '').title()}
-    University: {registration_data.get('university', 'N/A')}
     Country: {registration_data.get('country', 'N/A')}
-    Institution: {registration_data.get('institution_name', 'N/A')}
-    Dietary Requirements: {registration_data.get('dietary_requirements', 'None')}
-    Special Needs: {registration_data.get('special_needs', 'None')}
+    University: {registration_data.get('university', 'N/A')}
+    Registration Type: {registration_data.get('registration_type', '').title()}
+    
+    Institution Details:
+    Institution Name: {registration_data.get('institution_name', 'N/A')}
+    Country: {registration_data.get('institution_country', 'N/A')}
+    University Contact Email: {registration_data.get('university_contact_email', 'N/A')}
+    Your Contact Email: {registration_data.get('your_contact_email', 'N/A')}
+    Contact Phone: {registration_data.get('institution_phone', 'N/A')}
+    To Whom Should It Be Addressed: {registration_data.get('addressed_to', 'N/A')}
+    
+    Comments: {registration_data.get('special_needs', 'None')}
     """
     
     return await send_email(CONVENER_EMAIL, subject, body_html, body_text)

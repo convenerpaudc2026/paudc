@@ -29,6 +29,8 @@ from schemas.auth import (
     TokenExchangeResponse,
     UserResponse,
 )
+from services.firebase import verify_firebase_token, init_firebase
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -55,6 +57,90 @@ def derive_name_from_email(email: str) -> str:
     # Simple capitalization of parts
     parts = name_part.replace(".", " ").replace("_", " ").split()
     return " ".join(part.capitalize() for part in parts)
+
+
+# Firebase Login Schemas
+class FirebaseLoginRequest(BaseModel):
+    id_token: str
+
+
+class FirebaseLoginResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: UserResponse
+
+
+# Firebase Login Endpoint
+@router.post("/firebase/login", response_model=FirebaseLoginResponse)
+async def firebase_login(
+    request: FirebaseLoginRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Authenticate user with Firebase ID token and return JWT token.
+    
+    The frontend sends the Firebase ID token obtained after authentication,
+    and this endpoint validates it and returns a JWT token for API access.
+    """
+    # Initialize Firebase if not already done
+    try:
+        init_firebase()
+    except Exception as e:
+        logger.error(f"Firebase initialization failed: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Firebase authentication service unavailable"
+        )
+    
+    # Verify Firebase token
+    decoded_token = await verify_firebase_token(request.id_token)
+    if not decoded_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid Firebase token"
+        )
+    
+    firebase_uid = decoded_token.get("uid")
+    email = decoded_token.get("email")
+    
+    if not firebase_uid or not email:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token claims"
+        )
+    
+    # Check if user exists in database
+    stmt = select(User).where(User.external_id == firebase_uid)
+    result = await db.execute(stmt)
+    user = result.scalar_one_or_none()
+    
+    # Create user if doesn't exist
+    if not user:
+        name = decoded_token.get("name") or derive_name_from_email(email)
+        user = User(
+            external_id=firebase_uid,
+            email=email,
+            username=name or email.split("@")[0],
+            full_name=name,
+            role="participant",  # Default role
+            provider="firebase"
+        )
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
+        logger.info(f"New user created from Firebase: {email}")
+    
+    # Create JWT token
+    access_token = create_access_token(
+        data={"sub": str(user.id), "email": user.email}
+    )
+    
+    return FirebaseLoginResponse(
+        access_token=access_token,
+        token_type="bearer",
+        user=UserResponse.from_orm(user)
+    )
+
 
 @router.get("/login")
 async def login(request: Request, db: AsyncSession = Depends(get_db)):

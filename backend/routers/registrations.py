@@ -24,19 +24,23 @@ router = APIRouter(prefix="/api/v1/entities/registrations", tags=["registrations
 class RegistrationsData(BaseModel):
     """Entity data schema (for create/update)"""
     registration_type: str
-    participant_role: ParticipantRoleLiteral
+    participant_role: Optional[ParticipantRoleLiteral] = None
     status: str
+    # Institution fields
     institution_name: Optional[str] = None
     institution_country: Optional[str] = None
     institution_email: Optional[str] = None
     institution_phone: Optional[str] = None
-    number_of_participants: Optional[int] = None
+    addressed_to: Optional[str] = None
+    # Individual fields
     first_name: str
     last_name: str
     email: str
+    your_contact_email: Optional[str] = None
     phone: Optional[str] = None
     country: Optional[str] = None
     university: Optional[str] = None
+    # Common fields
     dietary_requirements: Optional[str] = None
     special_needs: Optional[str] = None
 
@@ -49,10 +53,11 @@ class RegistrationsUpdateData(BaseModel):
     institution_country: Optional[str] = None
     institution_email: Optional[str] = None
     institution_phone: Optional[str] = None
-    number_of_participants: Optional[int] = None
+    addressed_to: Optional[str] = None
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     email: Optional[str] = None
+    your_contact_email: Optional[str] = None
     phone: Optional[str] = None
     country: Optional[str] = None
     university: Optional[str] = None
@@ -64,16 +69,17 @@ class RegistrationsResponse(BaseModel):
     id: int
     user_id: Optional[str] = None
     registration_type: str
-    participant_role: ParticipantRoleLiteral
+    participant_role: Optional[ParticipantRoleLiteral] = None
     status: str
     institution_name: Optional[str] = None
     institution_country: Optional[str] = None
     institution_email: Optional[str] = None
     institution_phone: Optional[str] = None
-    number_of_participants: Optional[int] = None
+    addressed_to: Optional[str] = None
     first_name: str
     last_name: str
     email: str
+    your_contact_email: Optional[str] = None
     phone: Optional[str] = None
     country: Optional[str] = None
     university: Optional[str] = None

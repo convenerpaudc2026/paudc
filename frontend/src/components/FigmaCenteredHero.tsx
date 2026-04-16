@@ -12,10 +12,9 @@ type TimeLeft = {
 
 type FigmaCenteredHeroProps = {
     timeLeft: TimeLeft;
-    emblemSrc: string;
 };
 
-export default function FigmaCenteredHero({ timeLeft, emblemSrc }: FigmaCenteredHeroProps) {
+export default function FigmaCenteredHero({ timeLeft }: FigmaCenteredHeroProps) {
 
     useEffect(() => {
         const link = document.createElement("link");

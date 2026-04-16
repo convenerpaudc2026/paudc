@@ -15,7 +15,6 @@ import continent from "../assets/continent.jpg";
 import vunalogo from "../assets/vunalogo.jpg";
 import vuef from "../assets/vuef.jpg";
 import kakaki from "../assets/kakaki.png";
-import LOGO_URL from "../assets/paudc.png";
 import FigmaCenteredHero from "@/components/FigmaCenteredHero";
 
 /* ─── SVG trophy illustration ─── */
@@ -66,7 +65,7 @@ export default function Dashboard() {
 
       {/* ─── HERO ─── */}
       {/* Removed the extra pt-28 wrapper here to eliminate the massive gap */}
-      <FigmaCenteredHero timeLeft={timeLeft} emblemSrc={LOGO_URL} />
+      <FigmaCenteredHero timeLeft={timeLeft} />
 
       {/* ─── FEATURES ─── */}
       <section className="relative z-10 max-w-5xl mx-auto px-6 py-20 md:pb-24 text-center">

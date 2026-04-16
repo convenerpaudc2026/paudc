@@ -10,13 +10,6 @@ import { useToast } from '@/hooks/use-toast';
 import { User, Building, FileText, CheckCircle2 } from 'lucide-react';
 import { EmailPillInput } from '@/components/EmailPillInput';
 import { submitForm } from '@/lib/googleForms';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 
 export default function Register() {
     const navigate = useNavigate();
@@ -48,10 +41,6 @@ export default function Register() {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
-    const handleSelectChange = (name: string, value: string) => {
-        setFormData({ ...formData, [name]: value });
     };
 
     const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -247,12 +236,10 @@ export default function Register() {
                                             <div>
                                                 <label className="block text-sm font-bold text-[#1B5E3B] mb-2">Contact Emails *</label>
                                                 <EmailPillInput
-                                                    name="your_contact_email"
                                                     value={formData.your_contact_email}
                                                     onChange={(value) => setFormData({ ...formData, your_contact_email: value })}
                                                     placeholder="Enter email and press Enter..."
                                                     required
-                                                    className={`${uniformInputClasses} min-h-[48px]`}
                                                 />
                                             </div>
 

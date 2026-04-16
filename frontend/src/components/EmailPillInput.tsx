@@ -6,6 +6,7 @@ interface EmailPillInputProps {
   onChange: (value: string) => void;
   placeholder?: string;
   required?: boolean;
+  className?: string;
 }
 
 export function EmailPillInput({
@@ -13,6 +14,7 @@ export function EmailPillInput({
   onChange,
   placeholder = "Enter emails...",
   required = false,
+  className = "",
 }: EmailPillInputProps) {
   const [isFocused, setIsFocused] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -54,7 +56,7 @@ export function EmailPillInput({
   };
 
   return (
-    <div className="space-y-2">
+    <div className={`space-y-2 ${className}`}>
       <div
         className={`flex flex-wrap gap-2 items-center px-4 py-3 rounded-lg border bg-[#F6F0E1]/50 transition-all ${isFocused
           ? 'border-[#C8A046] ring-2 ring-[#C8A046]/30'

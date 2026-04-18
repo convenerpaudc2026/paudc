@@ -124,7 +124,7 @@ export default function FigmaCenteredHero({ timeLeft }: FigmaCenteredHeroProps) 
                     </p>
                     <div className="flex flex-row items-center gap-4">
                         <Link
-                            to="/register"
+                            to="/invite"
                             className="rounded-full border border-[#C8A046] px-6 py-2 text-sm font-bold text-[#544434] transition-colors hover:bg-[#C8A046] hover:text-[#FAF9F6] text-center"
                         >
                             Request An Invite
@@ -168,7 +168,7 @@ export default function FigmaCenteredHero({ timeLeft }: FigmaCenteredHeroProps) 
                 {/* ── Mobile: Buttons (Stacked at bottom) ── */}
                 <div className="flex md:hidden flex-col items-start gap-4 w-full">
                     <Link
-                        to="/register"
+                        to="/invite"
                         className="w-[220px] rounded-full border border-[#C8A046] px-6 py-3.5 text-sm font-bold text-[#544434] transition-colors hover:bg-[#C8A046] hover:text-[#FAF9F6] text-center"
                     >
                         Request An Invite

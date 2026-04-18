@@ -405,7 +405,7 @@ export default function Team() {
                         Be part of Africa's most prestigious debate championship. Updated tournament schedule will be shared soon.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                        <a href="/register" className="inline-block">
+                        <a href="/invite" className="inline-block">
                             <button className="px-10 py-4 bg-[#C8A046] hover:bg-[#b08c3e] text-[#022512] font-bold rounded-full shadow-lg transition-transform hover:-translate-y-1">
                                 Request an Invite
                             </button>

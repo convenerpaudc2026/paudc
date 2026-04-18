@@ -225,7 +225,7 @@ export default function Dashboard() {
           Be part of Africa&apos;s most prestigious intellectual gathering. Request an invite to secure your place in history as we build Africa&apos;s future through debate.
         </p>
         <div className="flex flex-wrap justify-center gap-6 mb-6">
-          <a href="/register">
+          <a href="/invite">
             <button className="px-8 py-3 bg-[#C8A046] text-[#022512] rounded-full font-bold hover:bg-[#b08c3e] transition shadow-lg">
               Request an Invite
             </button>

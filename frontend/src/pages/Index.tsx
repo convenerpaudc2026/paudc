@@ -100,7 +100,7 @@ export default function Index() {
                     {/* Call to Actions */}
                     <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
                         <Button size="lg" className="bg-[#C84B46] hover:bg-[#A83D39] text-white px-6 md:px-8 py-5 md:py-6 text-sm md:text-lg rounded-full" asChild>
-                            <Link to="/register">Request an Invite</Link>
+                            <Link to="/invite">Request an Invite</Link>
                         </Button>
                         <Button size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white/10 px-6 md:px-8 py-5 md:py-6 text-sm md:text-lg rounded-full" asChild>
                             <Link to="/about">Explore the Vision</Link>

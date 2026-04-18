@@ -86,7 +86,7 @@ export default function LegacyLab() {
                         Be part of Africa's largest youth-led innovation space. Whether you're a debater, an adjudicator, or an observer, there is a place for you in the Legacy Lab community.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
-                        <a href="/register" className="inline-block">
+                        <a href="/invite" className="inline-block">
                             <button className="px-6 md:px-8 py-2.5 md:py-3 bg-[#C84B46] hover:bg-[#B84040] text-white text-sm md:text-base rounded-md font-medium transition-colors w-full sm:w-auto">
                                 Register for PAUDC 2026
                             </button>

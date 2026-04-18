@@ -51,7 +51,7 @@ export default function Navbar() {
     const isSolidBackground = !isDashboard || isScrolled || isOpen;
 
     return (
-        <nav 
+        <nav
             className={`
                 w-full fixed z-50 top-0 left-0 transition-all duration-300 ease-in-out
                 ${isVisible ? 'translate-y-0' : '-translate-y-full'}
@@ -77,11 +77,10 @@ export default function Navbar() {
                                 <Link
                                     key={link.name}
                                     to={link.path}
-                                    className={`text-[13px] xl:text-sm transition-colors duration-200 whitespace-nowrap ${
-                                        isActive(link.path)
+                                    className={`text-[13px] xl:text-sm transition-colors duration-200 whitespace-nowrap ${isActive(link.path)
                                             ? 'text-[#022512] font-bold'
                                             : 'text-[#022512]/60 font-medium hover:text-[#022512]'
-                                    }`}
+                                        }`}
                                 >
                                     {link.name}
                                 </Link>
@@ -94,7 +93,7 @@ export default function Navbar() {
                                     LMS Portal
                                 </Button>
                             </a>
-                            <a href="/register">
+                            <a href="/invite">
                                 <Button className="bg-[#C8A046] hover:bg-[#b08c3e] text-[#022512] font-bold shadow-none rounded-full px-4 xl:px-5 h-9 text-xs xl:text-sm">
                                     Request an invite
                                 </Button>
@@ -116,7 +115,7 @@ export default function Navbar() {
             </div>
 
             {/* ── Mobile Navigation Dropdown ── */}
-            <div 
+            <div
                 className={`
                     lg:hidden absolute top-full left-0 w-full bg-white border-t border-gray-100 shadow-xl overflow-hidden transition-all duration-300 ease-in-out origin-top
                     ${isOpen ? 'opacity-100 max-h-[500px]' : 'opacity-0 max-h-0'}
@@ -128,24 +127,23 @@ export default function Navbar() {
                             <Link
                                 key={link.name}
                                 to={link.path}
-                                className={`block text-base transition-colors ${
-                                    isActive(link.path)
+                                className={`block text-base transition-colors ${isActive(link.path)
                                         ? 'text-[#022512] font-bold'
                                         : 'text-[#022512]/70 font-medium hover:text-[#022512]'
-                                }`}
+                                    }`}
                                 onClick={() => setIsOpen(false)}
                             >
                                 {link.name}
                             </Link>
                         ))}
-                        
+
                         <div className="pt-6 mt-2 border-t border-gray-100 flex flex-col space-y-3">
                             <a href="/lms" onClick={() => setIsOpen(false)}>
                                 <Button className="w-full bg-transparent border border-[#022512]/20 text-[#022512] hover:bg-[#022512] hover:text-white transition-colors duration-300 font-semibold shadow-none rounded-full h-12">
                                     LMS Portal
                                 </Button>
                             </a>
-                            <a href="/register" onClick={() => setIsOpen(false)}>
+                            <a href="/invite" onClick={() => setIsOpen(false)}>
                                 <Button className="w-full bg-[#C8A046] hover:bg-[#b08c3e] text-[#022512] font-bold shadow-none rounded-full h-12">
                                     Request an Invite
                                 </Button>

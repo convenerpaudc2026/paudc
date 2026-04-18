@@ -1,13 +1,24 @@
-"redirects": [
-    {
-        "source": "/",
-        "has": [
-            {
-                "type": "host",
-                "value": "invite.paudc2026.com"
-            }
-        ],
-        "destination": "https://paudc2026.com/invite",
-        "permanent": false
-    }
-],
+{
+    "buildCommand": "npm ci && npm run build",
+    "installCommand": "npm install",
+    "outputDirectory": "dist",
+    "redirects": [
+        {
+            "source": "/",
+            "has": [
+                {
+                    "type": "host",
+                    "value": "invite.paudc2026.com"
+                }
+            ],
+            "destination": "https://paudc2026.com/invite",
+            "permanent": false
+        }
+    ],
+    "rewrites": [
+        {
+            "source": "/(.*)",
+            "destination": "/index.html"
+        }
+    ]
+}

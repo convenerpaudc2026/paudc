@@ -12,7 +12,7 @@ interface SEOProps {
 export function SEO({
     title,
     description,
-    image = '/src/assets/paudc.png',
+    image = '/paudc.png',
     url,
     type = 'website',
     canonical

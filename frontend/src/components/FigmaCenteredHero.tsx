@@ -108,13 +108,14 @@ export default function FigmaCenteredHero({ timeLeft }: FigmaCenteredHeroProps) 
                 <h1
                     style={{ fontFamily: "'Anton', sans-serif", lineHeight: 1 }}
                     className="
-                        uppercase text-[#1A1C1A] font-normal
+                        uppercase font-normal
                         text-[clamp(5.5rem,18vw,180px)]
                         tracking-[-0.04em] md:tracking-[-0.06em]
                         mb-4 w-full
                     "
                 >
-                    PAUDC 2026
+                    <span className="text-[#1B5E3B]">PAUDC</span>
+                    <span className="text-[#A4372C]"> 2026</span>
                 </h1>
 
                 {/* ── Desktop: Tagline + Buttons ── */}
@@ -149,7 +150,7 @@ export default function FigmaCenteredHero({ timeLeft }: FigmaCenteredHeroProps) 
                         <div key={item.label} className="flex flex-col items-start">
                             <span
                                 style={{ fontFamily: "'Anton', sans-serif" }}
-                                className={`text-4xl md:text-6xl leading-none ${item.label === 'Seconds' ? 'text-[#1B5E3B] md:text-[#1A1C1A]' : 'text-[#1A1C1A]'}`}
+                                className={`text-4xl md:text-6xl leading-none ${item.label === 'Seconds' ? 'text-[#A4372C]' : 'text-[#1A1C1A]'}`}
                             >
                                 {String(item.value).padStart(2, "0")}
                             </span>

@@ -1,5 +1,6 @@
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { SEO } from '@/components/SEO';
 import { Card, CardContent } from '@/components/ui/card';
 import { Eye, Award, MapPin, Globe, Target } from 'lucide-react';
 import abjImage from '../assets/abj.jpg';
@@ -16,6 +17,11 @@ export default function About() {
 
     return (
         <div className="min-h-screen bg-white text-[#1B5E3B]">
+            <SEO
+                title="About PAUDC 2026"
+                description="Learn about the Pan-African University Debating Championship. Africa's premier intellectual arena bringing together over 1,000 young people for dialogue and debate."
+                canonical="https://www.paudc2026.com/about"
+            />
             <Navbar />
 
             {/* Hero Section */}

@@ -1,5 +1,6 @@
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { SEO } from '@/components/SEO';
 import { Card, CardContent } from '@/components/ui/card';
 import { Clock } from 'lucide-react';
 
@@ -231,6 +232,11 @@ export default function Schedule() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <SEO
+        title="Schedule"
+        description="PAUDC 2026 tournament schedule. December 5-13, 2026 in Abuja, Nigeria. Full event itinerary and round times."
+        canonical="https://www.paudc2026.com/schedule"
+      />
       <Navbar />
 
       {/* Hero Section */}

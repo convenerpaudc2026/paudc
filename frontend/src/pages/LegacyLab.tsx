@@ -1,5 +1,6 @@
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { SEO } from '@/components/SEO';
 import { Card, CardContent } from '@/components/ui/card';
 import { Lightbulb, Users, Rocket, Target, Heart, Globe } from 'lucide-react';
 
@@ -39,6 +40,11 @@ export default function LegacyLab() {
 
     return (
         <div className="min-h-screen bg-gray-50">
+            <SEO
+                title="Legacy Lab"
+                description="PAUDC 2026 Legacy Lab - Building Africa's intellectual future through innovation, youth leadership, and continental connection."
+                canonical="https://www.paudc2026.com/legacy-lab"
+            />
             <Navbar />
 
             {/* Hero Section */}

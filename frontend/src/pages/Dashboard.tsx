@@ -2,13 +2,15 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Trophy,
-  Mic,
+
   Lightbulb,
   Globe,
   GraduationCap,
   MessageSquare,
   Palette,
 } from "lucide-react";
+import { SEO } from "@/components/SEO";
+import { EventStructuredData } from "@/components/StructuredData";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import continent from "../assets/continent.jpg";
@@ -17,7 +19,6 @@ import vuef from "../assets/vuef.jpg";
 import kakaki from "../assets/kakaki.png";
 import FigmaCenteredHero from "@/components/FigmaCenteredHero";
 
-/* ─── SVG trophy illustration ─── */
 function TrophyIllustration({ className }: { className: string }) {
   return (
     <svg className={className} viewBox="0 0 120 140" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -59,42 +60,21 @@ export default function Dashboard() {
 
   return (
     <div className="bg-[#f6f0e1] w-full min-h-screen relative overflow-x-hidden text-[#022512]">
+      <SEO
+        title="Pan-African University Debating Championship 2026"
+        description="PAUDC 2026 - Africa's premier intellectual arena. December 5-13, 2026 in Abuja, Nigeria. The Sound of Africa's Resolve."
+        canonical="https://www.paudc2026.com/"
+      />
+      <EventStructuredData />
 
-      {/*
-        ── HERO + NAVBAR WRAPPER ──────────────────────────────────────────────
-        On mobile (< 768px) and small desktop (1024–1535px):
-          → Navbar is in normal flow (relative), hero sits below it. No wrapper magic needed.
-
-        On iPad (768–1023px) and iMac/large (≥ 1536px):
-          → The wrapper is made exactly 100dvh tall.
-          → The Navbar is absolutely positioned at the top of the wrapper,
-             so it overlays the hero without consuming any vertical space.
-          → The hero then fills the full 100dvh and can truly center its content.
-
-        100dvh (dynamic viewport height) accounts for the browser's own chrome
-        (address bar, tab bar) on iPad Safari, so nothing gets clipped.
-        ─────────────────────────────────────────────────────────────────────
-      */}
-      <div className="
-        relative
-        md:h-[100dvh]
-        lg:h-auto
-        2xl:h-[100dvh]
-      ">
-        {/* Navbar: normal flow on mobile/lg, absolutely overlaid on md/2xl */}
-        <div className="
-          md:absolute md:top-0 md:left-0 md:right-0 md:z-50
-          lg:relative lg:top-auto lg:left-auto lg:right-auto lg:z-auto
-          2xl:absolute 2xl:top-0 2xl:left-0 2xl:right-0 2xl:z-50
-        ">
+      <div className="relative md:h-[100dvh] lg:h-auto 2xl:h-[100dvh]">
+        <div className="md:absolute md:top-0 md:left-0 md:right-0 md:z-50 lg:relative lg:top-auto lg:left-auto lg:right-auto lg:z-auto 2xl:absolute 2xl:top-0 2xl:left-0 2xl:right-0 2xl:z-50">
           <Navbar />
         </div>
 
-        {/* Hero fills the wrapper completely on md/2xl */}
         <FigmaCenteredHero timeLeft={timeLeft} />
       </div>
 
-      {/* ─── FEATURES ─── */}
       <section className="relative z-10 max-w-5xl mx-auto px-6 py-20 md:pb-24 text-center">
         <TrophyIllustration className="w-24 h-28 mx-auto mb-6" />
         <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight mb-4 text-[#022512]">
@@ -124,7 +104,6 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* ─── CONTINENTAL HOMECOMING ─── */}
       <section className="relative z-10 bg-white py-24">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center gap-16">
           <div className="w-full md:w-1/2 text-left">
@@ -137,7 +116,6 @@ export default function Dashboard() {
             <p className="text-lg text-[#022512]/80 mb-8 leading-relaxed">
               At its heart,{" "}
               <span className="font-bold text-[#A4372C]">The Republic of Reason</span>{" "}
-              captures the idea of an Africa governed by intellect rather than impulse — a place where dialogue shapes destiny.
             </p>
             <Link to="/about">
               <button className="px-5 py-2 md:px-8 md:py-3 bg-[#1B5E3B] text-[#F6F0E1] rounded-full font-bold hover:bg-[#A4372C] transition-colors shadow-lg">
@@ -151,7 +129,6 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* ─── EVENT PILLARS ─── */}
       <section className="relative z-10 py-24 px-6 max-w-7xl mx-auto text-center">
         <h2 className="text-4xl md:text-5xl font-black mb-4 text-[#022512]">Event Pillars</h2>
         <p className="text-lg text-[#022512]/70 mb-16">
@@ -162,7 +139,6 @@ export default function Dashboard() {
             { icon: <Trophy className="w-7 h-7 text-[#A4372C]" />, bg: "bg-[#A4372C]/10", title: "Debate Championship", desc: "Ten days of British Parliamentary debate rounds testing reasoning, persuasion, and teamwork." },
             { icon: <MessageSquare className="w-7 h-7 text-[#C8A046]" />, bg: "bg-[#C8A046]/10", title: "Public Speaking", desc: "Celebrating clarity, persuasion, and thought leadership through speech." },
             { icon: <GraduationCap className="w-7 h-7 text-[#1B5E3B]" />, bg: "bg-[#1B5E3B]/10", title: "Adjudicators Academy", desc: "Training and certification program for over 200 judges." },
-            { icon: <Mic className="w-7 h-7 text-[#A4372C]" />, bg: "bg-[#A4372C]/10", title: "Civic Panels", desc: "Voices of a Continent – Rethinking Pan-Arcanism for a New Generation." },
             { icon: <Lightbulb className="w-7 h-7 text-[#1B5E3B]" />, bg: "bg-[#1B5E3B]/10", title: "The Legacy Lab", desc: "Youth-led innovation space transforming debate insights into actionable initiatives." },
             { icon: <Palette className="w-7 h-7 text-[#C8A046]" />, bg: "bg-[#C8A046]/10", title: "Cultural Exhibition", desc: "Celebrating Africa's artistic diversity and shared identity as One Africa." },
           ].map((item, i) => (
@@ -177,7 +153,6 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* ─── THE KAKAKI ─── */}
       <section className="relative z-10 bg-[#1B5E3B] text-[#F6F0E1] py-24">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center gap-16">
           <div className="w-full md:w-5/12">
@@ -198,7 +173,6 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* ─── PARTNERS ─── */}
       <section className="relative z-10 py-24 text-center overflow-hidden">
         <h2 className="text-3xl font-black mb-2 text-[#022512]">Our Partners</h2>
         <p className="text-[#022512]/70 mb-12">Proudly supported by leading institutions and organizations</p>
@@ -218,7 +192,6 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* ─── CTA ─── */}
       <section className="relative z-10 bg-white py-24 text-center px-6">
         <h2 className="text-4xl md:text-5xl font-black mb-4 text-[#022512]">Join the Republic of Reason</h2>
         <p className="text-lg text-[#022512]/70 max-w-2xl mx-auto mb-10">

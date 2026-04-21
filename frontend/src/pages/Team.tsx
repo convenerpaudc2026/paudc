@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { SEO } from '@/components/SEO';
 import { Card, CardContent } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -191,6 +192,11 @@ export default function Team() {
 
     return (
         <div className="min-h-screen bg-[#F6F0E1] text-[#1B5E3B]">
+            <SEO
+                title="Team"
+                description="Meet the advisory leadership, core adjudication panel, and local organizing committee of PAUDC 2026. Experienced professionals dedicated to delivering Africa's premier debate championship."
+                canonical="https://www.paudc2026.com/team"
+            />
             <Navbar />
 
             {/* Hero Section */}

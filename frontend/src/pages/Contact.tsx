@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { SEO } from '@/components/SEO';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -53,6 +54,11 @@ export default function Contact() {
 
     return (
         <div className="min-h-screen bg-[#F6F0E1] text-[#1B5E3B] relative overflow-hidden">
+            <SEO
+                title="Contact Us"
+                description="Get in touch with the PAUDC 2026 organizing team. Send us your inquiries, feedback, or partnership requests."
+                canonical="https://www.paudc2026.com/contact"
+            />
             <Navbar />
 
             {/* Decorative Blur Blobs */}
@@ -130,8 +136,8 @@ export default function Contact() {
                                 <CardContent className="p-8 md:p-10">
                                     {submitStatus && (
                                         <div className={`mb-6 p-4 rounded-xl ${submitStatus.type === 'success'
-                                                ? 'bg-green-50 border border-green-200 text-green-800'
-                                                : 'bg-red-50 border border-red-200 text-red-800'
+                                            ? 'bg-green-50 border border-green-200 text-green-800'
+                                            : 'bg-red-50 border border-red-200 text-red-800'
                                             }`}>
                                             {submitStatus.message}
                                         </div>

@@ -1,10 +1,16 @@
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { SEO } from '@/components/SEO';
 import { Card, CardContent } from '@/components/ui/card';
 
 export default function Speakers() {
     return (
         <div className="min-h-screen bg-white">
+            <SEO
+                title="Speakers"
+                description="Featured speakers and panelists for PAUDC 2026. Inspiring minds and distinguished voices leading conversations on Africa's future."
+                canonical="https://www.paudc2026.com/speakers"
+            />
             <Navbar />
 
             {/* Hero Section */}

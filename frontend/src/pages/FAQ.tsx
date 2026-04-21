@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { SEO } from '@/components/SEO';
 import {
     Accordion,
     AccordionContent,
@@ -101,6 +102,11 @@ export default function FAQ() {
 
     return (
         <div className="min-h-screen bg-gray-50">
+            <SEO
+                title="FAQ"
+                description="Frequently Asked Questions about PAUDC 2026. Find answers about registration, British Parliamentary format, logistics, accommodation, and more."
+                canonical="https://www.paudc2026.com/faq"
+            />
             <Navbar />
 
             {/* Hero Section */}

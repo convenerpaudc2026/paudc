@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { SEO } from '@/components/SEO';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -91,6 +92,11 @@ export default function Register() {
 
     return (
         <div className="min-h-screen bg-[#F6F0E1] text-[#1B5E3B] relative overflow-hidden">
+            <SEO
+                title="Request An Invite"
+                description="Request an invitation to PAUDC 2026. Register your institution or apply as an individual participant for Africa's premier debating championship."
+                canonical="https://www.paudc2026.com/invite"
+            />
             <Navbar />
 
             {/* Decorative Blur Blobs */}

@@ -1,5 +1,6 @@
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { SEO } from '@/components/SEO';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { BookOpen, FileText, Video, Download, GraduationCap, ExternalLink } from 'lucide-react';
@@ -29,6 +30,11 @@ export default function Resources() {
 
     return (
         <div className="min-h-screen bg-gray-50">
+            <SEO
+                title="Resources"
+                description="PAUDC 2026 resources and training materials. Access the learning management system, debate guides, templates, and preparation materials."
+                canonical="https://www.paudc2026.com/resources"
+            />
             <Navbar />
 
             {/* Hero Section */}

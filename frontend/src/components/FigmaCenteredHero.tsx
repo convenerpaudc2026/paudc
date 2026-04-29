@@ -115,7 +115,7 @@ export default function FigmaCenteredHero({ timeLeft }: FigmaCenteredHeroProps) 
                     "
                 >
                     <span className="text-[#1B5E3B]">PAUDC</span>
-                    <span className="text-[#A4372C]"> 2026</span>
+                    <span className="text-[#A4372C] block md:inline md:ml-[0.25em]">2026</span>
                 </h1>
 
                 {/* ── Desktop: Tagline + Buttons ── */}

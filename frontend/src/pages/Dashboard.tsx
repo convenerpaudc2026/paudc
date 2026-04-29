@@ -161,7 +161,7 @@ export default function Dashboard() {
               to="/about"
               className="mt-auto inline-flex items-center gap-2 text-[#022512] font-semibold text-sm hover:gap-3 transition-all pt-8"
             >
-              Explore Methodology <ArrowRight className="w-4 h-4" />
+              Learn More <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
 
@@ -199,21 +199,21 @@ export default function Dashboard() {
               icon: civicPanelIcon,
               title: "Civic Panel Sessions",
               desc: "Voices of a Continent: Rethininking Pan Africanism for a New Generation.",
-              cta: "Certification Program",
-              href: "/speakers",
+              cta: "Learn More",
+              href: "/civic-panels",
             },
             {
               icon: legacyLabIcon,
               title: "Legacy Lab",
               desc: "Youth led innovation spaces transforming debate insights into actionable initiatives.",
-              cta: "View Archives",
+              cta: "Learn More",
               href: "/legacy-lab",
             },
             {
               icon: culturalExhibitionIcon,
               title: "Cultural Exhibition",
               desc: "Celebrating Africa's artistic diversity and shared identity as One Africa.",
-              cta: "Upcoming Events",
+              cta: "Learn More",
               href: "/schedule",
             },
           ].map((item, i) => (

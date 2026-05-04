@@ -53,21 +53,34 @@ export default function Register() {
         setIsSubmitting(true);
 
         try {
-            const email = registrationType === 'institution' ? formData.your_contact_email : formData.email;
+            // For institution: first email in the pill list is the primary; full list goes to contactEmails
+            const allContactEmails = formData.your_contact_email;
+            const primaryEmail = registrationType === 'institution'
+                ? allContactEmails.split(',')[0].trim()
+                : formData.email;
             const name = registrationType === 'institution'
                 ? formData.institution_name
                 : `${formData.first_name} ${formData.last_name}`;
             const phone = registrationType === 'institution' ? formData.contact_phone : formData.phone;
             const institution = registrationType === 'individual' ? formData.university : formData.institution_name;
+            const country = registrationType === 'institution'
+                ? formData.institution_country
+                : formData.country;
 
             const success = await submitForm({
                 type: 'registration',
-                email,
+                registrationType,
+                email: primaryEmail,
+                contactEmails: registrationType === 'institution' ? allContactEmails : undefined,
                 name,
                 phone,
                 institution,
+                country,
                 team: formData.participant_role,
-                message: formData.comments
+                message: registrationType === 'institution'
+                    ? [formData.comments, formData.addressed_to ? `Addressed to: ${formData.addressed_to}` : ''].filter(Boolean).join('\n\n')
+                    : formData.comments,
+                addressedTo: registrationType === 'institution' ? formData.addressed_to : undefined,
             });
 
             if (success) {
@@ -155,7 +168,7 @@ export default function Register() {
                                 <div className="space-y-4 md:space-y-6">
                                     <div className="border-l-4 border-[#A4372C] pl-4 md:pl-6">
                                         <p className="text-sm md:text-base font-bold text-[#A4372C] mb-1">Phase 1</p>
-                                        <p className="text-[#1B5E3B]/80 text-sm md:text-lg">April 20, 2026 - June 13, 2026</p>
+                                        <p className="text-[#1B5E3B]/80 text-sm md:text-lg">May 1, 2026 - June 25, 2026</p>
                                     </div>
                                     <div className="border-l-4 border-[#A4372C] pl-4 md:pl-6">
                                         <p className="text-sm md:text-base font-bold text-[#A4372C] mb-1">Phase 2</p>

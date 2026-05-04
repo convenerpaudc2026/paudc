@@ -12,6 +12,10 @@ export interface FormSubmission {
   team?: string;
   subject?: string;
   message?: string;
+  registrationType?: string;
+  country?: string;
+  addressedTo?: string;
+  contactEmails?: string;
 }
 
 export async function submitForm(data: FormSubmission): Promise<boolean> {

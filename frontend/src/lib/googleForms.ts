@@ -20,20 +20,20 @@ export interface FormSubmission {
 
 export async function submitForm(data: FormSubmission): Promise<boolean> {
   try {
-    const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+    // URL-encoded form data is the only POST shape that works reliably
+    // with Google Apps Script web apps from a browser without CORS issues.
+    // The Apps Script reads it via e.parameter.payload.
+    const body = new URLSearchParams();
+    body.append("payload", JSON.stringify(data));
+
+    await fetch(GOOGLE_APPS_SCRIPT_URL, {
       method: "POST",
       mode: "no-cors",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
+      body,
     });
 
-    console.log("Form submission response status:", response.status);
-    console.log("Form submission response:", response);
-
-    // With no-cors mode, we can't read the response body
-    // But we can assume success if the fetch completes without error
+    // no-cors responses are opaque — we can't read status. Treat reaching
+    // this point as success and verify in the Apps Script Executions log.
     return true;
   } catch (error) {
     console.error("Form submission error:", error);

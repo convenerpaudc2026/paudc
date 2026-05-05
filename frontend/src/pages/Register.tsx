@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { User, Building, FileText, CheckCircle2, Calendar } from 'lucide-react';
 import { EmailPillInput } from '@/components/EmailPillInput';
-import { submitForm } from '@/lib/googleForms';
+import { submitForm, isValidEmail, FormError } from '@/lib/googleForms';
 
 export default function Register() {
     const navigate = useNavigate();
@@ -37,19 +37,82 @@ export default function Register() {
         university: '',
     });
 
+    const [errors, setErrors] = useState<Record<string, string>>({});
+
     // Unified styling variable for all text fields
     const uniformInputClasses = "bg-[#F6F0E1]/50 border-[#1B5E3B]/20 focus-visible:ring-[#C8A046] focus-visible:border-[#C8A046] text-[#1B5E3B] placeholder:text-[#1B5E3B]/50 transition-colors";
+    const errorInputClasses = "border-[#A4372C] focus-visible:ring-[#A4372C] focus-visible:border-[#A4372C]";
+
+    const fieldClass = (field: string) =>
+        `${uniformInputClasses} h-12 ${errors[field] ? errorInputClasses : ''}`;
+
+    const clearError = (field: string) => {
+        if (errors[field]) {
+            setErrors(prev => {
+                const next = { ...prev };
+                delete next[field];
+                return next;
+            });
+        }
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+        clearError(e.target.name);
     };
 
     const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+        clearError(e.target.name);
+    };
+
+    const validate = (): Record<string, string> => {
+        const errs: Record<string, string> = {};
+
+        if (registrationType === 'institution') {
+            if (!formData.institution_name.trim()) errs.institution_name = 'Institution name is required.';
+            if (!formData.institution_country.trim()) errs.institution_country = 'Country is required.';
+
+            const emails = formData.your_contact_email
+                .split(',')
+                .map(s => s.trim())
+                .filter(Boolean);
+            if (emails.length === 0) {
+                errs.your_contact_email = 'Please add at least one contact email.';
+            } else {
+                const invalid = emails.find(e => !isValidEmail(e));
+                if (invalid) errs.your_contact_email = `"${invalid}" is not a valid email address.`;
+            }
+
+            if (!formData.contact_phone.trim()) errs.contact_phone = 'Contact phone is required.';
+            if (!formData.addressed_to.trim()) errs.addressed_to = 'Please specify whom the invitation should be addressed to.';
+        } else {
+            if (!formData.first_name.trim()) errs.first_name = 'First name is required.';
+            if (!formData.last_name.trim()) errs.last_name = 'Last name is required.';
+            if (!formData.email.trim()) errs.email = 'Email address is required.';
+            else if (!isValidEmail(formData.email)) errs.email = 'Please enter a valid email address.';
+            if (!formData.phone.trim()) errs.phone = 'Phone number is required.';
+            if (!formData.country.trim()) errs.country = 'Country is required.';
+        }
+
+        return errs;
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        const validationErrors = validate();
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+            toast({
+                variant: "destructive",
+                title: "Please fix the highlighted fields",
+                description: "Some required information is missing or invalid.",
+            });
+            return;
+        }
+        setErrors({});
+
         setIsSubmitting(true);
 
         try {
@@ -67,7 +130,7 @@ export default function Register() {
                 ? formData.institution_country
                 : formData.country;
 
-            const success = await submitForm({
+            await submitForm({
                 type: 'registration',
                 registrationType,
                 email: primaryEmail,
@@ -83,20 +146,25 @@ export default function Register() {
                 addressedTo: registrationType === 'institution' ? formData.addressed_to : undefined,
             });
 
-            if (success) {
-                toast({
-                    title: "Registration Submitted",
-                    description: "We've sent a confirmation email with further instructions.",
-                });
-                setTimeout(() => navigate('/'), 2000);
-            } else {
-                throw new Error('Failed to submit registration');
-            }
+            toast({
+                title: "Registration Submitted",
+                description: "We've sent a confirmation email with further instructions.",
+            });
+            setTimeout(() => navigate('/'), 2000);
         } catch (error) {
+            const isFormError = error instanceof FormError;
+            const titleByCode: Record<string, string> = {
+                offline: "You're offline",
+                network: "Couldn't reach our servers",
+                timeout: "Request timed out",
+                unknown: "Submission failed",
+            };
             toast({
                 variant: "destructive",
-                title: "Registration Failed",
-                description: "Please check your details and try again.",
+                title: isFormError ? titleByCode[error.code] : "Submission failed",
+                description: isFormError
+                    ? error.message
+                    : "Something unexpected happened. Please try again.",
             });
         } finally {
             setIsSubmitting(false);
@@ -229,7 +297,7 @@ export default function Register() {
 
                             {/* Detail Form (Step 2) */}
                             {step === 2 && (
-                                <form onSubmit={handleSubmit} className="space-y-8">
+                                <form onSubmit={handleSubmit} className="space-y-8" noValidate>
 
                                     {registrationType === 'institution' && (
                                         <div className="space-y-6">
@@ -237,32 +305,37 @@ export default function Register() {
 
                                             <div>
                                                 <label className="block text-sm font-bold text-[#1B5E3B] mb-2">Institution Name *</label>
-                                                <Input name="institution_name" value={formData.institution_name} onChange={handleChange} required placeholder="Name of your institution" className={`${uniformInputClasses} h-12`} />
+                                                <Input name="institution_name" value={formData.institution_name} onChange={handleChange} required placeholder="Name of your institution" className={fieldClass('institution_name')} aria-invalid={!!errors.institution_name} />
+                                                {errors.institution_name && <p className="text-sm text-[#A4372C] mt-1.5 font-medium">{errors.institution_name}</p>}
                                             </div>
 
                                             <div>
                                                 <label className="block text-sm font-bold text-[#1B5E3B] mb-2">Country *</label>
-                                                <Input name="institution_country" value={formData.institution_country} onChange={handleChange} required placeholder="Country" className={`${uniformInputClasses} h-12`} />
+                                                <Input name="institution_country" value={formData.institution_country} onChange={handleChange} required placeholder="Country" className={fieldClass('institution_country')} aria-invalid={!!errors.institution_country} />
+                                                {errors.institution_country && <p className="text-sm text-[#A4372C] mt-1.5 font-medium">{errors.institution_country}</p>}
                                             </div>
 
                                             <div>
                                                 <label className="block text-sm font-bold text-[#1B5E3B] mb-2">Contact Emails *</label>
                                                 <EmailPillInput
                                                     value={formData.your_contact_email}
-                                                    onChange={(value) => setFormData({ ...formData, your_contact_email: value })}
+                                                    onChange={(value) => { setFormData({ ...formData, your_contact_email: value }); clearError('your_contact_email'); }}
                                                     placeholder="Enter email and press Enter..."
                                                     required
                                                 />
+                                                {errors.your_contact_email && <p className="text-sm text-[#A4372C] mt-1.5 font-medium">{errors.your_contact_email}</p>}
                                             </div>
 
                                             <div>
                                                 <label className="block text-sm font-bold text-[#1B5E3B] mb-2">Contact Phone (Preferably Whatsapp) *</label>
-                                                <Input name="contact_phone" type="tel" value={formData.contact_phone} onChange={handleChange} required placeholder="+234 xxx xxx xxxx" className={`${uniformInputClasses} h-12`} />
+                                                <Input name="contact_phone" type="tel" value={formData.contact_phone} onChange={handleChange} required placeholder="+234 xxx xxx xxxx" className={fieldClass('contact_phone')} aria-invalid={!!errors.contact_phone} />
+                                                {errors.contact_phone && <p className="text-sm text-[#A4372C] mt-1.5 font-medium">{errors.contact_phone}</p>}
                                             </div>
 
                                             <div>
                                                 <label className="block text-sm font-bold text-[#1B5E3B] mb-2">To Whom Should It Be Addressed *</label>
-                                                <Textarea name="addressed_to" value={formData.addressed_to} onChange={handleTextareaChange} required placeholder={"The Vice Chancellor,\nVeritas University.\nBwari, Abuja"} className={`${uniformInputClasses} min-h-[80px] resize-none`} />
+                                                <Textarea name="addressed_to" value={formData.addressed_to} onChange={handleTextareaChange} required placeholder={"The Vice Chancellor,\nVeritas University.\nBwari, Abuja"} className={`${uniformInputClasses} min-h-[80px] resize-none ${errors.addressed_to ? errorInputClasses : ''}`} aria-invalid={!!errors.addressed_to} />
+                                                {errors.addressed_to && <p className="text-sm text-[#A4372C] mt-1.5 font-medium">{errors.addressed_to}</p>}
                                             </div>
 
                                             <div>
@@ -279,27 +352,32 @@ export default function Register() {
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                 <div>
                                                     <label className="block text-sm font-bold text-[#1B5E3B] mb-2">First Name *</label>
-                                                    <Input name="first_name" value={formData.first_name} onChange={handleChange} required placeholder="First name" className={`${uniformInputClasses} h-12`} />
+                                                    <Input name="first_name" value={formData.first_name} onChange={handleChange} required placeholder="First name" className={fieldClass('first_name')} aria-invalid={!!errors.first_name} />
+                                                    {errors.first_name && <p className="text-sm text-[#A4372C] mt-1.5 font-medium">{errors.first_name}</p>}
                                                 </div>
                                                 <div>
                                                     <label className="block text-sm font-bold text-[#1B5E3B] mb-2">Last Name *</label>
-                                                    <Input name="last_name" value={formData.last_name} onChange={handleChange} required placeholder="Last name" className={`${uniformInputClasses} h-12`} />
+                                                    <Input name="last_name" value={formData.last_name} onChange={handleChange} required placeholder="Last name" className={fieldClass('last_name')} aria-invalid={!!errors.last_name} />
+                                                    {errors.last_name && <p className="text-sm text-[#A4372C] mt-1.5 font-medium">{errors.last_name}</p>}
                                                 </div>
                                             </div>
 
                                             <div>
                                                 <label className="block text-sm font-bold text-[#1B5E3B] mb-2">Email Address *</label>
-                                                <Input name="email" type="email" value={formData.email} onChange={handleChange} required placeholder="your.email@example.com" className={`${uniformInputClasses} h-12`} />
+                                                <Input name="email" type="email" value={formData.email} onChange={handleChange} required placeholder="your.email@example.com" className={fieldClass('email')} aria-invalid={!!errors.email} />
+                                                {errors.email && <p className="text-sm text-[#A4372C] mt-1.5 font-medium">{errors.email}</p>}
                                             </div>
 
                                             <div>
                                                 <label className="block text-sm font-bold text-[#1B5E3B] mb-2">Phone Number *</label>
-                                                <Input name="phone" type="tel" value={formData.phone} onChange={handleChange} required placeholder="+234 xxx xxx xxxx" className={`${uniformInputClasses} h-12`} />
+                                                <Input name="phone" type="tel" value={formData.phone} onChange={handleChange} required placeholder="+234 xxx xxx xxxx" className={fieldClass('phone')} aria-invalid={!!errors.phone} />
+                                                {errors.phone && <p className="text-sm text-[#A4372C] mt-1.5 font-medium">{errors.phone}</p>}
                                             </div>
 
                                             <div>
                                                 <label className="block text-sm font-bold text-[#1B5E3B] mb-2">Country *</label>
-                                                <Input name="country" value={formData.country} onChange={handleChange} required placeholder="Country" className={`${uniformInputClasses} h-12`} />
+                                                <Input name="country" value={formData.country} onChange={handleChange} required placeholder="Country" className={fieldClass('country')} aria-invalid={!!errors.country} />
+                                                {errors.country && <p className="text-sm text-[#A4372C] mt-1.5 font-medium">{errors.country}</p>}
                                             </div>
 
                                             <div>

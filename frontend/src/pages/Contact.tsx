@@ -7,11 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
-import { submitForm } from '@/lib/googleForms';
+import { submitForm, isValidEmail, FormError } from '@/lib/googleForms';
 
 export default function Contact() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitStatus, setSubmitStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+    const [errors, setErrors] = useState<Record<string, string>>({});
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -19,13 +20,45 @@ export default function Contact() {
         message: ''
     });
 
+    const updateField = (field: keyof typeof formData, value: string) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
+        if (errors[field]) {
+            setErrors(prev => {
+                const next = { ...prev };
+                delete next[field];
+                return next;
+            });
+        }
+    };
+
+    const validate = (): Record<string, string> => {
+        const errs: Record<string, string> = {};
+        if (!formData.name.trim()) errs.name = 'Name is required.';
+        if (!formData.email.trim()) errs.email = 'Email is required.';
+        else if (!isValidEmail(formData.email)) errs.email = 'Please enter a valid email address.';
+        if (!formData.subject.trim()) errs.subject = 'Subject is required.';
+        if (!formData.message.trim()) errs.message = 'Please enter a message.';
+        return errs;
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsSubmitting(true);
         setSubmitStatus(null);
 
+        const validationErrors = validate();
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+            setSubmitStatus({
+                type: 'error',
+                message: 'Please fix the highlighted fields and try again.',
+            });
+            return;
+        }
+        setErrors({});
+        setIsSubmitting(true);
+
         try {
-            const success = await submitForm({
+            await submitForm({
                 type: 'contact',
                 email: formData.email,
                 name: formData.name,
@@ -33,24 +66,20 @@ export default function Contact() {
                 message: formData.message
             });
 
-            if (success) {
-                setSubmitStatus({ type: 'success', message: 'Message sent successfully! We\'ll get back to you soon.' });
-                setFormData({ name: '', email: '', subject: '', message: '' });
-            } else {
-                setSubmitStatus({
-                    type: 'error',
-                    message: 'Failed to send message. Please try again.'
-                });
-            }
+            setSubmitStatus({ type: 'success', message: "Message sent successfully! We'll get back to you soon." });
+            setFormData({ name: '', email: '', subject: '', message: '' });
         } catch (error) {
-            setSubmitStatus({
-                type: 'error',
-                message: 'Network error. Please check your connection and try again.'
-            });
+            const message = error instanceof FormError
+                ? error.message
+                : 'Something unexpected happened. Please try again.';
+            setSubmitStatus({ type: 'error', message });
         } finally {
             setIsSubmitting(false);
         }
     };
+
+    const errorBorder = "border-[#A4372C] focus-visible:ring-[#A4372C] focus-visible:border-[#A4372C]";
+    const baseInput = "bg-[#F6F0E1]/50 border-[#1B5E3B]/20 focus-visible:ring-[#C8A046] focus-visible:border-[#C8A046]";
 
     return (
         <div className="min-h-screen bg-[#F6F0E1] text-[#1B5E3B] relative overflow-hidden">
@@ -142,7 +171,7 @@ export default function Contact() {
                                             {submitStatus.message}
                                         </div>
                                     )}
-                                    <form onSubmit={handleSubmit} className="space-y-6">
+                                    <form onSubmit={handleSubmit} className="space-y-6" noValidate>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div>
                                                 <label htmlFor="name" className="block text-sm font-bold text-[#1B5E3B] mb-2">
@@ -151,10 +180,12 @@ export default function Contact() {
                                                 <Input
                                                     id="name"
                                                     value={formData.name}
-                                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                                    onChange={(e) => updateField('name', e.target.value)}
                                                     required
-                                                    className="bg-[#F6F0E1]/50 border-[#1B5E3B]/20 focus-visible:ring-[#C8A046] focus-visible:border-[#C8A046] h-12"
+                                                    aria-invalid={!!errors.name}
+                                                    className={`${baseInput} h-12 ${errors.name ? errorBorder : ''}`}
                                                 />
+                                                {errors.name && <p className="text-sm text-[#A4372C] mt-1.5 font-medium">{errors.name}</p>}
                                             </div>
                                             <div>
                                                 <label htmlFor="email" className="block text-sm font-bold text-[#1B5E3B] mb-2">
@@ -164,10 +195,12 @@ export default function Contact() {
                                                     id="email"
                                                     type="email"
                                                     value={formData.email}
-                                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                                    onChange={(e) => updateField('email', e.target.value)}
                                                     required
-                                                    className="bg-[#F6F0E1]/50 border-[#1B5E3B]/20 focus-visible:ring-[#C8A046] focus-visible:border-[#C8A046] h-12"
+                                                    aria-invalid={!!errors.email}
+                                                    className={`${baseInput} h-12 ${errors.email ? errorBorder : ''}`}
                                                 />
+                                                {errors.email && <p className="text-sm text-[#A4372C] mt-1.5 font-medium">{errors.email}</p>}
                                             </div>
                                         </div>
 
@@ -178,10 +211,12 @@ export default function Contact() {
                                             <Input
                                                 id="subject"
                                                 value={formData.subject}
-                                                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                                                onChange={(e) => updateField('subject', e.target.value)}
                                                 required
-                                                className="bg-[#F6F0E1]/50 border-[#1B5E3B]/20 focus-visible:ring-[#C8A046] focus-visible:border-[#C8A046] h-12"
+                                                aria-invalid={!!errors.subject}
+                                                className={`${baseInput} h-12 ${errors.subject ? errorBorder : ''}`}
                                             />
+                                            {errors.subject && <p className="text-sm text-[#A4372C] mt-1.5 font-medium">{errors.subject}</p>}
                                         </div>
 
                                         <div>
@@ -192,10 +227,12 @@ export default function Contact() {
                                                 id="message"
                                                 rows={5}
                                                 value={formData.message}
-                                                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                                                onChange={(e) => updateField('message', e.target.value)}
                                                 required
-                                                className="bg-[#F6F0E1]/50 border-[#1B5E3B]/20 focus-visible:ring-[#C8A046] focus-visible:border-[#C8A046] resize-none"
+                                                aria-invalid={!!errors.message}
+                                                className={`${baseInput} resize-none ${errors.message ? errorBorder : ''}`}
                                             />
+                                            {errors.message && <p className="text-sm text-[#A4372C] mt-1.5 font-medium">{errors.message}</p>}
                                         </div>
 
                                         <Button

@@ -5,49 +5,45 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Clock, Bell } from 'lucide-react';
-import { submitForm } from '@/lib/googleForms';
+import { submitForm, isValidEmail, FormError } from '@/lib/googleForms';
 
 export default function LmsWaitlist() {
     const [email, setEmail] = useState('');
+    const [emailError, setEmailError] = useState<string>('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitStatus, setSubmitStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
-    const validateEmail = (email: string): boolean => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    };
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        if (!validateEmail(email)) {
-            setSubmitStatus({ type: 'error', message: 'Please enter a valid email address.' });
-            return;
-        }
-
-        setIsSubmitting(true);
         setSubmitStatus(null);
 
+        if (!email.trim()) {
+            setEmailError('Email address is required.');
+            return;
+        }
+        if (!isValidEmail(email)) {
+            setEmailError('Please enter a valid email address.');
+            return;
+        }
+        setEmailError('');
+        setIsSubmitting(true);
+
         try {
-            const success = await submitForm({
+            await submitForm({
                 type: 'lms_waitlist',
-                email
+                email,
             });
 
-            if (success) {
-                setSubmitStatus({
-                    type: 'success',
-                    message: 'Thanks for signing up! We\'ll notify you when the LMS goes live.'
-                });
-                setEmail('');
-            } else {
-                throw new Error('Submission failed');
-            }
-        } catch (error) {
             setSubmitStatus({
-                type: 'error',
-                message: 'Failed to submit. Please try again later.'
+                type: 'success',
+                message: "Thanks for signing up! We'll notify you when the LMS goes live.",
             });
+            setEmail('');
+        } catch (error) {
+            const message = error instanceof FormError
+                ? error.message
+                : 'Could not sign you up. Please try again.';
+            setSubmitStatus({ type: 'error', message });
         } finally {
             setIsSubmitting(false);
         }
@@ -118,7 +114,7 @@ export default function LmsWaitlist() {
                                 </div>
                             )}
 
-                            <form onSubmit={handleSubmit} className="space-y-4">
+                            <form onSubmit={handleSubmit} className="space-y-4" noValidate>
                                 <div>
                                     <label htmlFor="email" className="block text-sm font-bold text-[#1B5E3B] mb-2">
                                         Email Address
@@ -128,10 +124,12 @@ export default function LmsWaitlist() {
                                         type="email"
                                         placeholder="your@email.com"
                                         value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
+                                        onChange={(e) => { setEmail(e.target.value); if (emailError) setEmailError(''); }}
                                         required
-                                        className="bg-[#F6F0E1]/50 border-[#1B5E3B]/20 focus-visible:ring-[#C8A046] focus-visible:border-[#C8A046] h-12"
+                                        aria-invalid={!!emailError}
+                                        className={`bg-[#F6F0E1]/50 border-[#1B5E3B]/20 focus-visible:ring-[#C8A046] focus-visible:border-[#C8A046] h-12 ${emailError ? 'border-[#A4372C] focus-visible:ring-[#A4372C] focus-visible:border-[#A4372C]' : ''}`}
                                     />
+                                    {emailError && <p className="text-sm text-[#A4372C] mt-1.5 font-medium">{emailError}</p>}
                                 </div>
 
                                 <Button

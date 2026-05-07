@@ -112,12 +112,12 @@ export default function Dashboard() {
               A Continental Homecoming of Thought
             </h2>
             <p className="text-lg text-[#022512]/80 mb-6 leading-relaxed">
-              PAUDC 2026 is more than a tournament. It is a continental homecoming of thought, a revival of Africa’s intellectual identity, where young people gather not only to debate, but to shape the moral and civic fabric of the continent. At its heart, The Republic of Reason imagines an Africa governed by truth, dialogue, critical thought, unity, and resolve. In Abuja, voices from across the continent will gather to reason together, lead with conviction, and give life to The Sound of Africa’s Resolve.
+              PAUDC 2026 is more than a tournament. It is a continental homecoming of thought, a revival of Africa’s intellectual identity, where young people gather not only to debate, but to shape the moral and civic fabric of the continent.
             </p>
-            {/* <p className="text-lg text-[#022512]/80 mb-8 leading-relaxed">
-              At its heart,{" "}
-              <span className="font-bold text-[#A4372C]">The Republic of Reason</span>{" "}
-            </p> */}
+            <p className="text-lg text-[#022512]/80 mb-8 leading-relaxed">
+              At its heart, The Republic of Reason imagines an Africa governed by truth, dialogue, critical thought, unity, and resolve. In Abuja, voices from across the continent will gather to reason together, lead with conviction, and give life to{" "}
+              <span className="font-bold text-[#A4372C]">The Sound of Africa’s Resolve</span>.
+            </p>
             <Link to="/about">
               <button className="px-5 py-2 md:px-8 md:py-3 bg-[#1B5E3B] text-[#F6F0E1] rounded-full font-bold hover:bg-[#A4372C] transition-colors shadow-lg">
                 Discover Our Vision

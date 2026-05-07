@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { User, Building, FileText, CheckCircle2, Calendar } from 'lucide-react';
-import { EmailPillInput } from '@/components/EmailPillInput';
+import { EmailPillInput, type EmailPillInputHandle } from '@/components/EmailPillInput';
 import { submitForm, isValidEmail, FormError } from '@/lib/googleForms';
 
 export default function Register() {
@@ -38,6 +38,7 @@ export default function Register() {
     });
 
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const contactEmailsRef = useRef<EmailPillInputHandle>(null);
 
     // Unified styling variable for all text fields
     const uniformInputClasses = "bg-[#F6F0E1]/50 border-[#1B5E3B]/20 focus-visible:ring-[#C8A046] focus-visible:border-[#C8A046] text-[#1B5E3B] placeholder:text-[#1B5E3B]/50 transition-colors";
@@ -66,14 +67,15 @@ export default function Register() {
         clearError(e.target.name);
     };
 
-    const validate = (): Record<string, string> => {
+    const validate = (contactEmailsOverride?: string): Record<string, string> => {
         const errs: Record<string, string> = {};
 
         if (registrationType === 'institution') {
             if (!formData.institution_name.trim()) errs.institution_name = 'Institution name is required.';
             if (!formData.institution_country.trim()) errs.institution_country = 'Country is required.';
 
-            const emails = formData.your_contact_email
+            const contactEmailsValue = contactEmailsOverride ?? formData.your_contact_email;
+            const emails = contactEmailsValue
                 .split(',')
                 .map(s => s.trim())
                 .filter(Boolean);
@@ -101,7 +103,15 @@ export default function Register() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const validationErrors = validate();
+        // Commit any uncommitted email in the pill input before validating,
+        // so users who type an email and click Submit without pressing Enter
+        // still have their email captured.
+        const flushedContactEmails =
+            registrationType === 'institution'
+                ? contactEmailsRef.current?.flush() ?? formData.your_contact_email
+                : formData.your_contact_email;
+
+        const validationErrors = validate(flushedContactEmails);
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
             toast({
@@ -117,7 +127,7 @@ export default function Register() {
 
         try {
             // For institution: first email in the pill list is the primary; full list goes to contactEmails
-            const allContactEmails = formData.your_contact_email;
+            const allContactEmails = flushedContactEmails;
             const primaryEmail = registrationType === 'institution'
                 ? allContactEmails.split(',')[0].trim()
                 : formData.email;
@@ -318,9 +328,10 @@ export default function Register() {
                                             <div>
                                                 <label className="block text-sm font-bold text-[#1B5E3B] mb-2">Contact Emails *</label>
                                                 <EmailPillInput
+                                                    ref={contactEmailsRef}
                                                     value={formData.your_contact_email}
                                                     onChange={(value) => { setFormData({ ...formData, your_contact_email: value }); clearError('your_contact_email'); }}
-                                                    placeholder="Enter email and press Enter..."
+                                                    placeholder="Enter email and press Enter, space or comma..."
                                                     required
                                                 />
                                                 {errors.your_contact_email && <p className="text-sm text-[#A4372C] mt-1.5 font-medium">{errors.your_contact_email}</p>}

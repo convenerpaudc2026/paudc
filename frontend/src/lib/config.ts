@@ -34,22 +34,15 @@ export async function loadRuntimeConfig(): Promise<void> {
 }
 
 export function getConfig(): RuntimeConfig {
-    // If still loading, return default config to avoid using stale Vite env vars
-    if (configLoading) {
-        console.log('Config still loading, using default config');
-        return defaultConfig;
-    }
-
-    if (runtimeConfig) {
-        // console.log('Using runtime config:', runtimeConfig);
-        return runtimeConfig;
-    }
-
-    // Then try Vite environment variables (for local development)
+    // Prioritize Vite environment variables (baked at build time on Vercel)
     if (import.meta.env.VITE_API_BASE_URL) {
         return {
             API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
         };
+    }
+
+    if (runtimeConfig) {
+        return runtimeConfig;
     }
 
     // Fallback to default

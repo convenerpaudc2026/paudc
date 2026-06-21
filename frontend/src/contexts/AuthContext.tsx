@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { authApi } from '../lib/auth';
 
@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const checkAuthStatus = async () => {
+    const checkAuthStatus = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
@@ -47,18 +47,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
-    const login = async () => {
+    const login = useCallback(async () => {
         try {
             await authApi.login();
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Login failed');
             throw err;
         }
-    };
+    }, []);
 
-    const logout = async () => {
+    const logout = useCallback(async () => {
         try {
             await authApi.logout();
             setUser(null);
@@ -66,11 +66,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setError(err instanceof Error ? err.message : 'Logout failed');
             throw err;
         }
-    };
+    }, []);
 
     useEffect(() => {
         checkAuthStatus();
-    }, []);
+    }, [checkAuthStatus]);
 
     const value: AuthContextType = {
         user,

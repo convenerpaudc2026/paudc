@@ -18,7 +18,19 @@ from services.auth import initialize_admin_user
 
 def setup_logging():
     """Configure the root logger and logging system."""
-    if os.environ.get("IS_LAMBDA") == "true":
+    # Vercel and AWS Lambda have read-only filesystems (except /tmp)
+    is_serverless = (
+        os.environ.get("IS_LAMBDA") == "true" or 
+        os.environ.get("AWS_LAMBDA_FUNCTION_NAME") is not None or 
+        os.environ.get("VERCEL") == "1"
+    )
+    
+    if is_serverless:
+        # Just use console logging for serverless environments
+        logging.basicConfig(
+            level=logging.INFO,
+            format="%(name)s - %(levelname)s - %(message)s"
+        )
         return
 
     # Create the logs directory

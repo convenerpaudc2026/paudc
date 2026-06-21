@@ -1,0 +1,46 @@
+[
+    {
+        "course_id": 1,
+        "module_id": 3,
+        "title": "Knowledge Check: Judging Basics",
+        "description": "Verify your understanding of the foundational concepts of British Parliamentary adjudication.",
+        "time_limit_minutes": 5,
+        "max_attempts": 3,
+        "passing_score": 70,
+        "is_published": true,
+        "created_at": "2026-01-20 10:00:00"
+    },
+    {
+        "course_id": 2,
+        "module_id": 7,
+        "title": "Final Assessment: Advanced Argumentation",
+        "description": "Test your grasp of argument anatomy, comparative analysis, and framing.",
+        "time_limit_minutes": 10,
+        "max_attempts": 3,
+        "passing_score": 70,
+        "is_published": true,
+        "created_at": "2026-01-20 10:00:00"
+    },
+    {
+        "course_id": 3,
+        "module_id": 12,
+        "title": "Knowledge Check: BP Format",
+        "description": "Confirm your understanding of British Parliamentary structure and rules.",
+        "time_limit_minutes": 5,
+        "max_attempts": 3,
+        "passing_score": 70,
+        "is_published": true,
+        "created_at": "2026-01-20 10:00:00"
+    },
+    {
+        "course_id": 4,
+        "module_id": 13,
+        "title": "Knowledge Check: Delivery Skills",
+        "description": "Confirm your grasp of vocal preparation and stage presence.",
+        "time_limit_minutes": 5,
+        "max_attempts": 3,
+        "passing_score": 70,
+        "is_published": true,
+        "created_at": "2026-01-20 10:00:00"
+    }
+]

@@ -8,6 +8,8 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
+from dependencies.auth import get_admin_user
+from schemas.auth import UserResponse
 from services.courses import CoursesService
 
 # Set up logging
@@ -139,6 +141,73 @@ async def get_courses(
         raise
     except Exception as e:
         logger.error(f"Error fetching courses module {id}: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+@router.post("/", response_model=CoursesResponse, status_code=201)
+async def create_course(
+    data: CoursesData,
+    current_user: UserResponse = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Create a single course (admin only)"""
+    service = CoursesService(db)
+    try:
+        payload = data.model_dump()
+        payload["created_by"] = payload.get("created_by") or str(current_user.id)
+        payload["created_at"] = datetime.utcnow()
+        payload["updated_at"] = datetime.utcnow()
+        result = await service.create(payload)
+        if not result:
+            raise HTTPException(status_code=400, detail="Failed to create course")
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error creating course: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+@router.put("/{id}", response_model=CoursesResponse)
+async def update_course(
+    id: int,
+    data: CoursesUpdateData,
+    current_user: UserResponse = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update a single course (admin only)"""
+    service = CoursesService(db)
+    try:
+        update_dict = {k: v for k, v in data.model_dump().items() if v is not None}
+        update_dict["updated_at"] = datetime.utcnow()
+        result = await service.update(id, update_dict)
+        if not result:
+            raise HTTPException(status_code=404, detail=f"Course with id {id} not found")
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating course: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+@router.delete("/{id}")
+async def delete_course(
+    id: int,
+    current_user: UserResponse = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Delete a single course (admin only)"""
+    service = CoursesService(db)
+    try:
+        success = await service.delete(id)
+        if not success:
+            raise HTTPException(status_code=404, detail=f"Course with id {id} not found")
+        return {"message": "Course deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting course: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 

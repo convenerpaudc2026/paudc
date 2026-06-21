@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
-    LayoutDashboard, BookOpen, Calendar, FolderOpen,
-    LogOut, ChevronRight, Menu, X,
+    LayoutDashboard, BookOpen,
+    LogOut, ChevronRight, Menu, X, ShieldCheck,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import LOGO_URL from '@/assets/paudc.png';
@@ -10,9 +10,9 @@ import LOGO_URL from '@/assets/paudc.png';
 const NAV_ITEMS = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
     { icon: BookOpen, label: 'Courses', path: '/lms/courses' },
-    { icon: Calendar, label: 'Schedule', path: '/schedule' },
-    { icon: FolderOpen, label: 'Resources', path: '/resources' },
 ];
+
+const ADMIN_NAV_ITEM = { icon: ShieldCheck, label: 'Admin', path: '/lms/admin' };
 
 function SidebarContent({ onClose }: { onClose?: () => void }) {
     const location = useLocation();
@@ -61,6 +61,26 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
                         </Link>
                     );
                 })}
+
+                {user?.role === 'admin' && (() => {
+                    const { icon: Icon, label, path } = ADMIN_NAV_ITEM;
+                    const active = location.pathname === path || location.pathname.startsWith(path + '/');
+                    return (
+                        <Link
+                            key={path}
+                            to={path}
+                            onClick={onClose}
+                            className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${active
+                                ? 'bg-[#C8A046] text-[#022512]'
+                                : 'text-[#C8A046]/85 hover:bg-[#C8A046]/15 hover:text-[#C8A046]'
+                                }`}
+                        >
+                            <Icon className="w-[18px] h-[18px] shrink-0" />
+                            {label}
+                            {active && <ChevronRight className="w-3.5 h-3.5 ml-auto opacity-70" />}
+                        </Link>
+                    );
+                })()}
             </nav>
 
             {/* User + Logout */}

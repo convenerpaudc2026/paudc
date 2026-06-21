@@ -126,6 +126,30 @@ async def create_enrollments(
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
+@router.patch("/{id}", response_model=EnrollmentsResponse)
+async def update_enrollments(
+    id: int,
+    data: EnrollmentsUpdateData,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update an enrollment (user can only update their own)"""
+    service = EnrollmentsService(db)
+    try:
+        update_dict = {k: v for k, v in data.model_dump().items() if v is not None}
+        if update_dict.get("status") == "completed" and "completed_at" not in update_dict:
+            update_dict["completed_at"] = datetime.utcnow()
+        result = await service.update(id, update_dict, user_id=str(current_user.id))
+        if not result:
+            raise HTTPException(status_code=404, detail="Enrollment not found or unauthorized")
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating enrollment: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
 @router.delete("/{id}")
 async def delete_enrollments(
     id: int,

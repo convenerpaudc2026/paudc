@@ -54,7 +54,7 @@ async def verify_firebase_token(id_token: str) -> Optional[Dict[str, Any]]:
         if not firebase_admin._apps:
             init_firebase()
             
-        decoded_token = firebase_auth.verify_id_token(id_token)
+        decoded_token = firebase_auth.verify_id_token(id_token, clock_skew_seconds=10)
         return decoded_token
     except Exception as e:
         logger.error(f"Firebase token verification failed: {e}")

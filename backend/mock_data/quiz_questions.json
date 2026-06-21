@@ -1,0 +1,137 @@
+[
+    {
+        "quiz_id": 1,
+        "question_text": "What is the primary role of a judge in British Parliamentary debate?",
+        "question_type": "multiple_choice",
+        "options": "[\"To declare which side has the most charismatic speakers\", \"To rank the four teams based on the quality of their argumentation\", \"To enforce time limits and call points of order\", \"To select the most factually accurate team\"]",
+        "correct_answer": "To rank the four teams based on the quality of their argumentation",
+        "points": 10,
+        "order_index": 1
+    },
+    {
+        "quiz_id": 1,
+        "question_text": "Which of the following is NOT a core responsibility of a BP judge?",
+        "question_type": "multiple_choice",
+        "options": "[\"Listening actively to all four teams\", \"Taking structured notes\", \"Voting based on personal preference\", \"Delivering constructive feedback\"]",
+        "correct_answer": "Voting based on personal preference",
+        "points": 10,
+        "order_index": 2
+    },
+    {
+        "quiz_id": 1,
+        "question_text": "When should a judge mentally map out the strongest arguments each side could make?",
+        "question_type": "multiple_choice",
+        "options": "[\"After the round ends\", \"Before the round begins\", \"During the closing speeches only\", \"Never \\u2014 judges should remain blank slates\"]",
+        "correct_answer": "Before the round begins",
+        "points": 10,
+        "order_index": 3
+    },
+    {
+        "quiz_id": 2,
+        "question_text": "Which three components make up a complete argument?",
+        "question_type": "multiple_choice",
+        "options": "[\"Claim, evidence, warrant\", \"Statement, source, summary\", \"Topic, transition, takeaway\", \"Hypothesis, data, refutation\"]",
+        "correct_answer": "Claim, evidence, warrant",
+        "points": 10,
+        "order_index": 1
+    },
+    {
+        "quiz_id": 2,
+        "question_text": "Which framing tool asks 'whose interests does the motion serve?'",
+        "question_type": "multiple_choice",
+        "options": "[\"Stakeholder framing\", \"Time-horizon framing\", \"Risk-vs-reward framing\", \"Comparative framing\"]",
+        "correct_answer": "Stakeholder framing",
+        "points": 10,
+        "order_index": 2
+    },
+    {
+        "quiz_id": 2,
+        "question_text": "Why is comparative analysis more powerful than simple rebuttal?",
+        "question_type": "multiple_choice",
+        "options": "[\"It uses bigger words\", \"It shows judges why your world is better, not just why theirs is wrong\", \"It takes less preparation time\", \"It avoids engaging with opposing arguments\"]",
+        "correct_answer": "It shows judges why your world is better, not just why theirs is wrong",
+        "points": 10,
+        "order_index": 3
+    },
+    {
+        "quiz_id": 2,
+        "question_text": "What is the missing component most commonly absent in weak arguments?",
+        "question_type": "multiple_choice",
+        "options": "[\"Claim\", \"Evidence\", \"Warrant\", \"Conclusion\"]",
+        "correct_answer": "Warrant",
+        "points": 10,
+        "order_index": 4
+    },
+    {
+        "quiz_id": 3,
+        "question_text": "How many teams compete in a British Parliamentary debate?",
+        "question_type": "multiple_choice",
+        "options": "[\"Two\", \"Three\", \"Four\", \"Eight\"]",
+        "correct_answer": "Four",
+        "points": 10,
+        "order_index": 1
+    },
+    {
+        "quiz_id": 3,
+        "question_text": "Which team includes the Prime Minister?",
+        "question_type": "multiple_choice",
+        "options": "[\"Opening Government\", \"Opening Opposition\", \"Closing Government\", \"Closing Opposition\"]",
+        "correct_answer": "Opening Government",
+        "points": 10,
+        "order_index": 2
+    },
+    {
+        "quiz_id": 3,
+        "question_text": "How long may a Point of Information last?",
+        "question_type": "multiple_choice",
+        "options": "[\"Up to 15 seconds\", \"Up to 1 minute\", \"Up to 3 minutes\", \"Unlimited\"]",
+        "correct_answer": "Up to 15 seconds",
+        "points": 10,
+        "order_index": 3
+    },
+    {
+        "quiz_id": 3,
+        "question_text": "When may Points of Information NOT be offered?",
+        "question_type": "multiple_choice",
+        "options": "[\"During the protected first and last minute\", \"In the middle of a speech\", \"At any time\", \"Only during the first minute\"]",
+        "correct_answer": "During the protected first and last minute",
+        "points": 10,
+        "order_index": 4
+    },
+    {
+        "quiz_id": 4,
+        "question_text": "What is the purpose of vocal warm-ups before a competition?",
+        "question_type": "multiple_choice",
+        "options": "[\"To project further and sustain energy\", \"To memorize your speech\", \"To intimidate opponents\", \"To save preparation time\"]",
+        "correct_answer": "To project further and sustain energy",
+        "points": 10,
+        "order_index": 1
+    },
+    {
+        "quiz_id": 4,
+        "question_text": "Which of these strengthens stage presence?",
+        "question_type": "multiple_choice",
+        "options": "[\"Open posture and steady eye contact\", \"Gripping the podium tightly\", \"Speaking only to the chair\", \"Constant fidgeting\"]",
+        "correct_answer": "Open posture and steady eye contact",
+        "points": 10,
+        "order_index": 2
+    },
+    {
+        "quiz_id": 4,
+        "question_text": "How long is the recommended vocal warm-up routine?",
+        "question_type": "multiple_choice",
+        "options": "[\"About five minutes\", \"Thirty seconds\", \"A full hour\", \"No warm-up is needed\"]",
+        "correct_answer": "About five minutes",
+        "points": 10,
+        "order_index": 3
+    },
+    {
+        "quiz_id": 4,
+        "question_text": "During a debate speech, eye contact should be directed at:",
+        "question_type": "multiple_choice",
+        "options": "[\"All four teams and the audience\", \"Only the chair\", \"Your notes\", \"The floor\"]",
+        "correct_answer": "All four teams and the audience",
+        "points": 10,
+        "order_index": 4
+    }
+]

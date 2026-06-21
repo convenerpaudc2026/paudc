@@ -109,18 +109,44 @@ async def firebase_login(
             detail="Invalid token claims"
         )
     
-    # Check if user exists in database
+    # Check if user exists by Firebase UID first, then fall back to email
     stmt = select(User).where(User.external_id == firebase_uid)
     result = await db.execute(stmt)
     user = result.scalar_one_or_none()
-    
-    # Create user if doesn't exist
+
     if not user:
-        name = decoded_token.get("name") or derive_name_from_email(email)
+        stmt = select(User).where(User.email == email)
+        result = await db.execute(stmt)
+        user = result.scalar_one_or_none()
+
+    name = decoded_token.get("name") or derive_name_from_email(email)
+
+    if user:
+        # Existing user — backfill Firebase identity / profile if missing
+        updated = False
+        if user.external_id != firebase_uid:
+            user.external_id = firebase_uid
+            updated = True
+        if not user.provider:
+            user.provider = "firebase"
+            updated = True
+        if name and not user.name:
+            user.name = name
+            updated = True
+        if name and not user.full_name:
+            user.full_name = name
+            updated = True
+        if updated:
+            await db.commit()
+            await db.refresh(user)
+            logger.info(f"Updated existing user from Firebase: {email}")
+    else:
         user = User(
+            id=firebase_uid,
             external_id=firebase_uid,
             email=email,
             username=name or email.split("@")[0],
+            name=name,
             full_name=name,
             role="participant",  # Default role
             provider="firebase"
@@ -130,9 +156,14 @@ async def firebase_login(
         await db.refresh(user)
         logger.info(f"New user created from Firebase: {email}")
     
-    # Create JWT token
+    # Create JWT token — include name and role so /auth/me reflects them
     access_token = create_access_token(
-        data={"sub": str(user.id), "email": user.email}
+        data={
+            "sub": str(user.id),
+            "email": user.email,
+            "name": user.name or user.full_name,
+            "role": user.role,
+        }
     )
     
     return FirebaseLoginResponse(

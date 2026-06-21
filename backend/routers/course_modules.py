@@ -8,20 +8,25 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
+from dependencies.auth import get_current_user, get_admin_user
+from schemas.auth import UserResponse
 from services.course_modules import CourseModulesService
 
-# Set up logging
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/entities/course_modules", tags=["course_modules"])
 
 # Pydantic Schemas
 class CourseModulesData(BaseModel):
-    """Entity data schema (for create/update)"""
+    """Entity data schema (for create)"""
     course_id: int
     title: str
     description: Optional[str] = None
     order_index: int
+    content_type: Optional[str] = None
+    content: Optional[str] = None
+    video_url: Optional[str] = None
+    duration_minutes: Optional[int] = None
     created_at: Optional[datetime] = None
 
 class CourseModulesUpdateData(BaseModel):
@@ -30,42 +35,44 @@ class CourseModulesUpdateData(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     order_index: Optional[int] = None
+    content_type: Optional[str] = None
+    content: Optional[str] = None
+    video_url: Optional[str] = None
+    duration_minutes: Optional[int] = None
     created_at: Optional[datetime] = None
 
 class CourseModulesResponse(BaseModel):
-    """Entity response schema"""
     id: int
     course_id: int
     title: str
     description: Optional[str] = None
     order_index: int
+    content_type: Optional[str] = None
+    content: Optional[str] = None
+    video_url: Optional[str] = None
+    duration_minutes: Optional[int] = None
     created_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
 
 class CourseModulesListResponse(BaseModel):
-    """List response schema"""
     items: List[CourseModulesResponse]
     total: int
     skip: int
     limit: int
 
 class CourseModulesBatchCreateRequest(BaseModel):
-    """Batch create request"""
     items: List[CourseModulesData]
 
 class CourseModulesBatchUpdateItem(BaseModel):
-    """Batch update item"""
     id: int
     updates: CourseModulesUpdateData
 
 class CourseModulesBatchUpdateRequest(BaseModel):
-    """Batch update request"""
     items: List[CourseModulesBatchUpdateItem]
 
 class CourseModulesBatchDeleteRequest(BaseModel):
-    """Batch delete request"""
     ids: List[int]
 
 
@@ -79,9 +86,6 @@ async def query_course_modules(
     fields: str = Query(None, description="Comma-separated list of fields to return"),
     db: AsyncSession = Depends(get_db),
 ):
-    """Query course modules with filtering, sorting, and pagination"""
-    logger.debug(f"Querying course modules: query={query}, sort={sort}, skip={skip}, limit={limit}")
-    
     try:
         query_dict = None
         if query:
@@ -91,13 +95,7 @@ async def query_course_modules(
                 raise HTTPException(status_code=400, detail="Invalid query JSON format")
 
         service = CourseModulesService(db)
-        result = await service.get_list(
-            skip=skip,
-            limit=limit,
-            query=query_dict,
-            sort=sort,
-        )
-        return result
+        return await service.get_list(skip=skip, limit=limit, query=query_dict, sort=sort)
     except HTTPException:
         raise
     except Exception as e:
@@ -110,7 +108,6 @@ async def get_course_modules(
     id: int,
     db: AsyncSession = Depends(get_db),
 ):
-    """Get a single course module by ID"""
     try:
         service = CourseModulesService(db)
         result = await service.get_by_id(id)
@@ -124,17 +121,85 @@ async def get_course_modules(
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
+@router.post("/", response_model=CourseModulesResponse, status_code=201)
+async def create_course_module(
+    data: CourseModulesData,
+    current_user: UserResponse = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Create a single course module (admin only)"""
+    service = CourseModulesService(db)
+    try:
+        payload = data.model_dump()
+        if not payload.get("created_at"):
+            payload["created_at"] = datetime.utcnow()
+        result = await service.create(payload)
+        if not result:
+            raise HTTPException(status_code=400, detail="Failed to create course module")
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error creating course module: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+@router.put("/{id}", response_model=CourseModulesResponse)
+async def update_course_module(
+    id: int,
+    data: CourseModulesUpdateData,
+    current_user: UserResponse = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update a single course module (admin only)"""
+    service = CourseModulesService(db)
+    try:
+        update_dict = {k: v for k, v in data.model_dump().items() if v is not None}
+        result = await service.update(id, update_dict)
+        if not result:
+            raise HTTPException(status_code=404, detail=f"Course module with id {id} not found")
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating course module: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+@router.delete("/{id}")
+async def delete_course_module(
+    id: int,
+    current_user: UserResponse = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Delete a single course module (admin only)"""
+    service = CourseModulesService(db)
+    try:
+        success = await service.delete(id)
+        if not success:
+            raise HTTPException(status_code=404, detail=f"Course module with id {id} not found")
+        return {"message": "Course module deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting course module: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
 @router.post("/batch", response_model=CourseModulesListResponse, status_code=201)
 async def create_course_modules_batch(
     request: CourseModulesBatchCreateRequest,
+    current_user: UserResponse = Depends(get_admin_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Create multiple course modules in a single request"""
     service = CourseModulesService(db)
     results = []
     try:
         for item in request.items:
-            result = await service.create(item.model_dump())
+            payload = item.model_dump()
+            if not payload.get("created_at"):
+                payload["created_at"] = datetime.utcnow()
+            result = await service.create(payload)
             if result:
                 results.append(result)
         return {"items": results, "total": len(results), "skip": 0, "limit": len(results)}
@@ -146,9 +211,9 @@ async def create_course_modules_batch(
 @router.put("/batch", response_model=CourseModulesListResponse)
 async def update_course_modules_batch(
     request: CourseModulesBatchUpdateRequest,
+    current_user: UserResponse = Depends(get_admin_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Update multiple course modules in a single request"""
     service = CourseModulesService(db)
     results = []
     try:
@@ -166,9 +231,9 @@ async def update_course_modules_batch(
 @router.delete("/batch")
 async def delete_course_modules_batch(
     request: CourseModulesBatchDeleteRequest,
+    current_user: UserResponse = Depends(get_admin_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Delete multiple course modules by their IDs"""
     service = CourseModulesService(db)
     deleted_count = 0
     try:

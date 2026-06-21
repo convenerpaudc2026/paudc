@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
     BookOpen, Clock, ArrowLeft, CheckCircle2,
-    PlayCircle, Lock, Users,
+    PlayCircle, Lock, Users, FileText, HelpCircle,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { api, type Course, type Enrollment } from '@/lib/api';
+import { api, type Course, type CourseModule, type Enrollment, type ProgressTracking } from '@/lib/api';
 import LMSSidebar from '@/components/lms/LMSSidebar';
 
 const DIFFICULTY_COLORS: Record<string, string> = {
@@ -14,19 +14,19 @@ const DIFFICULTY_COLORS: Record<string, string> = {
     advanced: '#A4372C',
 };
 
-const PLACEHOLDER_MODULES = [
-    'Introduction & Overview',
-    'Core Concepts',
-    'Practical Application',
-    'Advanced Techniques',
-    'Assessment & Review',
-];
+const moduleIcon = (type?: string) => {
+    if (type === 'video') return PlayCircle;
+    if (type === 'quiz') return HelpCircle;
+    return FileText;
+};
 
 export default function LMSCourseDetail() {
     const { id } = useParams<{ id: string }>();
     const { user, loading } = useAuth();
     const [course, setCourse] = useState<Course | null>(null);
+    const [modules, setModules] = useState<CourseModule[]>([]);
     const [enrollment, setEnrollment] = useState<Enrollment | null>(null);
+    const [progress, setProgress] = useState<ProgressTracking[]>([]);
     const [enrolling, setEnrolling] = useState(false);
     const [dataLoading, setDataLoading] = useState(true);
 
@@ -38,12 +38,26 @@ export default function LMSCourseDetail() {
         if (!user || !id) return;
         (async () => {
             try {
-                const [cr, er] = await Promise.all([
-                    api.entities.courses.query({ limit: 200 }),
-                    api.entities.enrollments.query({ limit: 200 }),
+                const courseId = Number(id);
+                const [cr, mr, er] = await Promise.all([
+                    api.entities.courses.get(courseId),
+                    api.entities.course_modules.query({ query: { course_id: courseId }, sort: 'order_index', limit: 200 }),
+                    api.entities.enrollments.query({ query: { course_id: courseId }, limit: 5 }),
                 ]);
-                setCourse(cr.data.items.find(c => c.id === Number(id)) ?? null);
-                setEnrollment(er.data.items.find(e => e.course_id === Number(id)) ?? null);
+                setCourse(cr.data);
+                setModules(mr.data.items);
+                const enr = er.data.items[0] ?? null;
+                setEnrollment(enr);
+
+                if (enr) {
+                    const pr = await api.entities.progress_tracking.query({
+                        query: { course_id: courseId },
+                        limit: 200,
+                    });
+                    setProgress(pr.data.items);
+                }
+            } catch (err) {
+                console.error('Failed to load course detail', err);
             } finally {
                 setDataLoading(false);
             }
@@ -64,10 +78,18 @@ export default function LMSCourseDetail() {
         }
     };
 
-    const progress = enrollment?.progress_percentage ?? 0;
-    const completedModules = Math.round((progress / 100) * PLACEHOLDER_MODULES.length);
+    const completedModuleIds = new Set(
+        progress.filter(p => p.status === 'completed' && p.module_id != null).map(p => p.module_id),
+    );
+    const completedCount = modules.filter(m => completedModuleIds.has(m.id)).length;
+    const progressPercent = modules.length
+        ? Math.round((completedCount / modules.length) * 100)
+        : (enrollment?.progress_percentage ?? 0);
+
     const diff = course?.difficulty_level?.toLowerCase() || 'beginner';
     const diffColor = DIFFICULTY_COLORS[diff] || '#1B5E3B';
+
+    const nextModule = modules.find(m => !completedModuleIds.has(m.id)) ?? modules[0];
 
     if (loading || dataLoading) {
         return (
@@ -105,7 +127,6 @@ export default function LMSCourseDetail() {
             <LMSSidebar />
 
             <main className="flex-1 overflow-y-auto">
-                {/* Header */}
                 <header className="sticky top-0 z-20 bg-[#F6F0E1]/95 backdrop-blur-sm border-b border-[#022512]/10 px-6 md:px-8 py-4 flex items-center gap-3 mt-[52px] md:mt-0">
                     <Link
                         to="/lms/courses"
@@ -120,8 +141,6 @@ export default function LMSCourseDetail() {
                 </header>
 
                 <div className="px-6 md:px-8 py-7 max-w-5xl">
-
-                    {/* Hero banner */}
                     <div className="bg-[#022512] rounded-2xl overflow-hidden mb-7 relative">
                         <div className="h-44 relative">
                             {course.thumbnail_url ? (
@@ -153,7 +172,7 @@ export default function LMSCourseDetail() {
                                         )}
                                         <span className="flex items-center gap-1.5 text-xs text-[#F6F0E1]/65">
                                             <Users className="w-3.5 h-3.5" />
-                                            {PLACEHOLDER_MODULES.length} modules
+                                            {modules.length} {modules.length === 1 ? 'module' : 'modules'}
                                         </span>
                                     </div>
                                 </div>
@@ -162,8 +181,6 @@ export default function LMSCourseDetail() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-                        {/* Left: description + modules */}
                         <div className="md:col-span-2 space-y-5">
                             {course.description && (
                                 <div className="bg-white rounded-2xl p-5 border border-[#022512]/5">
@@ -174,43 +191,56 @@ export default function LMSCourseDetail() {
 
                             <div className="bg-white rounded-2xl p-5 border border-[#022512]/5">
                                 <h3 className="font-black text-[#022512] text-sm mb-4">Course Modules</h3>
-                                {enrollment ? (
+                                {modules.length === 0 ? (
+                                    <div className="text-center py-8">
+                                        <BookOpen className="w-8 h-8 text-[#022512]/15 mx-auto mb-2" />
+                                        <p className="text-xs text-[#022512]/50 font-semibold">
+                                            No modules have been added to this course yet.
+                                        </p>
+                                    </div>
+                                ) : enrollment ? (
                                     <div className="space-y-2">
-                                        {PLACEHOLDER_MODULES.map((mod, i) => {
-                                            const done = i < completedModules;
-                                            const current = i === completedModules;
+                                        {modules.map((mod, i) => {
+                                            const done = completedModuleIds.has(mod.id);
+                                            const current = !done && mod.id === nextModule?.id;
+                                            const Icon = moduleIcon(mod.content_type);
                                             return (
                                                 <Link
-                                                    key={i}
-                                                    to={`/lms/courses/${id}/modules/${i + 1}`}
-                                                    className={`flex items-center gap-3 p-3 rounded-xl transition-colors hover:opacity-80 ${done ? 'bg-[#1B5E3B]/8' :
-                                                            current ? 'bg-[#C8A046]/8' :
-                                                                'bg-[#022512]/3'
-                                                        }`}
+                                                    key={mod.id}
+                                                    to={`/lms/courses/${id}/modules/${mod.id}`}
+                                                    className={`flex items-center gap-3 p-3 rounded-xl transition-colors hover:opacity-80 ${
+                                                        done ? 'bg-[#1B5E3B]/8'
+                                                            : current ? 'bg-[#C8A046]/8'
+                                                                : 'bg-[#022512]/3'
+                                                    }`}
                                                 >
                                                     {done ? (
                                                         <CheckCircle2 className="w-4 h-4 text-[#1B5E3B] shrink-0" />
-                                                    ) : current ? (
-                                                        <PlayCircle className="w-4 h-4 text-[#C8A046] shrink-0" />
                                                     ) : (
-                                                        <Lock className="w-4 h-4 text-[#022512]/20 shrink-0" />
+                                                        <Icon className={`w-4 h-4 shrink-0 ${current ? 'text-[#C8A046]' : 'text-[#022512]/40'}`} />
                                                     )}
-                                                    <span
-                                                        className={`text-xs font-semibold ${done ? 'text-[#1B5E3B]' :
-                                                                current ? 'text-[#022512]' :
-                                                                    'text-[#022512]/35'
-                                                            }`}
-                                                    >
-                                                        Module {i + 1}: {mod}
-                                                    </span>
+                                                    <div className="min-w-0 flex-1">
+                                                        <p className={`text-xs font-semibold leading-tight ${
+                                                            done ? 'text-[#1B5E3B]'
+                                                                : current ? 'text-[#022512]'
+                                                                    : 'text-[#022512]/65'
+                                                        }`}>
+                                                            Module {i + 1}: {mod.title}
+                                                        </p>
+                                                        {mod.duration_minutes && (
+                                                            <p className="text-[10px] text-[#022512]/40 mt-0.5">
+                                                                {mod.duration_minutes} min · {mod.content_type || 'lesson'}
+                                                            </p>
+                                                        )}
+                                                    </div>
                                                     {done && (
-                                                        <span className="ml-auto text-xs text-[#1B5E3B] font-bold">
+                                                        <span className="ml-auto text-xs text-[#1B5E3B] font-bold shrink-0">
                                                             Done
                                                         </span>
                                                     )}
                                                     {current && (
-                                                        <span className="ml-auto text-xs text-[#C8A046] font-bold">
-                                                            In Progress
+                                                        <span className="ml-auto text-xs text-[#C8A046] font-bold shrink-0">
+                                                            Continue
                                                         </span>
                                                     )}
                                                 </Link>
@@ -218,17 +248,26 @@ export default function LMSCourseDetail() {
                                         })}
                                     </div>
                                 ) : (
-                                    <div className="text-center py-8">
-                                        <Lock className="w-8 h-8 text-[#022512]/15 mx-auto mb-2" />
-                                        <p className="text-xs text-[#022512]/50 font-semibold">
-                                            Enroll to access course modules
+                                    <div className="space-y-2">
+                                        {modules.map((mod, i) => (
+                                            <div
+                                                key={mod.id}
+                                                className="flex items-center gap-3 p-3 rounded-xl bg-[#022512]/3"
+                                            >
+                                                <Lock className="w-4 h-4 text-[#022512]/20 shrink-0" />
+                                                <span className="text-xs font-semibold text-[#022512]/35">
+                                                    Module {i + 1}: {mod.title}
+                                                </span>
+                                            </div>
+                                        ))}
+                                        <p className="text-center text-xs text-[#022512]/45 pt-3">
+                                            Enroll to unlock module content.
                                         </p>
                                     </div>
                                 )}
                             </div>
                         </div>
 
-                        {/* Right: enrollment card */}
                         <div>
                             <div className="bg-white rounded-2xl p-5 border border-[#022512]/5 space-y-4 sticky top-24">
                                 {enrollment ? (
@@ -236,16 +275,16 @@ export default function LMSCourseDetail() {
                                         <div>
                                             <div className="flex justify-between text-xs text-[#022512]/55 mb-1.5">
                                                 <span>Your Progress</span>
-                                                <span className="font-bold">{progress}%</span>
+                                                <span className="font-bold">{progressPercent}%</span>
                                             </div>
                                             <div className="w-full bg-[#022512]/10 rounded-full h-2">
                                                 <div
                                                     className="bg-[#1B5E3B] h-2 rounded-full transition-all"
-                                                    style={{ width: `${progress}%` }}
+                                                    style={{ width: `${progressPercent}%` }}
                                                 />
                                             </div>
                                             <p className="text-xs text-[#022512]/45 mt-1.5">
-                                                {completedModules} of {PLACEHOLDER_MODULES.length} modules completed
+                                                {completedCount} of {modules.length} modules completed
                                             </p>
                                         </div>
 
@@ -254,12 +293,18 @@ export default function LMSCourseDetail() {
                                             <span className="text-xs font-bold text-[#1B5E3B]">Enrolled</span>
                                         </div>
 
-                                        <Link
-                                            to={`/lms/courses/${id}/modules/${completedModules + 1}`}
-                                            className="block w-full text-center bg-[#1B5E3B] text-[#F6F0E1] font-bold py-3 rounded-xl text-sm hover:bg-[#0d301e] transition-colors"
-                                        >
-                                            Continue Learning
-                                        </Link>
+                                        {nextModule ? (
+                                            <Link
+                                                to={`/lms/courses/${id}/modules/${nextModule.id}`}
+                                                className="block w-full text-center bg-[#1B5E3B] text-[#F6F0E1] font-bold py-3 rounded-xl text-sm hover:bg-[#0d301e] transition-colors"
+                                            >
+                                                {completedCount === 0 ? 'Start Course' : 'Continue Learning'}
+                                            </Link>
+                                        ) : (
+                                            <div className="text-center bg-[#022512] text-[#F6F0E1] font-bold py-3 rounded-xl text-sm">
+                                                Course Complete
+                                            </div>
+                                        )}
                                     </>
                                 ) : (
                                     <>

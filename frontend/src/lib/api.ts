@@ -11,6 +11,13 @@ type ApiResponse<T> = {
 	data: T;
 };
 
+type ListResponse<T> = {
+	items: T[];
+	total: number;
+	skip: number;
+	limit: number;
+};
+
 export type AuthUser = {
 	id: string;
 	email: string;
@@ -38,6 +45,66 @@ export type Course = {
 	estimated_hours?: number;
 	is_published?: boolean;
 	created_by?: string;
+	created_at?: string;
+	updated_at?: string;
+};
+
+export type CourseModule = {
+	id: number;
+	course_id: number;
+	title: string;
+	description?: string;
+	order_index: number;
+	content_type?: 'text' | 'video' | 'quiz' | string;
+	content?: string;
+	video_url?: string;
+	duration_minutes?: number;
+	created_at?: string;
+};
+
+export type ProgressTracking = {
+	id: number;
+	user_id: string;
+	course_id: number;
+	module_id?: number;
+	material_id?: number;
+	status: string;
+	last_accessed_at?: string;
+};
+
+export type Quiz = {
+	id: number;
+	course_id: number;
+	module_id?: number;
+	title: string;
+	description?: string;
+	time_limit_minutes?: number;
+	max_attempts?: number;
+	passing_score?: number;
+	is_published?: boolean;
+	created_at?: string;
+};
+
+export type QuizQuestion = {
+	id: number;
+	quiz_id: number;
+	question_text: string;
+	question_type: string;
+	options: string;
+	correct_answer: string;
+	points: number;
+	order_index: number;
+};
+
+export type QuizAttempt = {
+	id: number;
+	user_id: string;
+	quiz_id: number;
+	score?: number;
+	started_at?: string;
+	completed_at?: string;
+	attempt_number?: number;
+	passed?: boolean;
 };
 
 const buildUrl = (path: string) => `${getAPIBaseURL()}${path}`;
@@ -99,6 +166,37 @@ const toListPath = (entityPath: string, params: QueryParams) => {
 	return `${entityPath}${query ? `?${query}` : ''}`;
 };
 
+const makeCrud = <TItem, TCreate = Partial<TItem>, TUpdate = Partial<TItem>>(basePath: string) => ({
+	query: async (params: QueryParams): Promise<ApiResponse<ListResponse<TItem>>> => {
+		const data = await request<ListResponse<TItem>>(toListPath(basePath, params));
+		return { data };
+	},
+	get: async (id: number): Promise<ApiResponse<TItem>> => {
+		const data = await request<TItem>(`${basePath}${id}`);
+		return { data };
+	},
+	create: async (payload: TCreate): Promise<ApiResponse<TItem>> => {
+		const data = await request<TItem>(basePath, {
+			method: 'POST',
+			body: JSON.stringify(payload),
+		});
+		return { data };
+	},
+	update: async (id: number, payload: TUpdate): Promise<ApiResponse<TItem>> => {
+		const data = await request<TItem>(`${basePath}${id}`, {
+			method: 'PUT',
+			body: JSON.stringify(payload),
+		});
+		return { data };
+	},
+	remove: async (id: number): Promise<ApiResponse<{ message: string }>> => {
+		const data = await request<{ message: string }>(`${basePath}${id}`, {
+			method: 'DELETE',
+		});
+		return { data };
+	},
+});
+
 export const api = {
 	auth: {
 		firebaseLogin: async (idToken: string): Promise<ApiResponse<{ access_token: string; token_type: string; user: AuthUser }>> => {
@@ -135,19 +233,17 @@ export const api = {
 		},
 	},
 	entities: {
-		courses: {
-			query: async (params: QueryParams): Promise<ApiResponse<{ items: Course[]; total: number; skip: number; limit: number }>> => {
-				const data = await request<{ items: Course[]; total: number; skip: number; limit: number }>(
-					toListPath('/api/v1/entities/courses/', params)
-				);
-				return { data };
-			},
-		},
+		courses: makeCrud<Course>('/api/v1/entities/courses/'),
+		course_modules: makeCrud<CourseModule>('/api/v1/entities/course_modules/'),
+		progress_tracking: makeCrud<ProgressTracking>('/api/v1/entities/progress_tracking/'),
+		quizzes: makeCrud<Quiz>('/api/v1/entities/quizzes/'),
+		quiz_questions: makeCrud<QuizQuestion>('/api/v1/entities/quiz_questions/'),
+		quiz_attempts: makeCrud<QuizAttempt>('/api/v1/entities/quiz_attempts/'),
 		enrollments: {
 			query: async (
 				params: QueryParams
-			): Promise<ApiResponse<{ items: Enrollment[]; total: number; skip: number; limit: number }>> => {
-				const data = await request<{ items: Enrollment[]; total: number; skip: number; limit: number }>(
+			): Promise<ApiResponse<ListResponse<Enrollment>>> => {
+				const data = await request<ListResponse<Enrollment>>(
 					toListPath('/api/v1/entities/enrollments/', params)
 				);
 				return { data };

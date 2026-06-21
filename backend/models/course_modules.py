@@ -1,5 +1,5 @@
 from core.database import Base
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, Text
 
 class CourseModules(Base):
     __tablename__ = "course_modules"
@@ -10,4 +10,8 @@ class CourseModules(Base):
     title = Column(String, nullable=False)
     description = Column(String, nullable=True)
     order_index = Column(Integer, nullable=False)
-    created_at = Column(DateTime(timezone=True), nullable=False)
+    content_type = Column(String, nullable=True)
+    content = Column(Text, nullable=True)
+    video_url = Column(String, nullable=True)
+    duration_minutes = Column(Integer, nullable=True)
+    created_at = Column(DateTime(timezone=True), nullable=True)

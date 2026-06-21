@@ -1,0 +1,136 @@
+[
+    {
+        "course_id": 1,
+        "title": "What is Adjudication?",
+        "description": "An overview of the role of a judge in British Parliamentary debate.",
+        "order_index": 1,
+        "content_type": "text",
+        "content": "<h2>What is Adjudication?</h2><p>Adjudication is the practice of evaluating and ranking debate teams based on the quality of their argumentation, engagement with the motion, and overall persuasiveness. As a judge, your role is to remain neutral, follow the format's conventions, and deliver feedback that helps debaters grow.</p><h3>Core Responsibilities</h3><ul><li>Listen actively to all four teams</li><li>Take structured notes on arguments and rebuttals</li><li>Assess based on argumentation, not personal preference</li><li>Deliver clear, constructive oral adjudications</li></ul><blockquote>Good judging is invisible — it lets the debate speak for itself.</blockquote>",
+        "duration_minutes": 8,
+        "created_at": "2026-01-20 10:00:00"
+    },
+    {
+        "course_id": 1,
+        "title": "Reading the Motion",
+        "description": "How to interpret debate motions and identify the burdens of each side.",
+        "order_index": 2,
+        "content_type": "video",
+        "content": "<h2>Reading the Motion</h2><p>Before the round begins, judges should mentally map out the strongest arguments each side could make. This helps you spot when a team is missing crucial ground or making unusually clever moves.</p><p>Watch the video for a guided walkthrough of three sample motions and the burdens they create for each side.</p>",
+        "video_url": "https://www.youtube.com/embed/aoCEMMr63UM",
+        "duration_minutes": 12,
+        "created_at": "2026-01-20 10:00:00"
+    },
+    {
+        "course_id": 1,
+        "title": "Knowledge Check: Judging Basics",
+        "description": "A short quiz to verify you've absorbed the foundational concepts.",
+        "order_index": 3,
+        "content_type": "quiz",
+        "content": "<h2>Quiz: Judging Basics</h2><p>Answer the questions below to verify you've grasped the foundational concepts of British Parliamentary adjudication.</p>",
+        "duration_minutes": 5,
+        "created_at": "2026-01-20 10:00:00"
+    },
+    {
+        "course_id": 2,
+        "title": "Anatomy of an Argument",
+        "description": "Claim, evidence, and warrant — the three components of every strong argument.",
+        "order_index": 1,
+        "content_type": "text",
+        "content": "<h2>The Anatomy of an Argument</h2><p>Every strong argument has three components: a <strong>claim</strong>, <strong>evidence</strong>, and a <strong>warrant</strong> linking the two. Mastering this structure is the single highest-leverage skill in competitive debate.</p><ul><li><strong>Claim</strong> &mdash; the assertion you are making</li><li><strong>Evidence</strong> &mdash; facts, data, or expert testimony that support it</li><li><strong>Warrant</strong> &mdash; the logical link explaining <em>why</em> the evidence proves the claim</li></ul><p>When you assess your opponents' arguments in the round, look for missing warrants &mdash; that is almost always where the weakest link lies.</p>",
+        "duration_minutes": 15,
+        "created_at": "2026-01-20 10:00:00"
+    },
+    {
+        "course_id": 2,
+        "title": "Comparative Analysis",
+        "description": "Beyond rebuttal: how to weigh arguments against each other.",
+        "order_index": 2,
+        "content_type": "video",
+        "content": "<h2>Comparative Analysis</h2><p>Rather than simply refuting your opponent's points, show why your world is <strong>comparatively better</strong>. Judges look for debaters who can weigh competing claims, not just attack one side of the debate.</p>",
+        "video_url": "https://www.youtube.com/embed/1hd6DEnih-c",
+        "duration_minutes": 18,
+        "created_at": "2026-01-20 10:00:00"
+    },
+    {
+        "course_id": 2,
+        "title": "Framing the Debate",
+        "description": "Why controlling the lens of the debate often beats winning individual clashes.",
+        "order_index": 3,
+        "content_type": "text",
+        "content": "<h2>Framing the Debate</h2><p>Controlling the framing of the debate &mdash; the lens through which the motion is evaluated &mdash; is often more important than the individual arguments you make. Introduce your framing early and defend it consistently.</p><h3>Three Framing Tools</h3><ul><li><strong>Stakeholder framing</strong> &mdash; whose interests does the motion serve?</li><li><strong>Time-horizon framing</strong> &mdash; short term vs long term consequences</li><li><strong>Risk-vs-reward framing</strong> &mdash; how do we weigh certain harms against possible gains?</li></ul>",
+        "duration_minutes": 14,
+        "created_at": "2026-01-20 10:00:00"
+    },
+    {
+        "course_id": 2,
+        "title": "Final Assessment",
+        "description": "Test your grasp of advanced argumentation techniques.",
+        "order_index": 4,
+        "content_type": "quiz",
+        "content": "<h2>Final Assessment</h2><p>Apply what you've learned about argumentation, comparative analysis, and framing.</p>",
+        "duration_minutes": 10,
+        "created_at": "2026-01-20 10:00:00"
+    },
+    {
+        "course_id": 3,
+        "title": "Roles in BP",
+        "description": "The four teams and eight speakers of British Parliamentary debate.",
+        "order_index": 1,
+        "content_type": "text",
+        "content": "<h2>Roles in British Parliamentary Debate</h2><p>BP debate features four teams of two speakers each, divided into Government and Opposition benches:</p><ul><li><strong>Opening Government</strong> &mdash; Prime Minister + Deputy Prime Minister</li><li><strong>Opening Opposition</strong> &mdash; Leader of Opposition + Deputy Leader</li><li><strong>Closing Government</strong> &mdash; Member for Government + Government Whip</li><li><strong>Closing Opposition</strong> &mdash; Member for Opposition + Opposition Whip</li></ul><p>Each role carries distinct responsibilities for setting up cases, extending arguments, and summarising the round.</p>",
+        "duration_minutes": 10,
+        "created_at": "2026-01-20 10:00:00"
+    },
+    {
+        "course_id": 3,
+        "title": "Points of Information",
+        "description": "How to take, refuse, and answer POIs effectively.",
+        "order_index": 2,
+        "content_type": "video",
+        "content": "<h2>Points of Information</h2><p>POIs are 15-second interjections offered by the opposing bench during the protected period of an opponent's speech. Knowing when to offer, when to take, and how to dispatch them efficiently is essential to BP performance.</p>",
+        "video_url": "https://www.youtube.com/embed/Kgvx7Z7dR9U",
+        "duration_minutes": 8,
+        "created_at": "2026-01-20 10:00:00"
+    },
+    {
+        "course_id": 4,
+        "title": "Vocal Warm-ups",
+        "description": "Five-minute routine to prepare your voice before competition.",
+        "order_index": 1,
+        "content_type": "text",
+        "content": "<h2>Vocal Warm-ups</h2><p>A relaxed, well-warmed voice projects further, reads more confidently, and sustains energy across long rounds. Try this five-minute routine before any competition:</p><ol><li>Lip trills (60s)</li><li>Tongue twisters (60s)</li><li>Pitch slides (60s)</li><li>Resonance hums (60s)</li><li>Hydration check &amp; jaw release (60s)</li></ol>",
+        "duration_minutes": 5,
+        "created_at": "2026-01-20 10:00:00"
+    },
+    {
+        "course_id": 4,
+        "title": "Body Language and Stage Presence",
+        "description": "How posture, gesture, and eye contact reinforce your argument.",
+        "order_index": 2,
+        "content_type": "video",
+        "content": "<h2>Body Language and Stage Presence</h2><p>Your body is part of your argument. Open posture, deliberate gestures, and steady eye contact across all four teams signal control and credibility. Avoid fidgeting, podium gripping, or speaking only to the chair.</p>",
+        "video_url": "https://www.youtube.com/embed/i5mYphUoOCs",
+        "duration_minutes": 12,
+        "created_at": "2026-01-20 10:00:00"
+    },
+    {
+        "course_id": 3,
+        "title": "Knowledge Check: BP Format",
+        "description": "Verify your understanding of British Parliamentary structure and rules.",
+        "order_index": 3,
+        "content_type": "quiz",
+        "content": "<h2>Knowledge Check: BP Format</h2><p>Answer the questions below to confirm you have grasped the structure, roles, and rules of British Parliamentary debate.</p>",
+        "duration_minutes": 5,
+        "created_at": "2026-01-20 10:00:00"
+    },
+    {
+        "course_id": 4,
+        "title": "Knowledge Check: Delivery Skills",
+        "description": "Test what you have learned about voice, presence, and delivery.",
+        "order_index": 3,
+        "content_type": "quiz",
+        "content": "<h2>Knowledge Check: Delivery Skills</h2><p>Answer the questions below to confirm you have grasped the essentials of vocal preparation and stage presence.</p>",
+        "duration_minutes": 5,
+        "created_at": "2026-01-20 10:00:00"
+    }
+]

@@ -8,6 +8,8 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
+from dependencies.auth import get_admin_user
+from schemas.auth import UserResponse
 from services.quizzes import QuizzesService
 
 logger = logging.getLogger(__name__)
@@ -75,4 +77,81 @@ async def query_quizzes(
     except json.JSONDecodeError:
         raise HTTPException(status_code=400, detail="Invalid query JSON format")
     except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+@router.get("/{id}", response_model=QuizzesResponse)
+async def get_quiz(
+    id: int,
+    db: AsyncSession = Depends(get_db),
+):
+    service = QuizzesService(db)
+    result = await service.get_by_id(id)
+    if not result:
+        raise HTTPException(status_code=404, detail=f"Quiz with id {id} not found")
+    return result
+
+
+@router.post("/", response_model=QuizzesResponse, status_code=201)
+async def create_quiz(
+    data: QuizzesData,
+    current_user: UserResponse = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Create a quiz (admin only)"""
+    service = QuizzesService(db)
+    try:
+        payload = data.model_dump()
+        if not payload.get("created_at"):
+            payload["created_at"] = datetime.utcnow()
+        result = await service.create(payload)
+        if not result:
+            raise HTTPException(status_code=400, detail="Failed to create quiz")
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error creating quiz: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+@router.put("/{id}", response_model=QuizzesResponse)
+async def update_quiz(
+    id: int,
+    data: QuizzesUpdateData,
+    current_user: UserResponse = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update a quiz (admin only)"""
+    service = QuizzesService(db)
+    try:
+        update_dict = {k: v for k, v in data.model_dump().items() if v is not None}
+        result = await service.update(id, update_dict)
+        if not result:
+            raise HTTPException(status_code=404, detail=f"Quiz with id {id} not found")
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating quiz: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+@router.delete("/{id}")
+async def delete_quiz(
+    id: int,
+    current_user: UserResponse = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Delete a quiz (admin only)"""
+    service = QuizzesService(db)
+    try:
+        success = await service.delete(id)
+        if not success:
+            raise HTTPException(status_code=404, detail=f"Quiz with id {id} not found")
+        return {"message": "Quiz deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting quiz: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")

@@ -73,6 +73,31 @@ class EnrollmentsService:
             logger.error(f"Error fetching enrollments list: {str(e)}")
             raise
 
+    async def update(self, obj_id: int, update_data: Dict[str, Any], user_id: str = None) -> Optional[Enrollments]:
+        """Update enrollment (requires ownership)"""
+        try:
+            query = select(Enrollments).where(Enrollments.id == obj_id)
+            if user_id:
+                query = query.where(Enrollments.user_id == user_id)
+
+            result = await self.db.execute(query)
+            obj = result.scalar_one_or_none()
+
+            if not obj:
+                return None
+
+            for key, value in update_data.items():
+                if hasattr(obj, key):
+                    setattr(obj, key, value)
+
+            await self.db.commit()
+            await self.db.refresh(obj)
+            return obj
+        except Exception as e:
+            await self.db.rollback()
+            logger.error(f"Error updating enrollment: {str(e)}")
+            raise
+
     async def delete(self, obj_id: int, user_id: str = None) -> bool:
         """Delete enrollment (requires ownership)"""
         try:

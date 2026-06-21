@@ -36,7 +36,7 @@ export default function LMSDashboard() {
     (async () => {
       try {
         const [cr, er] = await Promise.all([
-          api.entities.courses.query({ limit: 6 }),
+          api.entities.courses.query({ limit: 50 }),
           api.entities.enrollments.query({ limit: 50 }),
         ]);
         setCourses(cr.data.items);
@@ -58,9 +58,14 @@ export default function LMSDashboard() {
   }
 
   const enrolledIds = new Set(enrollments.map((e) => e.course_id));
+  const completedCourseIds = new Set(
+    enrollments.filter((e) => e.status === "completed").map((e) => e.course_id),
+  );
   const completedCount = enrollments.filter(
     (e) => e.status === "completed",
   ).length;
+  const allCoursesComplete =
+    courses.length > 0 && courses.every((c) => completedCourseIds.has(c.id));
   const inProgressCount = enrollments.filter(
     (e) => e.status === "in_progress" || e.status === "enrolled",
   ).length;
@@ -99,14 +104,14 @@ export default function LMSDashboard() {
       icon: PlusCircle,
       label: 'Create Course',
       desc: 'Add a new course or module',
-      href: '/lms/courses',
+      href: '/lms/admin',
       color: '#1B5E3B',
     },
     {
       icon: ListChecks,
       label: 'Manage Content',
-      desc: 'Edit modules & materials',
-      href: '/lms/courses',
+      desc: 'Edit modules & quizzes',
+      href: '/lms/admin',
       color: '#C8A046',
     },
     {
@@ -207,6 +212,27 @@ export default function LMSDashboard() {
               </div>
             ))}
           </div>
+
+          {/* Certificate banner — shown when every course is complete */}
+          {allCoursesComplete && (
+            <Link
+              to="/lms/certificate"
+              className="flex items-center gap-4 bg-gradient-to-r from-[#1B5E3B] to-[#022512] rounded-2xl p-5 border border-[#C8A046]/30 hover:-translate-y-0.5 transition-transform"
+            >
+              <div className="rounded-xl bg-[#C8A046] p-3 shrink-0">
+                <Award className="w-6 h-6 text-[#022512]" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-black text-[#F6F0E1] text-sm">
+                  🎉 All courses complete — your certificate is ready!
+                </p>
+                <p className="text-xs text-[#F6F0E1]/55 mt-0.5">
+                  View and print your PAUDC 2026 Certificate of Completion.
+                </p>
+              </div>
+              <ArrowRight className="w-5 h-5 text-[#C8A046] shrink-0" />
+            </Link>
+          )}
 
           {/* My Courses */}
           <section>

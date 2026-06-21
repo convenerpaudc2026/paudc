@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { AuthProvider } from '@/contexts/AuthContext';
@@ -20,11 +20,12 @@ import LogoutCallback from '@/pages/LogoutCallback';
 import Dashboard from '@/pages/Dashboard';
 import BlogIndex from '@/pages/blog/BlogIndex';
 import BlogPost from '@/pages/blog/BlogPost';
-import LmsWaitlist from '@/pages/lms/LmsWaitlist';
 import LMSDashboard from '@/pages/lms/LMSDashboard';
 import LMSCourses from '@/pages/lms/LMSCourses';
 import LMSCourseDetail from '@/pages/lms/LMSCourseDetail';
 import LMSModuleViewer from '@/pages/lms/LMSModuleViewer';
+import LMSAdmin from '@/pages/lms/LMSAdmin';
+import LMSCertificate from '@/pages/lms/LMSCertificate';
 import NotFound from '@/pages/NotFound';
 
 const queryClient = new QueryClient();
@@ -53,13 +54,14 @@ const App = () => (
             <Route path="/auth/error" element={<AuthError />} />
             <Route path="/login" element={<Login />} />
             <Route path="/logout/callback" element={<LogoutCallback />} />
-            {/* LMS Portal — coming soon page for unauthenticated users */}
-            <Route path="/lms" element={<LmsWaitlist />} />
-            {/* LMS Portal — authenticated */}
+            {/* LMS Portal */}
+            <Route path="/lms" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<LMSDashboard />} />
             <Route path="/lms/courses" element={<LMSCourses />} />
             <Route path="/lms/courses/:id" element={<LMSCourseDetail />} />
             <Route path="/lms/courses/:courseId/modules/:moduleId" element={<LMSModuleViewer />} />
+            <Route path="/lms/admin" element={<LMSAdmin />} />
+            <Route path="/lms/certificate" element={<LMSCertificate />} />
             {/* Add protected admin routes if needed */}
             <Route path="*" element={<NotFound />} />
           </Routes>

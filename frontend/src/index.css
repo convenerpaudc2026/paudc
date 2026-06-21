@@ -41,6 +41,31 @@ html, body, button, input, textarea, select {
   --navbar-h: 4rem; /* keeps in sync with the h-16 Tailwind class on the nav */
 }
 
+/* ── LMS admin form inputs ──────────────────────────────────────────────── */
+.adminput {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(2, 37, 18, 0.18);
+  border-radius: 0.5rem;
+  background: #ffffff;
+  color: #022512;
+  font-size: 0.8125rem;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.adminput:focus {
+  border-color: #1B5E3B;
+  box-shadow: 0 0 0 3px rgba(27, 94, 59, 0.12);
+}
+
+/* ── Certificate print layout ───────────────────────────────────────────── */
+@media print {
+  body { background: #ffffff; }
+  #root { max-width: none; }
+  .certificate { box-shadow: none !important; }
+  @page { size: landscape; margin: 1cm; }
+}
+
 /* ── Blog / Article prose styles ────────────────────────────────────────── */
 .prose-paudc {
   color: #1B5E3B;

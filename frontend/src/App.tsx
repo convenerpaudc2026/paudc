@@ -55,7 +55,7 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/logout/callback" element={<LogoutCallback />} />
             {/* LMS Portal */}
-            <Route path="/lms" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/lms" element={<Navigate to="/login" replace />} />
             <Route path="/dashboard" element={<LMSDashboard />} />
             <Route path="/lms/courses" element={<LMSCourses />} />
             <Route path="/lms/courses/:id" element={<LMSCourseDetail />} />

@@ -39,7 +39,7 @@ const STEPS = [
     {
         icon: Stamp,
         title: 'We prepare your letter',
-        body: 'Our secretariat drafts an official visa invitation letter on Veritas University letterhead, addressed to your embassy.',
+        body: 'Our secretariat drafts an official visa invitation letter on Veritas University letterhead to support your application.',
     },
     {
         icon: Mail,
@@ -64,11 +64,8 @@ export default function VisaRequest() {
         phone: '',
         nationality: '',
         passport_number: '',
-        passport_expiry: '',
-        date_of_birth: '',
         institution: '',
         role: '',
-        embassy: '',
         arrival_date: '',
         departure_date: '',
         notes: '',
@@ -109,19 +106,14 @@ export default function VisaRequest() {
         if (!formData.phone.trim()) errs.phone = 'Phone number is required.';
         if (!formData.nationality.trim()) errs.nationality = 'Nationality is required.';
         if (!formData.passport_number.trim()) errs.passport_number = 'Passport number is required.';
-        if (!formData.passport_expiry.trim()) errs.passport_expiry = 'Passport expiry date is required.';
         if (!formData.institution.trim()) errs.institution = 'Institution / university is required.';
         if (!formData.role.trim()) errs.role = 'Please select your role at PAUDC 2026.';
-        if (!formData.embassy.trim())
-            errs.embassy = 'Please specify the embassy or consulate where you will apply.';
         return errs;
     };
 
     const buildMessage = (): string => {
         const lines = [
             `Passport number: ${formData.passport_number}`,
-            formData.passport_expiry ? `Passport expiry: ${formData.passport_expiry}` : '',
-            formData.date_of_birth ? `Date of birth: ${formData.date_of_birth}` : '',
             formData.arrival_date ? `Expected arrival: ${formData.arrival_date}` : '',
             formData.departure_date ? `Expected departure: ${formData.departure_date}` : '',
             formData.notes ? `\nAdditional notes:\n${formData.notes}` : '',
@@ -154,7 +146,6 @@ export default function VisaRequest() {
                 country: formData.nationality,
                 institution: formData.institution,
                 team: formData.role,
-                addressedTo: formData.embassy,
                 message: buildMessage(),
             });
 
@@ -303,7 +294,7 @@ export default function VisaRequest() {
 
                                     <div>
                                         <label className="block text-sm font-bold text-[#1B5E3B] mb-2">
-                                            Full Name (exactly as on passport) *
+                                            Full Name (as is on your international passport) *
                                         </label>
                                         <Input
                                             name="full_name"
@@ -376,21 +367,6 @@ export default function VisaRequest() {
                                         </div>
                                         <div>
                                             <label className="block text-sm font-bold text-[#1B5E3B] mb-2">
-                                                Date of Birth
-                                            </label>
-                                            <Input
-                                                name="date_of_birth"
-                                                type="date"
-                                                value={formData.date_of_birth}
-                                                onChange={handleChange}
-                                                className={`${uniformInputClasses} h-12`}
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div>
-                                            <label className="block text-sm font-bold text-[#1B5E3B] mb-2">
                                                 Passport Number *
                                             </label>
                                             <Input
@@ -404,24 +380,6 @@ export default function VisaRequest() {
                                             {errors.passport_number && (
                                                 <p className="text-sm text-[#A4372C] mt-1.5 font-medium">
                                                     {errors.passport_number}
-                                                </p>
-                                            )}
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-bold text-[#1B5E3B] mb-2">
-                                                Passport Expiry Date *
-                                            </label>
-                                            <Input
-                                                name="passport_expiry"
-                                                type="date"
-                                                value={formData.passport_expiry}
-                                                onChange={handleChange}
-                                                className={fieldClass('passport_expiry')}
-                                                aria-invalid={!!errors.passport_expiry}
-                                            />
-                                            {errors.passport_expiry && (
-                                                <p className="text-sm text-[#A4372C] mt-1.5 font-medium">
-                                                    {errors.passport_expiry}
                                                 </p>
                                             )}
                                         </div>
@@ -485,7 +443,7 @@ export default function VisaRequest() {
                                 {/* Travel & Embassy */}
                                 <div className="space-y-6">
                                     <h3 className="flex items-center gap-3 text-xl font-bold text-[#1B5E3B] border-b border-[#1B5E3B]/10 pb-4">
-                                        <CalendarDays className="w-5 h-5 text-[#C8A046]" /> Travel &amp; Embassy Details
+                                        <CalendarDays className="w-5 h-5 text-[#C8A046]" /> Travel Details
                                     </h3>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -513,27 +471,6 @@ export default function VisaRequest() {
                                                 className={`${uniformInputClasses} h-12`}
                                             />
                                         </div>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-bold text-[#1B5E3B] mb-2">
-                                            Embassy / Consulate You Will Apply At *
-                                        </label>
-                                        <Textarea
-                                            name="embassy"
-                                            value={formData.embassy}
-                                            onChange={handleChange}
-                                            placeholder={
-                                                'e.g. The Nigerian High Commission,\n9 Northumberland Avenue,\nLondon, United Kingdom'
-                                            }
-                                            className={`${uniformInputClasses} min-h-[90px] resize-none ${
-                                                errors.embassy ? errorInputClasses : ''
-                                            }`}
-                                            aria-invalid={!!errors.embassy}
-                                        />
-                                        {errors.embassy && (
-                                            <p className="text-sm text-[#A4372C] mt-1.5 font-medium">{errors.embassy}</p>
-                                        )}
                                     </div>
 
                                     <div>

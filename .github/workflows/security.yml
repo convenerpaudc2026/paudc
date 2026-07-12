@@ -44,7 +44,12 @@ jobs:
             backend/requirements-dev.txt
       - run: python -m pip install --upgrade pip
       - run: python -m pip install -r requirements.txt -r requirements-dev.txt
-      - run: pip-audit -r requirements.txt
+      # PYSEC-2026-1325: side-channel in the pure-Python `ecdsa` package, a
+      # transitive dependency of python-jose. It has no fix release, and our
+      # code never performs EC operations (app tokens use HS256; Firebase ID
+      # tokens are verified with RS256 via `cryptography`), so it is not
+      # reachable here. Revisit if `ecdsa` ships a fix or we drop python-jose.
+      - run: pip-audit -r requirements.txt --ignore-vuln PYSEC-2026-1325
       - run: bandit -r core dependencies middlewares routers schemas services -ll
       - run: pytest -q
 

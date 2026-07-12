@@ -1,7 +1,7 @@
 fastapi>=0.115.12,<1
 uvicorn[standard]>=0.34.0,<1
 python-multipart>=0.0.20,<1
-python-dotenv==1.0.1
+python-dotenv>=1.2.2,<2
 
 # Bumped for Python 3.13 compatibility
 pydantic>=2.9.2

@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
-from dependencies.auth import get_admin_user
+from dependencies.auth import get_admin_user, get_optional_user
 from schemas.auth import UserResponse
 from services.courses import CoursesService
 
@@ -87,6 +87,7 @@ async def query_courses(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(20, ge=1, le=2000, description="Max number of records to return"),
     fields: str = Query(None, description="Comma-separated list of fields to return"),
+    current_user: Optional[UserResponse] = Depends(get_optional_user),
     db: AsyncSession = Depends(get_db),
 ):
     """Query courses with filtering, sorting, and pagination"""
@@ -94,12 +95,15 @@ async def query_courses(
     
     try:
         # Parse query JSON if provided
-        query_dict = None
+        query_dict = {}
         if query:
             try:
                 query_dict = json.loads(query)
             except json.JSONDecodeError:
                 raise HTTPException(status_code=400, detail="Invalid query JSON format")
+
+        if not current_user or current_user.role != 'admin':
+            query_dict['is_published'] = True
 
         service = CoursesService(db)
         result = await service.get_list(
@@ -123,6 +127,7 @@ async def query_courses(
 async def get_courses(
     id: int,
     fields: str = Query(None, description="Comma-separated list of fields to return"),
+    current_user: Optional[UserResponse] = Depends(get_optional_user),
     db: AsyncSession = Depends(get_db),
 ):
     """Get a single courses by ID"""
@@ -134,6 +139,8 @@ async def get_courses(
         
         if not result:
             raise HTTPException(status_code=404, detail=f"Courses with id {id} not found")
+        if not result.is_published and (not current_user or current_user.role != 'admin'):
+            raise HTTPException(status_code=404, detail='Course not found')
             
         return result
         
@@ -211,7 +218,7 @@ async def delete_course(
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
-@router.post("/batch", response_model=CoursesListResponse, status_code=201)
+@router.post("/batch", response_model=CoursesListResponse, status_code=201, dependencies=[Depends(get_admin_user)])
 async def create_courses_batch(
     request: CoursesBatchCreateRequest,
     db: AsyncSession = Depends(get_db),
@@ -236,7 +243,7 @@ async def create_courses_batch(
         raise HTTPException(status_code=500, detail=f"Batch create failed: {str(e)}")
 
 
-@router.put("/batch", response_model=CoursesListResponse)
+@router.put("/batch", response_model=CoursesListResponse, dependencies=[Depends(get_admin_user)])
 async def update_courses_batch(
     request: CoursesBatchUpdateRequest,
     db: AsyncSession = Depends(get_db),
@@ -263,7 +270,7 @@ async def update_courses_batch(
         raise HTTPException(status_code=500, detail=f"Batch update failed: {str(e)}")
 
 
-@router.delete("/batch")
+@router.delete("/batch", dependencies=[Depends(get_admin_user)])
 async def delete_courses_batch(
     request: CoursesBatchDeleteRequest,
     db: AsyncSession = Depends(get_db),

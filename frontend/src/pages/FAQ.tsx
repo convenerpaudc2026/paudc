@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { SEO } from '@/components/SEO';
@@ -72,26 +72,17 @@ export default function FAQ() {
         }
     ];
 
-    const [filteredFaqs, setFilteredFaqs] = useState(allFaqs);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
 
-    useEffect(() => {
-        let filtered = allFaqs;
-
-        if (selectedCategory !== 'all') {
-            filtered = filtered.filter(faq => faq.category === selectedCategory);
-        }
-
-        if (searchQuery.trim() !== '') {
-            filtered = filtered.filter(faq =>
-                faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                faq.answer.toLowerCase().includes(searchQuery.toLowerCase())
-            );
-        }
-
-        setFilteredFaqs(filtered);
-    }, [searchQuery, selectedCategory]);
+    const normalizedSearch = searchQuery.trim().toLowerCase();
+    const filteredFaqs = allFaqs.filter(faq => {
+        const matchesCategory = selectedCategory === 'all' || faq.category === selectedCategory;
+        const matchesSearch = !normalizedSearch
+            || faq.question.toLowerCase().includes(normalizedSearch)
+            || faq.answer.toLowerCase().includes(normalizedSearch);
+        return matchesCategory && matchesSearch;
+    });
 
     const categories = [
         { id: 'all', label: 'All Questions' },

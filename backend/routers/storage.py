@@ -37,7 +37,7 @@ async def create_bucket(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Failed to create bucket")
 
 @router.get("/list-buckets", response_model=BucketListResponse)
-async def list_buckets(current_user: User = Depends(get_current_user)):
+async def list_buckets(current_user: User = Depends(get_admin_user)):
     """List buckets of the user"""
     service = StorageService()
     try:
@@ -49,7 +49,7 @@ async def list_buckets(current_user: User = Depends(get_current_user)):
 @router.get("/get-object-info", response_model=ObjectRequest)
 async def get_object_info(
     request: ObjectRequest = Depends(), 
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_admin_user)
 ):
     """Get object metadata from the bucket"""
     service = StorageService()
@@ -64,7 +64,7 @@ async def get_object_info(
 @router.post("/upload-url", response_model=FileUpDownloadResponse)
 async def upload_file_url(
     request: FileUpDownloadRequest, 
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_admin_user)
 ):
     """Get a presigned URL for uploading a file to StorageService."""
     service = StorageService()
@@ -79,7 +79,7 @@ async def upload_file_url(
 @router.post("/rename-object", response_model=RenameRequest)
 async def rename_object(
     request: RenameRequest, 
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_admin_user)
 ):
     """Rename an object in the bucket"""
     service = StorageService()

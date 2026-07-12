@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from core.database import get_db
+from dependencies.auth import get_admin_user
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +97,7 @@ async def get_content_pages(
     """Get a single content_pages by ID"""
     pass
 
-@router.post("/", response_model=ContentPagesResponse, status_code=201)
+@router.post("/", response_model=ContentPagesResponse, status_code=201, dependencies=[Depends(get_admin_user)])
 async def create_content_pages(
     data: ContentPagesData,
     db: AsyncSession = Depends(get_db),
@@ -104,7 +105,7 @@ async def create_content_pages(
     """Create a new content_pages"""
     pass
 
-@router.post("/batch", response_model=ContentPagesListResponse, status_code=201)
+@router.post("/batch", response_model=ContentPagesListResponse, status_code=201, dependencies=[Depends(get_admin_user)])
 async def create_course_batch(
     request: ContentPagesBatchCreateRequest,
     db: AsyncSession = Depends(get_db),
@@ -112,7 +113,7 @@ async def create_course_batch(
     """Create multiple content_pages in a single request"""
     pass
 
-@router.put("/{id}", response_model=ContentPagesResponse)
+@router.put("/{id}", response_model=ContentPagesResponse, dependencies=[Depends(get_admin_user)])
 async def update_content_pages(
     id: int,
     data: ContentPagesUpdateData,
@@ -121,7 +122,7 @@ async def update_content_pages(
     """Update a single content_pages by ID"""
     pass
 
-@router.put("/batch", response_model=ContentPagesListResponse)
+@router.put("/batch", response_model=ContentPagesListResponse, dependencies=[Depends(get_admin_user)])
 async def update_course_batch(
     request: ContentPagesBatchUpdateRequest,
     db: AsyncSession = Depends(get_db),
@@ -129,7 +130,7 @@ async def update_course_batch(
     """Update multiple content_pages in a single request"""
     pass
 
-@router.delete("/{id}")
+@router.delete("/{id}", dependencies=[Depends(get_admin_user)])
 async def delete_content_pages(
     id: int,
     db: AsyncSession = Depends(get_db),
@@ -137,7 +138,7 @@ async def delete_content_pages(
     """Delete a single content_pages by ID"""
     pass
 
-@router.delete("/batch")
+@router.delete("/batch", dependencies=[Depends(get_admin_user)])
 async def delete_course_batch(
     request: ContentPagesBatchDeleteRequest,
     db: AsyncSession = Depends(get_db),

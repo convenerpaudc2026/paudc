@@ -25,18 +25,21 @@ def init_firebase():
             creds_dict = json.loads(firebase_creds_json)
             creds = credentials.Certificate(creds_dict)
         else:
-            # Try to load from file (for development)
-            creds_path = Path(__file__).parent.parent / "firebase-credentials.json"
-            if creds_path.exists():
-                creds = credentials.Certificate(str(creds_path))
-            else:
-                logger.warning("Firebase credentials not found. Firebase features will be disabled.")
-                return
+            credentials_file = os.getenv('FIREBASE_CREDENTIALS_FILE') or os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+            if not credentials_file:
+                raise RuntimeError(
+                    'Firebase credentials are not configured. Set FIREBASE_CREDENTIALS_JSON '
+                    'or FIREBASE_CREDENTIALS_FILE.'
+                )
+            creds_path = Path(credentials_file).expanduser().resolve()
+            if not creds_path.is_file():
+                raise RuntimeError('The configured Firebase credentials file does not exist')
+            creds = credentials.Certificate(str(creds_path))
         
         firebase_admin.initialize_app(creds)
         logger.info("Firebase Admin SDK initialized successfully")
     except Exception as e:
-        logger.error(f"Failed to initialize Firebase: {e}")
+        logger.error('Failed to initialize Firebase: %s', type(e).__name__)
         raise
 
 
@@ -57,7 +60,7 @@ async def verify_firebase_token(id_token: str) -> Optional[Dict[str, Any]]:
         decoded_token = firebase_auth.verify_id_token(id_token, clock_skew_seconds=10)
         return decoded_token
     except Exception as e:
-        logger.error(f"Firebase token verification failed: {e}")
+        logger.warning('Firebase token verification failed: %s', type(e).__name__)
         return None
 
 
@@ -84,5 +87,5 @@ async def get_firebase_user(uid: str) -> Optional[Dict[str, Any]]:
             "email_verified": user.email_verified,
         }
     except Exception as e:
-        logger.error(f"Failed to get Firebase user {uid}: {e}")
+        logger.error('Failed to get Firebase user: %s', type(e).__name__)
         return None

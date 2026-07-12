@@ -5,16 +5,55 @@ from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
 from dependencies.auth import get_current_user
+from dependencies.course_access import require_course_access
 from models.auth import User
+from models.course_modules import CourseModules
+from models.progress_tracking import ProgressTracking
+from models.quiz_attempts import QuizAttempts
+from models.quizzes import Quizzes
 from services.progress_tracking import ProgressTrackingService
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/entities/progress_tracking", tags=["progress_tracking"])
+
+
+async def validate_completion(
+    course_id: int,
+    module_id: Optional[int],
+    status_value: str,
+    current_user: User,
+    db: AsyncSession,
+) -> None:
+    await require_course_access(course_id, current_user, db)
+    if module_id is None:
+        return
+    module = await db.scalar(
+        select(CourseModules).where(CourseModules.id == module_id, CourseModules.course_id == course_id)
+    )
+    if module is None:
+        raise HTTPException(status_code=400, detail='Module does not belong to this course')
+    if status_value != 'completed' or module.content_type != 'quiz':
+        return
+    quiz_id = await db.scalar(
+        select(Quizzes.id).where(Quizzes.module_id == module_id, Quizzes.is_published.is_(True))
+    )
+    passed_attempt = None
+    if quiz_id is not None:
+        passed_attempt = await db.scalar(
+            select(QuizAttempts.id).where(
+                QuizAttempts.quiz_id == quiz_id,
+                QuizAttempts.user_id == str(current_user.id),
+                QuizAttempts.passed.is_(True),
+            )
+        )
+    if passed_attempt is None:
+        raise HTTPException(status_code=403, detail='A passing quiz attempt is required')
 
 # Pydantic Schemas
 class ProgressTrackingData(BaseModel):
@@ -84,12 +123,16 @@ async def create_progress_tracking(
 ):
     service = ProgressTrackingService(db)
     try:
+        await validate_completion(data.course_id, data.module_id, data.status, current_user, db)
         result = await service.create(data.model_dump(), user_id=str(current_user.id))
         if not result:
             raise HTTPException(status_code=400, detail="Failed to create progress_tracking")
         return result
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+    except HTTPException:
+        raise
+    except Exception:
+        logger.error('Failed to create progress record', exc_info=True)
+        raise HTTPException(status_code=500, detail='Failed to create progress record')
 
 @router.put("/{id}", response_model=ProgressTrackingResponse)
 async def update_progress_tracking(
@@ -100,7 +143,19 @@ async def update_progress_tracking(
 ):
     service = ProgressTrackingService(db)
     try:
+        existing = await db.scalar(
+            select(ProgressTracking).where(
+                ProgressTracking.id == id,
+                ProgressTracking.user_id == str(current_user.id),
+            )
+        )
+        if existing is None:
+            raise HTTPException(status_code=404, detail='Progress tracking not found')
         update_dict = {k: v for k, v in data.model_dump().items() if v is not None}
+        course_id = update_dict.get('course_id', existing.course_id)
+        module_id = update_dict.get('module_id', existing.module_id)
+        status_value = update_dict.get('status', existing.status)
+        await validate_completion(course_id, module_id, status_value, current_user, db)
         result = await service.update(id, update_dict, user_id=str(current_user.id))
         if not result:
             raise HTTPException(status_code=404, detail="Progress_tracking not found for update")

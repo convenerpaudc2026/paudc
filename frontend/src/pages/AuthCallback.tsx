@@ -10,9 +10,9 @@ export default function AuthCallback() {
             try {
                 await authApi.completeCallback();
                 window.location.href = '/dashboard';
-            } catch (err: any) {
+            } catch (err: unknown) {
                 console.error('Auth callback error:', err);
-                setError(err.message || 'Authentication failed');
+                setError(err instanceof Error ? err.message : 'Authentication failed');
             }
         };
 

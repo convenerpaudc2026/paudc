@@ -7,6 +7,8 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
+from dependencies.auth import get_admin_user, get_optional_user
+from schemas.auth import UserResponse
 from services.resources import ResourcesService
 
 logger = logging.getLogger(__name__)
@@ -80,10 +82,13 @@ async def query_resources(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(20, ge=1, le=2000, description="Max number of records to return"),
     fields: str = Query(None, description="Comma-separated list of fields to return"),
+    current_user: Optional[UserResponse] = Depends(get_optional_user),
     db: AsyncSession = Depends(get_db),
 ):
     try:
-        query_dict = json.loads(query) if query else None
+        query_dict = json.loads(query) if query else {}
+        if not current_user or current_user.role != 'admin':
+            query_dict['is_public'] = True
         service = ResourcesService(db)
         result = await service.get_list(skip=skip, limit=limit, query=query_dict, sort=sort)
         return result
@@ -94,14 +99,20 @@ async def query_resources(
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 @router.get("/{id}", response_model=ResourcesResponse)
-async def get_resources(id: int, db: AsyncSession = Depends(get_db)):
+async def get_resources(
+    id: int,
+    current_user: Optional[UserResponse] = Depends(get_optional_user),
+    db: AsyncSession = Depends(get_db),
+):
     service = ResourcesService(db)
     result = await service.get_by_id(id)
     if not result:
         raise HTTPException(status_code=404, detail="Resources not found")
+    if not result.is_public and (not current_user or current_user.role != 'admin'):
+        raise HTTPException(status_code=404, detail='Resource not found')
     return result
 
-@router.post("/batch", response_model=ResourcesListResponse, status_code=201)
+@router.post("/batch", response_model=ResourcesListResponse, status_code=201, dependencies=[Depends(get_admin_user)])
 async def create_resources_batch(request: ResourcesBatchCreateRequest, db: AsyncSession = Depends(get_db)):
     service = ResourcesService(db)
     results = []
@@ -115,7 +126,7 @@ async def create_resources_batch(request: ResourcesBatchCreateRequest, db: Async
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Batch create failed: {str(e)}")
 
-@router.put("/{id}", response_model=ResourcesResponse)
+@router.put("/{id}", response_model=ResourcesResponse, dependencies=[Depends(get_admin_user)])
 async def update_resources(id: int, data: ResourcesUpdateData, db: AsyncSession = Depends(get_db)):
     service = ResourcesService(db)
     try:
@@ -129,7 +140,7 @@ async def update_resources(id: int, data: ResourcesUpdateData, db: AsyncSession 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
-@router.delete("/{id}")
+@router.delete("/{id}", dependencies=[Depends(get_admin_user)])
 async def delete_resources(id: int, db: AsyncSession = Depends(get_db)):
     service = ResourcesService(db)
     try:

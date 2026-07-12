@@ -3,7 +3,6 @@ import base64
 import hashlib
 from cryptography.fernet import Fernet
 
-secret_key = "MySecFunctionSea"
 key_prefix = "mgxkey-"
 
 def derive_fernet_key(key_material: str) -> bytes:
@@ -16,6 +15,8 @@ def get_fernet(key_str: str) -> Fernet:
     return Fernet(key)
 
 def encrypt_text(plain: str) -> str:
-    pwd = os.environ.get("MASK_KEY", secret_key)
+    pwd = os.environ.get('MASK_KEY')
+    if not pwd or len(pwd) < 32:
+        raise RuntimeError('MASK_KEY must be configured with at least 32 characters')
     f = get_fernet(pwd)
     return key_prefix + f.encrypt(plain.encode("utf-8")).decode("utf-8")

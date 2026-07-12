@@ -3,11 +3,12 @@ import json
 import logging
 from typing import Any, Dict
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
 from sse_starlette.sse import EventSourceResponse
 from services.aihub import generate_image, generate_text
 from schemas.aihub import GenImgRequest, GenTxtRequest
+from dependencies.auth import get_current_user
 
 logger = logging.getLogger(__name__)
 
@@ -83,7 +84,11 @@ def extract_error_message(error: Any) -> str:
                 
     return error_str
 
-router = APIRouter(prefix="/api/v1/aihub", tags=["aihub"])
+router = APIRouter(
+    prefix="/api/v1/aihub",
+    tags=["aihub"],
+    dependencies=[Depends(get_current_user)],
+)
 
 @router.post("/genTxt")
 async def generate_text_endpoint(request: GenTxtRequest):
@@ -105,8 +110,8 @@ async def generate_text_endpoint(request: GenTxtRequest):
                     async for chunk in generate_text(request):
                         yield json.dumps({"text": chunk})
                 except Exception as e:
-                    logger.error(f"Stream error: {e}")
-                    yield json.dumps({"error": f"Error: {extract_error_message(e)}"})
+                    logger.error('AI stream failed: %s', type(e).__name__)
+                    yield json.dumps({'error': 'Generation failed'})
             return EventSourceResponse(event_generator(), media_type="text/event-stream")
         else:
             # Non-streaming response
@@ -114,11 +119,11 @@ async def generate_text_endpoint(request: GenTxtRequest):
             return response
             
     except ValueError as e:
-        logger.error(f"AI service configuration error: {e}")
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=extract_error_message(e))
+        logger.error('AI service configuration error: %s', type(e).__name__)
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail='AI service unavailable')
     except Exception as e:
-        logger.error(f"Text generation failed: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=extract_error_message(e))
+        logger.error('Text generation failed: %s', type(e).__name__)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Generation failed')
 
 @router.post("/genImg", response_model=Dict[str, Any])
 async def generate_image_endpoint(request: GenImgRequest):
@@ -142,8 +147,8 @@ async def generate_image_endpoint(request: GenImgRequest):
     try:
         return await generate_image(request)
     except ValueError as e:
-        logger.error(f"AI service configuration error: {e}")
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=extract_error_message(e))
+        logger.error('AI service configuration error: %s', type(e).__name__)
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail='AI service unavailable')
     except Exception as e:
-        logger.error(f"Image generation failed: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=extract_error_message(e))
+        logger.error('Image generation failed: %s', type(e).__name__)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Generation failed')

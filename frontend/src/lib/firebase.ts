@@ -1,5 +1,5 @@
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { initializeApp, type FirebaseApp } from 'firebase/app';
+import { getAuth, type Auth } from 'firebase/auth';
 
 // Firebase configuration from environment variables
 const firebaseConfig = {
@@ -17,8 +17,8 @@ const missingFields = requiredFields.filter(
   (field) => !firebaseConfig[field]
 );
 
-let app: any = null;
-let auth: any = null;
+let app: FirebaseApp | null = null;
+let auth: Auth | null = null;
 
 if (missingFields.length > 0) {
   console.warn(

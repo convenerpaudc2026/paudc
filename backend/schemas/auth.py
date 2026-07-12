@@ -25,5 +25,5 @@ class PlatformTokenExchangeRequest(BaseModel):
     platform_token: str
 
 class TokenExchangeResponse(BaseModel):
-    """Response body for issued application token."""
-    token: str
+    """Response body after establishing the HttpOnly application session."""
+    success: bool = True

@@ -9,8 +9,7 @@ const readPlatformTokenFromHash = (): string | null => {
 
 export const authApi = {
 	async firebaseLogin(idToken: string): Promise<void> {
-		const response = await api.auth.firebaseLogin(idToken);
-		localStorage.setItem('auth_token', response.data.access_token);
+		await api.auth.firebaseLogin(idToken);
 	},
 
 	async login(): Promise<void> {
@@ -19,7 +18,7 @@ export const authApi = {
 	},
 
 	async logout(): Promise<void> {
-		localStorage.removeItem('auth_token');
+		await api.auth.logout();
 		// Sign out from Firebase (only if Firebase is initialized)
 		try {
 			if (auth) {
@@ -41,7 +40,6 @@ export const authApi = {
 			throw new Error('Missing token from authentication callback.');
 		}
 
-		const exchange = await api.auth.exchangePlatformToken(platformToken);
-		localStorage.setItem('auth_token', exchange.data.token);
+		await api.auth.exchangePlatformToken(platformToken);
 	},
 };

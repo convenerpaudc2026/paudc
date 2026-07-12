@@ -7,6 +7,8 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
+from dependencies.auth import get_admin_user, get_current_user
+from schemas.auth import UserResponse
 from services.notifications import NotificationsService
 
 logger = logging.getLogger(__name__)
@@ -63,6 +65,7 @@ async def query_notifications(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(20, ge=1, le=2000, description="Max number of records to return"),
     fields: str = Query(None, description="Comma-separated list of fields to return"),
+    current_user: UserResponse = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     logger.debug(f"Querying notifications: query={query}, sort={sort}, skip={skip}, limit={limit}, fields={fields}")
@@ -76,7 +79,7 @@ async def query_notifications(
         logger.error(f"Error querying notifications: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
-@router.post("/", response_model=NotificationsResponse, status_code=201)
+@router.post("/", response_model=NotificationsResponse, status_code=201, dependencies=[Depends(get_admin_user)])
 async def create_notifications(
     data: NotificationsData,
     db: AsyncSession = Depends(get_db),
@@ -90,7 +93,7 @@ async def create_notifications(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
-@router.put("/{id}", response_model=NotificationsResponse)
+@router.put("/{id}", response_model=NotificationsResponse, dependencies=[Depends(get_admin_user)])
 async def update_notifications(
     id: int,
     data: NotificationsUpdateData,
@@ -108,7 +111,7 @@ async def update_notifications(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
-@router.delete("/{id}")
+@router.delete("/{id}", dependencies=[Depends(get_admin_user)])
 async def delete_notifications(
     id: int,
     db: AsyncSession = Depends(get_db),

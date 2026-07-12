@@ -10,10 +10,19 @@ const defaultConfig = {
 
 export function getConfig(): RuntimeConfig {
     // Prioritize Vite environment variables (baked at build time on Vercel)
-    if (import.meta.env.VITE_API_BASE_URL) {
+    const configuredUrl = import.meta.env.VITE_API_BASE_URL?.trim();
+    if (configuredUrl) {
+        const parsedUrl = new URL(configuredUrl);
+        if (import.meta.env.PROD && parsedUrl.protocol !== 'https:') {
+            throw new Error('VITE_API_BASE_URL must use HTTPS in production');
+        }
         return {
-            API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
+            API_BASE_URL: configuredUrl.replace(/\/$/, ''),
         };
+    }
+
+    if (import.meta.env.PROD) {
+        throw new Error('VITE_API_BASE_URL must be configured in production');
     }
 
     // Fallback to default

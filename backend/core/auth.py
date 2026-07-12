@@ -13,6 +13,7 @@ from jose.exceptions import ExpiredSignatureError, JWTError, JWTClaimsError
 
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
+from starlette.responses import Response
 
 
 logger = logging.getLogger(__name__)
@@ -54,14 +55,14 @@ async def get_jwks() -> dict:
             logger.info(f"Successfully fetched JWKS with {len(jwks_data.get('keys', []))} keys")
             return jwks_data
     except httpx.TimeoutException:
-        logger.error(f"Timeout while fetching JWKS from {jwks_url}")
+        logger.error('Timeout while fetching OIDC JWKS')
         raise
     except httpx.HTTPStatusError as e:
-        logger.error(f"HTTP error {e.response.status_code} while fetching JWKS from {jwks_url}: {e.response.text}")
+        logger.error('OIDC JWKS request failed with status %s', e.response.status_code)
         raise
     except Exception as e:
-        logger.error(f"Failed to fetch JWKS from {jwks_url}: {e}")
-        raise Exception("Unable to retrieve authentication keys")
+        logger.error('OIDC JWKS retrieval failed: %s', type(e).__name__)
+        raise IDTokenValidationError('Unable to retrieve authentication keys', 'jwks_fetch_error') from e
 
 
 class IDTokenValidationError(Exception):
@@ -80,7 +81,14 @@ def decode_access_token(token: str) -> Dict[str, Any]:
         raise ValueError("JWT_SECRET_KEY is not configured")
         
     try:
-        payload = jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
+        payload = jwt.decode(
+            token,
+            settings.jwt_secret_key,
+            algorithms=[settings.jwt_algorithm],
+            audience=settings.jwt_audience,
+            issuer=settings.backend_url.rstrip('/'),
+            options={'require_sub': True, 'require_exp': True, 'require_iat': True},
+        )
         
         # Log user hash instead of actual user ID to avoid exposing sensitive information
         user_id = payload.get("sub", "unknown")
@@ -104,8 +112,33 @@ def create_access_token(data: Dict[str, Any]) -> str:
         **data,
         "exp": expire,
         "iat": datetime.now(timezone.utc),
+        'iss': settings.backend_url.rstrip('/'),
+        'aud': settings.jwt_audience,
+        'jti': secrets.token_urlsafe(16),
     }
     return jwt.encode(payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
+
+
+def set_auth_cookie(response: Response, token: str) -> None:
+    response.set_cookie(
+        key=settings.auth_cookie_name,
+        value=token,
+        max_age=settings.jwt_expire_minutes * 60,
+        path='/',
+        secure=settings.environment == 'production',
+        httponly=True,
+        samesite=settings.auth_cookie_samesite,
+    )
+
+
+def clear_auth_cookie(response: Response) -> None:
+    response.delete_cookie(
+        key=settings.auth_cookie_name,
+        path='/',
+        secure=settings.environment == 'production',
+        httponly=True,
+        samesite=settings.auth_cookie_samesite,
+    )
 
 
 async def validate_id_token(id_token: str) -> Optional[Dict[str, Any]]:
@@ -123,7 +156,7 @@ async def validate_id_token(id_token: str) -> Optional[Dict[str, Any]]:
     try:
         jwks = await get_jwks()
     except Exception as e:
-        logger.error(f"ID token validation failed: Failed to fetch JWKS from {settings.oidc_issuer_url}: {e}")
+        logger.error('ID token validation failed because JWKS retrieval failed')
         raise IDTokenValidationError("Unable to retrieve authentication keys", "jwks_fetch_error")
         
     # Find the matching key
@@ -192,7 +225,7 @@ async def validate_id_token(id_token: str) -> Optional[Dict[str, Any]]:
         logger.warning("ID token validation failed: Token has expired")
         raise IDTokenValidationError("Token has expired", "expired")
     except JWTClaimsError as e:
-        logger.error(f"ID token validation failed: Invalid claims: {e}")
+        logger.error('ID token validation failed: invalid claims')
         raise IDTokenValidationError("Invalid token claims", "invalid_claims")
     except JWTError as e:
         logger.error(f"ID token validation failed: Signature verification failed")
@@ -232,6 +265,3 @@ def build_logout_url(id_token: Optional[str] = None) -> str:
         
     logout_url = f"{settings.oidc_issuer_url}/logout?{urllib.parse.urlencode(params)}"
     return logout_url
-
-
-from dependencies.auth import get_current_user

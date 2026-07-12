@@ -7,6 +7,8 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
+from dependencies.auth import get_admin_user, get_optional_user
+from schemas.auth import UserResponse
 from services.faqs import FaqsService
 
 # Set up logging
@@ -79,17 +81,21 @@ async def query_faqs(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(20, ge=1, le=2000, description="Max number of records to return"),
     fields: str = Query(None, description="Comma-separated list of fields to return"),
+    current_user: Optional[UserResponse] = Depends(get_optional_user),
     db: AsyncSession = Depends(get_db),
 ):
     """Query faqs with filtering, sorting, and pagination"""
     service = FaqsService(db)
     try:
-        query_dict = None
+        query_dict = {}
         if query:
             try:
                 query_dict = json.loads(query)
             except json.JSONDecodeError:
                 raise HTTPException(status_code=400, detail="Invalid query JSON format")
+
+        if not current_user or current_user.role != 'admin':
+            query_dict['is_published'] = True
 
         result = await service.get_list(skip=skip, limit=limit, query=query_dict, sort=sort)
         return result
@@ -102,6 +108,7 @@ async def query_faqs(
 @router.get("/{id}", response_model=FaqsResponse)
 async def get_faqs(
     id: int,
+    current_user: Optional[UserResponse] = Depends(get_optional_user),
     db: AsyncSession = Depends(get_db),
 ):
     """Get a single faqs by ID"""
@@ -110,13 +117,15 @@ async def get_faqs(
         result = await service.get_by_id(id)
         if not result:
             raise HTTPException(status_code=404, detail="Faq not found")
+        if not result.is_published and (not current_user or current_user.role != 'admin'):
+            raise HTTPException(status_code=404, detail='Faq not found')
         return result
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
-@router.post("/", response_model=FaqsResponse, status_code=201)
+@router.post("/", response_model=FaqsResponse, status_code=201, dependencies=[Depends(get_admin_user)])
 async def create_faqs(
     data: FaqsData,
     db: AsyncSession = Depends(get_db),
@@ -131,7 +140,7 @@ async def create_faqs(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
-@router.put("/{id}", response_model=FaqsResponse)
+@router.put("/{id}", response_model=FaqsResponse, dependencies=[Depends(get_admin_user)])
 async def update_faqs(
     id: int,
     data: FaqsUpdateData,
@@ -150,7 +159,7 @@ async def update_faqs(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
-@router.delete("/{id}")
+@router.delete("/{id}", dependencies=[Depends(get_admin_user)])
 async def delete_faqs(
     id: int,
     db: AsyncSession = Depends(get_db),

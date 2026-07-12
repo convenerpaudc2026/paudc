@@ -9,19 +9,20 @@ import httpx
 from core.auth import (
     build_authorization_url,
     build_logout_url,
+    clear_auth_cookie,
     create_access_token,
     generate_code_challenge,
     generate_code_verifier,
     generate_nonce,
     generate_state,
-    get_current_user,
+    set_auth_cookie,
     validate_id_token,
 )
 from core.config import settings
 from core.database import get_db
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from dependencies.auth import get_current_user
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.responses import RedirectResponse
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from models.auth import OIDCState
 from models.auth import User
 from schemas.auth import (
@@ -36,18 +37,7 @@ from sqlalchemy.future import select
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
-bearer_scheme = HTTPBearer(auto_error=False)
-
-async def get_bearer_token(
-    request: Request, credentials: Optional[HTTPAuthorizationCredentials] = Depends(bearer_scheme)
-):
-    """Extract bearer token from Authorization header."""
-    if credentials and credentials.scheme.lower() == "bearer":
-        return credentials.credentials
-        
-    logger.debug(f"Authentication required for request: {request.method} {request.url}")
-    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication credentials were not provided")
+router = APIRouter(prefix='/api/v1/auth', tags=['auth'])
 
 def derive_name_from_email(email: str) -> str:
     """Derive a simple name from email address."""
@@ -65,8 +55,6 @@ class FirebaseLoginRequest(BaseModel):
 
 
 class FirebaseLoginResponse(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
     user: UserResponse
 
 
@@ -74,6 +62,7 @@ class FirebaseLoginResponse(BaseModel):
 @router.post("/firebase/login", response_model=FirebaseLoginResponse)
 async def firebase_login(
     request: FirebaseLoginRequest,
+    response: Response,
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -86,7 +75,7 @@ async def firebase_login(
     try:
         init_firebase()
     except Exception as e:
-        logger.error(f"Firebase initialization failed: {e}")
+        logger.error('Firebase initialization failed: %s', type(e).__name__)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Firebase authentication service unavailable"
@@ -108,6 +97,13 @@ async def firebase_login(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token claims"
         )
+    if decoded_token.get('email_verified') is not True:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='Email verification is required before signing in'
+        )
+
+    email = str(email).strip().lower()
     
     # Check if user exists by Firebase UID first, then fall back to email
     stmt = select(User).where(User.external_id == firebase_uid)
@@ -118,6 +114,14 @@ async def firebase_login(
         stmt = select(User).where(User.email == email)
         result = await db.execute(stmt)
         user = result.scalar_one_or_none()
+        if user and (
+            user.provider not in (None, 'firebase')
+            or (user.external_id and user.external_id != firebase_uid)
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail='This email is already linked to another sign-in provider'
+            )
 
     name = decoded_token.get("name") or derive_name_from_email(email)
 
@@ -139,7 +143,7 @@ async def firebase_login(
         if updated:
             await db.commit()
             await db.refresh(user)
-            logger.info(f"Updated existing user from Firebase: {email}")
+            logger.info('Updated existing Firebase user')
     else:
         user = User(
             id=firebase_uid,
@@ -154,7 +158,7 @@ async def firebase_login(
         db.add(user)
         await db.commit()
         await db.refresh(user)
-        logger.info(f"New user created from Firebase: {email}")
+        logger.info('New Firebase user created')
     
     # Create JWT token — include name and role so /auth/me reflects them
     access_token = create_access_token(
@@ -165,10 +169,9 @@ async def firebase_login(
             "role": user.role,
         }
     )
+    set_auth_cookie(response, access_token)
     
     return FirebaseLoginResponse(
-        access_token=access_token,
-        token_type="bearer",
         user=UserResponse.from_orm(user)
     )
 
@@ -230,7 +233,7 @@ async def callback(
 ):
     """Handle OIDC callback."""
     if error:
-        logger.error(f"OIDC error: {error} - {error_description}")
+        logger.warning('OIDC provider returned an authentication error')
         return RedirectResponse(
             url=f"{settings.frontend_url}/auth/error?msg={urllib.parse.quote(error_description or error)}"
         )
@@ -247,7 +250,7 @@ async def callback(
     oidc_state = result.scalar_one_or_none()
     
     if not oidc_state or oidc_state.expires_at < datetime.now():
-        logger.error(f"Invalid or expired state: {state}")
+        logger.warning('Invalid or expired OIDC state')
         return RedirectResponse(
             url=f"{settings.frontend_url}/auth/error?msg=Session expired or invalid state"
         )
@@ -268,7 +271,7 @@ async def callback(
         
     # Exchange authorization code for tokens with PKCE
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=15.0) as client:
             token_url = f"{settings.oidc_issuer_url}/oauth/token"
             data = {
                 "grant_type": "authorization_code",
@@ -285,14 +288,13 @@ async def callback(
             token_response = await client.post(token_url, data=data, headers=headers)
             
             if token_response.status_code != 200:
-                logger.error(f"Token exchange failed: {token_response.status_code} - {token_response.text}")
+                logger.error('OIDC token exchange failed with status %s', token_response.status_code)
                 return RedirectResponse(
                     url=f"{settings.frontend_url}/auth/error?msg=Authentication token exchange failed"
                 )
                 
             token_data = token_response.json()
             id_token = token_data.get("id_token")
-            access_token = token_data.get("access_token")
             
             if not id_token:
                 logger.error("No ID token returned")
@@ -304,7 +306,7 @@ async def callback(
             try:
                 payload = await validate_id_token(id_token)
             except Exception as e:
-                logger.error(f"Token validation failed: {e}")
+                logger.error('OIDC token validation failed: %s', type(e).__name__)
                 return RedirectResponse(
                     url=f"{settings.frontend_url}/auth/error?msg=Token validation failed"
                 )
@@ -320,99 +322,149 @@ async def callback(
             await db.delete(oidc_state)
             
             # Find or create user
-            email = payload.get("email")
-            sub = payload.get("sub")
+            email = payload.get('email')
+            sub = payload.get('sub')
             
             if not email or not sub:
                 logger.error("Missing email or sub in token payload")
                 return RedirectResponse(
-                    url=f"{settings.frontend_url}/auth/error?msg=Incomplete user profile"
+                    url=f'{settings.frontend_url}/auth/error?msg=Incomplete user profile'
                 )
-                
+            if settings.oidc_require_verified_email and payload.get('email_verified') is not True:
+                logger.warning('OIDC login rejected because email is not verified')
+                return RedirectResponse(
+                    url=f'{settings.frontend_url}/auth/error?msg=Email verification is required'
+                )
+
+            email = str(email).strip().lower()
+            sub = str(sub)
             stmt = select(User).where(User.id == sub)
             result = await db.execute(stmt)
             user = result.scalar_one_or_none()
-            
+
             if not user:
+                stmt = select(User).where(User.email == email)
+                result = await db.execute(stmt)
+                if result.scalar_one_or_none():
+                    logger.warning('OIDC login rejected due to provider conflict')
+                    return RedirectResponse(
+                        url=f'{settings.frontend_url}/auth/error?msg=Email is linked to another sign-in method'
+                    )
                 # Create new user
                 user = User(
                     id=sub,
                     email=email,
-                    name=payload.get("name") or derive_name_from_email(email),
-                    role=payload.get("role", "user"),
+                    name=payload.get('name') or derive_name_from_email(email),
+                    role='participant',
+                    provider='oidc',
+                    external_id=sub,
                     last_login=datetime.now()
                 )
                 db.add(user)
             else:
+                if user.provider not in (None, 'oidc'):
+                    logger.warning('OIDC login rejected due to identity provider mismatch')
+                    return RedirectResponse(
+                        url=f'{settings.frontend_url}/auth/error?msg=Account sign-in method mismatch'
+                    )
                 # Update existing user
+                user.provider = 'oidc'
+                user.external_id = sub
                 user.last_login = datetime.now()
-                # Update role if provided in token (useful for admin syncing)
-                if "role" in payload:
-                    user.role = payload["role"]
                     
             await db.commit()
-            
-            # Store tokens in session/cookies or issue a new app token
-            # For this implementation, we'll pass the platform token back to the frontend
-            # which will exchange it for an app token using /token/exchange
-            
-            # Redirect to frontend callback page with the platform access token
-            redirect_url = f"{settings.frontend_url}/auth/callback#token={urllib.parse.quote(access_token)}"
-            return RedirectResponse(url=redirect_url)
+
+            app_token = create_access_token({
+                'sub': str(user.id),
+                'email': user.email,
+                'name': user.name,
+                'role': user.role,
+                'last_login': user.last_login.isoformat() if user.last_login else None,
+            })
+            redirect_response = RedirectResponse(url=f'{settings.frontend_url}/dashboard')
+            set_auth_cookie(redirect_response, app_token)
+            return redirect_response
             
     except Exception as e:
-        logger.error(f"Callback processing failed: {e}", exc_info=True)
+        logger.error('OIDC callback processing failed: %s', type(e).__name__, exc_info=True)
         return RedirectResponse(
             url=f"{settings.frontend_url}/auth/error?msg=Internal server error during authentication"
         )
 
 
 @router.post("/token/exchange", response_model=TokenExchangeResponse)
-async def exchange_token(request: PlatformTokenExchangeRequest, db: AsyncSession = Depends(get_db)):
+async def exchange_token(
+    request: PlatformTokenExchangeRequest,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+):
     """Exchange a platform token for an application token."""
     platform_token = request.platform_token
     
     try:
         # 1. Verify the platform token
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=15.0) as client:
             userinfo_url = f"{settings.oidc_issuer_url}/userinfo"
             headers = {"Authorization": f"Bearer {platform_token}"}
             
             userinfo_response = await client.get(userinfo_url, headers=headers)
             
             if userinfo_response.status_code != 200:
-                logger.error(f"Platform token verification failed: {userinfo_response.status_code} - {userinfo_response.text}")
+                logger.error('Platform token verification failed with status %s', userinfo_response.status_code)
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Invalid or expired platform token"
                 )
                 
             userinfo = userinfo_response.json()
-            sub = userinfo.get("sub")
-            email = userinfo.get("email")
+            sub = userinfo.get('sub')
+            email = userinfo.get('email')
             
             if not sub or not email:
                 logger.error("Platform token missing essential claims (sub, email)")
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Incomplete user profile in token"
+                    detail='Incomplete user profile in token'
                 )
-                
+            if settings.oidc_require_verified_email and userinfo.get('email_verified') is not True:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail='Email verification is required before signing in',
+                )
+
+            sub = str(sub)
+            email = str(email).strip().lower()
             # 2. Get or update user
             stmt = select(User).where(User.id == sub)
             result = await db.execute(stmt)
             user = result.scalar_one_or_none()
-            
+
             if not user:
+                 stmt = select(User).where(User.email == email)
+                 result = await db.execute(stmt)
+                 if result.scalar_one_or_none():
+                     raise HTTPException(
+                         status_code=status.HTTP_409_CONFLICT,
+                         detail='This email is linked to another sign-in provider',
+                     )
                  user = User(
                     id=sub,
                     email=email,
-                    name=userinfo.get("name") or derive_name_from_email(email),
-                    role=userinfo.get("role", "user"),
+                    name=userinfo.get('name') or derive_name_from_email(email),
+                    role='participant',
+                    provider='oidc',
+                    external_id=sub,
                     last_login=datetime.now()
                 )
                  db.add(user)
             else:
+                if user.provider not in (None, 'oidc'):
+                    raise HTTPException(
+                        status_code=status.HTTP_409_CONFLICT,
+                        detail='Account sign-in method mismatch',
+                    )
+                user.provider = 'oidc'
+                user.external_id = sub
                 user.last_login = datetime.now()
                 
             await db.commit()
@@ -425,12 +477,13 @@ async def exchange_token(request: PlatformTokenExchangeRequest, db: AsyncSession
                 "role": user.role,
                 "last_login": user.last_login.isoformat() if user.last_login else None,
             })
-            return TokenExchangeResponse(token=app_token)
+            set_auth_cookie(response, app_token)
+            return TokenExchangeResponse(success=True)
             
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Token exchange failed: {e}", exc_info=True)
+        logger.error('Token exchange failed: %s', type(e).__name__, exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to exchange token"
@@ -444,7 +497,8 @@ async def get_me(current_user: User = Depends(get_current_user)):
 
 
 @router.post("/logout")
-async def logout():
+async def logout(response: Response):
     """Build OIDC logout URL and return to client."""
     logout_url = build_logout_url()
+    clear_auth_cookie(response)
     return {"redirect_url": logout_url}

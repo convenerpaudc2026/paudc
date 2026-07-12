@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
 from dependencies.auth import get_current_user, get_admin_user
+from dependencies.course_access import require_course_access
 from schemas.auth import UserResponse
 from services.course_modules import CourseModulesService
 
@@ -84,6 +85,7 @@ async def query_course_modules(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(20, ge=1, le=2000, description="Max number of records to return"),
     fields: str = Query(None, description="Comma-separated list of fields to return"),
+    current_user: UserResponse = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     try:
@@ -93,6 +95,12 @@ async def query_course_modules(
                 query_dict = json.loads(query)
             except json.JSONDecodeError:
                 raise HTTPException(status_code=400, detail="Invalid query JSON format")
+
+        if current_user.role != 'admin':
+            course_id = query_dict.get('course_id') if query_dict else None
+            if not isinstance(course_id, int):
+                raise HTTPException(status_code=400, detail='course_id is required')
+            await require_course_access(course_id, current_user, db)
 
         service = CourseModulesService(db)
         return await service.get_list(skip=skip, limit=limit, query=query_dict, sort=sort)
@@ -106,6 +114,7 @@ async def query_course_modules(
 @router.get("/{id}", response_model=CourseModulesResponse)
 async def get_course_modules(
     id: int,
+    current_user: UserResponse = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     try:
@@ -113,6 +122,7 @@ async def get_course_modules(
         result = await service.get_by_id(id)
         if not result:
             raise HTTPException(status_code=404, detail=f"Course module with id {id} not found")
+        await require_course_access(result.course_id, current_user, db)
         return result
     except HTTPException:
         raise

@@ -4,6 +4,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { SEO } from '@/components/SEO';
 import { BLOG_POSTS, getPostBySlug, formatDate, getCategoryImage } from '@/data/blogPosts';
+import { sanitizeRichHtml } from '@/lib/sanitize';
 
 const CATEGORY_COLORS: Record<string, string> = {
     'Debate Tips': '#1B5E3B',
@@ -94,7 +95,7 @@ export default function BlogPost() {
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 2xl:px-20 py-12">
                 <div
                     className="prose-paudc"
-                    dangerouslySetInnerHTML={{ __html: post.content }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(post.content) }}
                 />
 
                 {/* Tags */}

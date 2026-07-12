@@ -311,7 +311,7 @@ export default function LMSAdmin() {
         setQuestionForm({
             question_text: q.question_text,
             options: opts,
-            correct_answer: q.correct_answer,
+            correct_answer: q.correct_answer ?? '',
             points: String(q.points),
             order_index: String(q.order_index),
         });

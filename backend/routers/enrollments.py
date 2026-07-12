@@ -1,15 +1,20 @@
 import json
 import logging
-from typing import Optional, List
+from typing import Literal, Optional, List
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
 from dependencies.auth import get_current_user
 from models.auth import User
+from models.courses import Courses
+from models.course_modules import CourseModules
+from models.enrollments import Enrollments
+from models.progress_tracking import ProgressTracking
 from services.enrollments import EnrollmentsService
 
 # Set up logging
@@ -21,7 +26,7 @@ router = APIRouter(prefix="/api/v1/entities/enrollments", tags=["enrollments"])
 class EnrollmentsData(BaseModel):
     """Entity data schema (for create/update)"""
     course_id: int
-    status: str
+    status: Literal['enrolled'] = 'enrolled'
 
 class EnrollmentsUpdateData(BaseModel):
     """Update entity data (partial updates allowed)"""
@@ -117,10 +122,28 @@ async def create_enrollments(
     """Create a new enrollment"""
     service = EnrollmentsService(db)
     try:
-        result = await service.create(data.model_dump(), user_id=str(current_user.id))
+        course = await db.scalar(
+            select(Courses).where(Courses.id == data.course_id, Courses.is_published.is_(True))
+        )
+        if course is None:
+            raise HTTPException(status_code=404, detail='Course not found')
+        existing = await db.scalar(
+            select(Enrollments.id).where(
+                Enrollments.course_id == data.course_id,
+                Enrollments.user_id == str(current_user.id),
+            )
+        )
+        if existing is not None:
+            raise HTTPException(status_code=409, detail='Already enrolled in this course')
+        result = await service.create(
+            {'course_id': data.course_id, 'status': 'enrolled'},
+            user_id=str(current_user.id),
+        )
         if not result:
             raise HTTPException(status_code=400, detail="Failed to create enrollment")
         return result
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error creating enrollment: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
@@ -136,9 +159,33 @@ async def update_enrollments(
     """Update an enrollment (user can only update their own)"""
     service = EnrollmentsService(db)
     try:
-        update_dict = {k: v for k, v in data.model_dump().items() if v is not None}
-        if update_dict.get("status") == "completed" and "completed_at" not in update_dict:
-            update_dict["completed_at"] = datetime.utcnow()
+        enrollment = await db.scalar(
+            select(Enrollments).where(
+                Enrollments.id == id,
+                Enrollments.user_id == str(current_user.id),
+            )
+        )
+        if enrollment is None:
+            raise HTTPException(status_code=404, detail='Enrollment not found or unauthorized')
+
+        total_modules = await db.scalar(
+            select(func.count(CourseModules.id)).where(CourseModules.course_id == enrollment.course_id)
+        ) or 0
+        completed_modules = await db.scalar(
+            select(func.count(func.distinct(ProgressTracking.module_id))).where(
+                ProgressTracking.user_id == str(current_user.id),
+                ProgressTracking.course_id == enrollment.course_id,
+                ProgressTracking.status == 'completed',
+                ProgressTracking.module_id.is_not(None),
+            )
+        ) or 0
+        progress_percentage = round((completed_modules / total_modules) * 100) if total_modules else 0
+        is_complete = total_modules > 0 and completed_modules >= total_modules
+        update_dict = {
+            'progress_percentage': progress_percentage,
+            'status': 'completed' if is_complete else 'in_progress',
+            'completed_at': datetime.utcnow() if is_complete else None,
+        }
         result = await service.update(id, update_dict, user_id=str(current_user.id))
         if not result:
             raise HTTPException(status_code=404, detail="Enrollment not found or unauthorized")

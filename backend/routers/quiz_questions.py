@@ -4,10 +4,13 @@ from typing import Optional, List
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
-from dependencies.auth import get_admin_user
+from dependencies.auth import get_admin_user, get_current_user
+from dependencies.course_access import require_course_access
+from models.quizzes import Quizzes
 from schemas.auth import UserResponse
 from services.quiz_questions import QuizQuestionsService
 
@@ -40,7 +43,7 @@ class QuizQuestionsResponse(BaseModel):
     question_text: str
     question_type: str
     options: str
-    correct_answer: str
+    correct_answer: Optional[str] = None
     points: int
     order_index: int
 
@@ -61,12 +64,29 @@ async def query_quiz_questions(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(20, ge=1, le=2000, description="Max number of records to return"),
     fields: str = Query(None, description="Comma-separated list of fields to return"),
+    current_user: UserResponse = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     service = QuizQuestionsService(db)
     try:
-        query_dict = json.loads(query) if query else None
-        return await service.get_list(skip=skip, limit=limit, query=query_dict, sort=sort)
+        query_dict = json.loads(query) if query else {}
+        if current_user.role != 'admin':
+            quiz_id = query_dict.get('quiz_id')
+            if not isinstance(quiz_id, int):
+                raise HTTPException(status_code=400, detail='quiz_id is required')
+            quiz = await db.scalar(select(Quizzes).where(Quizzes.id == quiz_id, Quizzes.is_published.is_(True)))
+            if quiz is None:
+                raise HTTPException(status_code=404, detail='Quiz not found')
+            await require_course_access(quiz.course_id, current_user, db)
+        result = await service.get_list(skip=skip, limit=limit, query=query_dict, sort=sort)
+        if current_user.role != 'admin':
+            result['items'] = [
+                QuizQuestionsResponse.model_validate(item).model_copy(update={'correct_answer': None})
+                for item in result['items']
+            ]
+        return result
+    except HTTPException:
+        raise
     except json.JSONDecodeError:
         raise HTTPException(status_code=400, detail="Invalid query JSON format")
     except Exception as e:
@@ -76,12 +96,19 @@ async def query_quiz_questions(
 @router.get("/{id}", response_model=QuizQuestionsResponse)
 async def get_quiz_question(
     id: int,
+    current_user: UserResponse = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     service = QuizQuestionsService(db)
     result = await service.get_by_id(id)
     if not result:
         raise HTTPException(status_code=404, detail=f"Quiz question {id} not found")
+    if current_user.role != 'admin':
+        quiz = await db.scalar(select(Quizzes).where(Quizzes.id == result.quiz_id, Quizzes.is_published.is_(True)))
+        if quiz is None:
+            raise HTTPException(status_code=404, detail='Quiz not found')
+        await require_course_access(quiz.course_id, current_user, db)
+        return QuizQuestionsResponse.model_validate(result).model_copy(update={'correct_answer': None})
     return result
 
 

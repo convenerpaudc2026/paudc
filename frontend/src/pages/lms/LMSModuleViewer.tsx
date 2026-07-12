@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
     ArrowLeft, ArrowRight, CheckCircle2, PlayCircle,
@@ -16,10 +16,32 @@ import {
     type QuizQuestion,
 } from '@/lib/api';
 import LMSSidebar from '@/components/lms/LMSSidebar';
+import { sanitizeRichHtml } from '@/lib/sanitize';
+
+interface YouTubePlayer {
+    destroy?: () => void;
+    getCurrentTime: () => number;
+    getDuration: () => number;
+    getPlayerState: () => number;
+    seekTo: (seconds: number, allowSeekAhead: boolean) => void;
+}
+
+interface YouTubeNamespace {
+    Player: new (
+        element: HTMLElement,
+        options: {
+            videoId: string;
+            width: string;
+            height: string;
+            playerVars: Record<string, number>;
+            events: { onReady: (event: { target: YouTubePlayer }) => void };
+        },
+    ) => YouTubePlayer;
+}
 
 declare global {
     interface Window {
-        YT?: any;
+        YT?: YouTubeNamespace;
         onYouTubeIframeAPIReady?: () => void;
     }
 }
@@ -127,7 +149,7 @@ interface VideoPlayerProps {
  */
 function VideoPlayer({ videoId, storageKey, onProgress }: VideoPlayerProps) {
     const hostRef = useRef<HTMLDivElement>(null);
-    const playerRef = useRef<any>(null);
+    const playerRef = useRef<YouTubePlayer | null>(null);
     const watchedRef = useRef<Set<number>>(new Set());
     const lastTimeRef = useRef<number | null>(null);
     const durationRef = useRef<number>(0);
@@ -179,18 +201,20 @@ function VideoPlayer({ videoId, storageKey, onProgress }: VideoPlayerProps) {
 
         loadYouTubeApi().then(() => {
             if (cancelled || !hostRef.current) return;
+            const youtube = window.YT;
+            if (!youtube) return;
 
             const mount = document.createElement('div');
             mount.className = 'w-full h-full';
             hostRef.current.appendChild(mount);
 
-            playerRef.current = new window.YT.Player(mount, {
+            playerRef.current = new youtube.Player(mount, {
                 videoId,
                 width: '100%',
                 height: '100%',
                 playerVars: { rel: 0, modestbranding: 1 },
                 events: {
-                    onReady: (e: any) => {
+                    onReady: (e: { target: YouTubePlayer }) => {
                         // resume exactly where the learner stopped
                         if (savedPos > 1) {
                             try { e.target.seekTo(savedPos, true); } catch { /* ignore */ }
@@ -296,39 +320,27 @@ function QuizPanel({ quiz, questions, onPassed }: QuizPanelProps) {
     const [score, setScore] = useState(0);
     const [submitting, setSubmitting] = useState(false);
 
-    const totalPoints = useMemo(
-        () => questions.reduce((s, q) => s + (q.points ?? 0), 0),
-        [questions],
-    );
     const passingScore = quiz.passing_score ?? 70;
 
     const handleSubmit = async () => {
         if (submitting) return;
         setSubmitting(true);
-        const earned = questions.reduce((sum, q) => {
-            return answers[q.id] === q.correct_answer ? sum + (q.points ?? 0) : sum;
-        }, 0);
-        const pct = totalPoints > 0 ? Math.round((earned / totalPoints) * 100) : 0;
-        setScore(pct);
-        setSubmitted(true);
 
         try {
-            await api.entities.quiz_attempts.create({
+            const response = await api.entities.quiz_attempts.create({
                 quiz_id: quiz.id,
-                score: pct,
-                started_at: new Date().toISOString(),
-                completed_at: new Date().toISOString(),
-                attempt_number: 1,
-                passed: pct >= passingScore,
+                answers,
             });
+            const pct = response.data.score ?? 0;
+            setScore(pct);
+            setSubmitted(true);
+            if (response.data.passed) {
+                onPassed();
+            }
         } catch (err) {
-            console.error('Failed to record quiz attempt', err);
+            console.error('Failed to submit quiz attempt', err);
         } finally {
             setSubmitting(false);
-        }
-
-        if (pct >= passingScore) {
-            onPassed();
         }
     };
 
@@ -369,7 +381,6 @@ function QuizPanel({ quiz, questions, onPassed }: QuizPanelProps) {
             {questions.map((q, idx) => {
                 const opts = safeParseOptions(q.options);
                 const userAnswer = answers[q.id];
-                const isCorrect = submitted && userAnswer === q.correct_answer;
                 return (
                     <div key={q.id} className="bg-white rounded-2xl p-5 border border-[#022512]/5">
                         <p className="text-sm font-bold text-[#022512] mb-3">
@@ -378,19 +389,13 @@ function QuizPanel({ quiz, questions, onPassed }: QuizPanelProps) {
                         <div className="space-y-2">
                             {opts.map(opt => {
                                 const selected = userAnswer === opt;
-                                const correctAnswer = submitted && opt === q.correct_answer;
-                                const wrongChoice = submitted && selected && opt !== q.correct_answer;
                                 return (
                                     <label
                                         key={opt}
                                         className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${
-                                            correctAnswer
-                                                ? 'border-[#1B5E3B] bg-[#1B5E3B]/8'
-                                                : wrongChoice
-                                                    ? 'border-[#A4372C] bg-[#A4372C]/8'
-                                                    : selected
-                                                        ? 'border-[#022512] bg-[#022512]/5'
-                                                        : 'border-[#022512]/10 hover:border-[#022512]/25'
+                                            selected
+                                                ? 'border-[#022512] bg-[#022512]/5'
+                                                : 'border-[#022512]/10 hover:border-[#022512]/25'
                                         } ${submitted ? 'cursor-default' : ''}`}
                                     >
                                         <input
@@ -403,8 +408,6 @@ function QuizPanel({ quiz, questions, onPassed }: QuizPanelProps) {
                                             className="mt-0.5 accent-[#1B5E3B]"
                                         />
                                         <span className={`text-xs leading-snug ${
-                                            correctAnswer ? 'text-[#1B5E3B] font-semibold' :
-                                            wrongChoice ? 'text-[#A4372C]' :
                                             'text-[#022512]/80'
                                         }`}>
                                             {opt}
@@ -413,11 +416,6 @@ function QuizPanel({ quiz, questions, onPassed }: QuizPanelProps) {
                                 );
                             })}
                         </div>
-                        {submitted && !isCorrect && (
-                            <p className="mt-2 text-xs text-[#A4372C] font-semibold">
-                                Correct answer: {q.correct_answer}
-                            </p>
-                        )}
                     </div>
                 );
             })}
@@ -740,7 +738,7 @@ export default function LMSModuleViewer() {
                             {current.content && (
                                 <div
                                     className="prose-paudc bg-white rounded-2xl p-6 md:p-8 border border-[#022512]/5"
-                                    dangerouslySetInnerHTML={{ __html: current.content }}
+                                    dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(current.content) }}
                                 />
                             )}
 

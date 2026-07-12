@@ -91,7 +91,7 @@ export type QuizQuestion = {
 	question_text: string;
 	question_type: string;
 	options: string;
-	correct_answer: string;
+	correct_answer?: string;
 	points: number;
 	order_index: number;
 };
@@ -109,21 +109,12 @@ export type QuizAttempt = {
 
 const buildUrl = (path: string) => `${getAPIBaseURL()}${path}`;
 
-const getAuthHeaders = (): HeadersInit => {
-	const token = localStorage.getItem('auth_token');
-	return token
-		? {
-			Authorization: `Bearer ${token}`,
-		}
-		: {};
-};
-
 const request = async <T>(path: string, init: RequestInit = {}): Promise<T> => {
 	const response = await fetch(buildUrl(path), {
 		...init,
+		credentials: 'include',
 		headers: {
 			'Content-Type': 'application/json',
-			...getAuthHeaders(),
 			...(init.headers || {}),
 		},
 	});
@@ -199,8 +190,8 @@ const makeCrud = <TItem, TCreate = Partial<TItem>, TUpdate = Partial<TItem>>(bas
 
 export const api = {
 	auth: {
-		firebaseLogin: async (idToken: string): Promise<ApiResponse<{ access_token: string; token_type: string; user: AuthUser }>> => {
-			const data = await request<{ access_token: string; token_type: string; user: AuthUser }>('/api/v1/auth/firebase/login', {
+		firebaseLogin: async (idToken: string): Promise<ApiResponse<{ user: AuthUser }>> => {
+			const data = await request<{ user: AuthUser }>('/api/v1/auth/firebase/login', {
 				method: 'POST',
 				body: JSON.stringify({ id_token: idToken }),
 			});
@@ -217,16 +208,18 @@ export const api = {
 			const data = await request<AuthUser>('/api/v1/users/profile');
 			return { data };
 		},
-		exchangePlatformToken: async (platformToken: string): Promise<ApiResponse<{ token: string }>> => {
-			const data = await request<{ token: string }>('/api/v1/auth/token/exchange', {
+		exchangePlatformToken: async (platformToken: string): Promise<ApiResponse<{ success: boolean }>> => {
+			const data = await request<{ success: boolean }>('/api/v1/auth/token/exchange', {
 				method: 'POST',
 				body: JSON.stringify({ platform_token: platformToken }),
 			});
 			return { data };
 		},
-		logout: async (): Promise<ApiResponse<{ success: boolean }>> => {
-			localStorage.removeItem('auth_token');
-			return { data: { success: true } };
+		logout: async (): Promise<ApiResponse<{ redirect_url: string }>> => {
+			const data = await request<{ redirect_url: string }>('/api/v1/auth/logout', {
+				method: 'POST',
+			});
+			return { data };
 		},
 		toLogin: (): void => {
 			window.location.href = '/login';
@@ -238,7 +231,21 @@ export const api = {
 		progress_tracking: makeCrud<ProgressTracking>('/api/v1/entities/progress_tracking/'),
 		quizzes: makeCrud<Quiz>('/api/v1/entities/quizzes/'),
 		quiz_questions: makeCrud<QuizQuestion>('/api/v1/entities/quiz_questions/'),
-		quiz_attempts: makeCrud<QuizAttempt>('/api/v1/entities/quiz_attempts/'),
+		quiz_attempts: {
+			query: async (params: QueryParams): Promise<ApiResponse<ListResponse<QuizAttempt>>> => {
+				const data = await request<ListResponse<QuizAttempt>>(
+					toListPath('/api/v1/entities/quiz_attempts/', params)
+				);
+				return { data };
+			},
+			create: async (payload: { quiz_id: number; answers: Record<number, string> }): Promise<ApiResponse<QuizAttempt>> => {
+				const data = await request<QuizAttempt>('/api/v1/entities/quiz_attempts/', {
+					method: 'POST',
+					body: JSON.stringify(payload),
+				});
+				return { data };
+			},
+		},
 		enrollments: {
 			query: async (
 				params: QueryParams

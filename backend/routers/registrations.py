@@ -25,7 +25,7 @@ class RegistrationsData(BaseModel):
     """Entity data schema (for create/update)"""
     registration_type: str
     participant_role: Optional[ParticipantRoleLiteral] = None
-    status: str
+    status: Literal['pending'] = 'pending'
     # Institution fields
     institution_name: Optional[str] = None
     institution_country: Optional[str] = None
@@ -200,7 +200,14 @@ async def update_registrations_batch(
     try:
         for item in request.items:
             update_dict = {k: v for k, v in item.updates.model_dump().items() if v is not None}
-            result = await service.update(item.id, update_dict, user_id=str(current_user.id))
+            is_manager = current_user.role in ['admin', 'organizer']
+            if not is_manager:
+                update_dict.pop('status', None)
+            result = await service.update(
+                item.id,
+                update_dict,
+                user_id=None if is_manager else str(current_user.id),
+            )
             if result:
                 results.append(result)
         return {"items": results, "total": len(results), "skip": 0, "limit": len(results)}
@@ -219,7 +226,11 @@ async def delete_registrations_batch(
     deleted_count = 0
     try:
         for item_id in request.ids:
-            success = await service.delete(item_id, user_id=str(current_user.id))
+            is_manager = current_user.role in ['admin', 'organizer']
+            success = await service.delete(
+                item_id,
+                user_id=None if is_manager else str(current_user.id),
+            )
             if success:
                 deleted_count += 1
         return {"message": f"Successfully deleted {deleted_count} registrations"}
@@ -235,7 +246,11 @@ async def delete_registration(
 ):
     service = RegistrationsService(db)
     try:
-        success = await service.delete(id, user_id=str(current_user.id))
+        is_manager = current_user.role in ['admin', 'organizer']
+        success = await service.delete(
+            id,
+            user_id=None if is_manager else str(current_user.id),
+        )
         if not success:
             raise HTTPException(status_code=404, detail="Registration not found")
         return {"message": "Registration deleted successfully"}

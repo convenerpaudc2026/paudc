@@ -8,6 +8,7 @@ from urllib.parse import unquote
 
 from mangum import Mangum
 from main import app
+from core.config import settings
 
 # Configure logging
 logger = logging.getLogger()
@@ -25,6 +26,15 @@ logger.addHandler(handler)
 backend_app = None
 mangum_handler = None
 dynamic_routes_initialized = False
+
+
+def cors_headers(request_headers: Dict[str, Any]) -> Dict[str, str]:
+    response_headers = {'Content-Type': 'application/json'}
+    origin = (request_headers.get('origin') or request_headers.get('Origin') or '').rstrip('/')
+    if origin in settings.allowed_cors_origins:
+        response_headers['Access-Control-Allow-Origin'] = origin
+        response_headers['Vary'] = 'Origin'
+    return response_headers
 
 async def initialize_services_once():
     """Initialize all services once for the Lambda function"""
@@ -58,7 +68,7 @@ def get_mangum_handler():
 
 def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     """AWS Lambda handler function that simulates Nginx routing"""
-    
+    headers: Dict[str, Any] = {}
     try:
         # Extract request information from the event
         # Support both API Gateway v1 and v2 event formats
@@ -91,7 +101,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         if path == "/health":
             return {
                 "statusCode": 200,
-                "headers": {"Content-Type": "application/json", "Access-Control-Allow-Origin": "*"},
+                "headers": cors_headers(headers),
                 "body": json.dumps({"status": "healthy"})
             }
             
@@ -99,12 +109,11 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         return serve_frontend(path)
         
     except Exception as e:
-        error_info = f"{e}\n{traceback.format_exc()}" if os.getenv("ENVIRONMENT", "prod").lower() == "dev" else str(e)
-        logger.error(f"Lambda handler error: {error_info}")
+        logger.error('Lambda handler error: %s', type(e).__name__, exc_info=True)
         return {
             "statusCode": 500,
-            "headers": {"Content-Type": "application/json", "Access-Control-Allow-Origin": "*"},
-            "body": json.dumps({"error": "Internal server error", "details": error_info})
+            "headers": cors_headers(headers),
+            "body": json.dumps({"error": "Internal server error"})
         }
 
 def handle_backend_request(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
@@ -170,8 +179,7 @@ def serve_frontend(path: str) -> Dict[str, Any]:
         return {
             "statusCode": 200,
             "headers": {
-                "Content-Type": "text/html",
-                "Access-Control-Allow-Origin": "*"
+                "Content-Type": "text/html"
             },
             "body": html_content
         }
@@ -179,6 +187,6 @@ def serve_frontend(path: str) -> Dict[str, Any]:
         logger.error(f"Error serving frontend: {e}")
         return {
             "statusCode": 500,
-            "headers": {"Content-Type": "text/plain", "Access-Control-Allow-Origin": "*"},
+            "headers": {"Content-Type": "text/plain"},
             "body": "Internal Server Error"
         }

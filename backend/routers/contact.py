@@ -1,6 +1,6 @@
 import logging
 from fastapi import APIRouter, HTTPException, BackgroundTasks
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 from services.email import send_contact_notification
 
@@ -11,10 +11,10 @@ router = APIRouter(prefix="/api/v1/contact", tags=["contact"])
 
 class ContactFormData(BaseModel):
     """Contact form submission data"""
-    name: str
+    name: str = Field(min_length=1, max_length=120)
     email: EmailStr
-    subject: str
-    message: str
+    subject: str = Field(min_length=1, max_length=200)
+    message: str = Field(min_length=1, max_length=5000)
 
 
 class ContactFormResponse(BaseModel):
@@ -39,7 +39,7 @@ async def submit_contact_form(
             data.model_dump()
         )
         
-        logger.info(f"Contact form submitted by {data.name} ({data.email})")
+        logger.info('Contact form submitted')
         
         return ContactFormResponse(
             success=True,

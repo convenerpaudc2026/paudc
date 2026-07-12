@@ -1,5 +1,6 @@
 import smtplib
 import logging
+import html
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from typing import Optional
@@ -13,6 +14,17 @@ SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
 SMTP_USERNAME = os.getenv("SMTP_USERNAME", "")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
 CONVENER_EMAIL = "convenerpaudc2026@gmail.com"
+
+
+def escape_email_data(data: dict) -> dict:
+    return {
+        key: html.escape(str(value), quote=True) if value is not None else ''
+        for key, value in data.items()
+    }
+
+
+def safe_subject(value: str) -> str:
+    return value.replace('\r', ' ').replace('\n', ' ').strip()
 
 async def send_email(
     to_email: str,
@@ -61,7 +73,10 @@ async def send_registration_notification(registration_data: dict) -> bool:
     """
     Send registration notification to the convener email.
     """
-    subject = f"New PAUDC 2026 Registration: {registration_data.get('first_name', '')} {registration_data.get('last_name', '')}"
+    registration_data = escape_email_data(registration_data)
+    subject = safe_subject(
+        f"New PAUDC 2026 Registration: {registration_data.get('first_name', '')} {registration_data.get('last_name', '')}"
+    )
     
     body_html = f"""
     <html>
@@ -172,7 +187,8 @@ async def send_contact_notification(contact_data: dict) -> bool:
     """
     Send contact form notification to the convener email.
     """
-    subject = f"PAUDC 2026 Contact: {contact_data.get('subject', 'New Message')}"
+    contact_data = escape_email_data(contact_data)
+    subject = safe_subject(f"PAUDC 2026 Contact: {contact_data.get('subject', 'New Message')}")
     
     body_html = f"""
     <html>

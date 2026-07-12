@@ -5,9 +5,14 @@ from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
+from dependencies.auth import get_admin_user, get_current_user
+from dependencies.course_access import require_course_access
+from models.course_modules import CourseModules
+from schemas.auth import UserResponse
 from services.course_materials import CourseMaterialsService
 
 # Set up logging
@@ -77,6 +82,7 @@ async def query_course_materials(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(20, ge=1, le=2000, description="Max number of records to return"),
     fields: str = Query(None, description="Comma-separated list of fields to return"),
+    current_user: UserResponse = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """Query course materials with filtering, sorting, and pagination"""
@@ -89,6 +95,15 @@ async def query_course_materials(
                 query_dict = json.loads(query)
             except json.JSONDecodeError:
                 raise HTTPException(status_code=400, detail="Invalid query JSON format")
+
+        if current_user.role != 'admin':
+            module_id = query_dict.get('module_id') if query_dict else None
+            if not isinstance(module_id, int):
+                raise HTTPException(status_code=400, detail='module_id is required')
+            module = await db.scalar(select(CourseModules).where(CourseModules.id == module_id))
+            if module is None:
+                raise HTTPException(status_code=404, detail='Module not found')
+            await require_course_access(module.course_id, current_user, db)
 
         service = CourseMaterialsService(db)
         result = await service.get_list(
@@ -108,6 +123,7 @@ async def query_course_materials(
 @router.get("/{id}", response_model=CourseMaterialsResponse)
 async def get_course_materials(
     id: int,
+    current_user: UserResponse = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """Get a single course material by ID"""
@@ -116,6 +132,11 @@ async def get_course_materials(
         result = await service.get_by_id(id)
         if not result:
             raise HTTPException(status_code=404, detail=f"Course material with id {id} not found")
+        if current_user.role != 'admin':
+            module = await db.scalar(select(CourseModules).where(CourseModules.id == result.module_id))
+            if module is None:
+                raise HTTPException(status_code=404, detail='Module not found')
+            await require_course_access(module.course_id, current_user, db)
         return result
     except HTTPException:
         raise
@@ -124,7 +145,7 @@ async def get_course_materials(
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
-@router.post("/batch", response_model=CourseMaterialsListResponse, status_code=201)
+@router.post("/batch", response_model=CourseMaterialsListResponse, status_code=201, dependencies=[Depends(get_admin_user)])
 async def create_course_materials_batch(
     request: CourseMaterialsBatchCreateRequest,
     db: AsyncSession = Depends(get_db),
@@ -143,7 +164,7 @@ async def create_course_materials_batch(
         raise HTTPException(status_code=500, detail=f"Batch create failed: {str(e)}")
 
 
-@router.put("/batch", response_model=CourseMaterialsListResponse)
+@router.put("/batch", response_model=CourseMaterialsListResponse, dependencies=[Depends(get_admin_user)])
 async def update_course_materials_batch(
     request: CourseMaterialsBatchUpdateRequest,
     db: AsyncSession = Depends(get_db),
@@ -163,7 +184,7 @@ async def update_course_materials_batch(
         raise HTTPException(status_code=500, detail=f"Batch update failed: {str(e)}")
 
 
-@router.delete("/batch")
+@router.delete("/batch", dependencies=[Depends(get_admin_user)])
 async def delete_course_materials_batch(
     request: CourseMaterialsBatchDeleteRequest,
     db: AsyncSession = Depends(get_db),

@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import {
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
+    sendEmailVerification,
     sendPasswordResetEmail,
+    signOut,
     updateProfile,
     GoogleAuthProvider,
     signInWithPopup,
@@ -43,7 +45,7 @@ export default function Login() {
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                if (auth.currentUser) {
+                if (auth?.currentUser) {
                     const idToken = await auth.currentUser.getIdToken();
                     await authApi.firebaseLogin(idToken);
                     await refetch();
@@ -74,6 +76,9 @@ export default function Login() {
         if (raw.includes('auth/weak-password')) {
             return 'Password is too weak. Use at least 6 characters.';
         }
+        if (raw.includes('Email verification is required')) {
+            return 'Verify your email address before signing in.';
+        }
         if (raw.includes('auth/popup-closed-by-user')) {
             return 'Google sign-in was cancelled.';
         }
@@ -89,6 +94,10 @@ export default function Login() {
             setError('Please enter your full name.');
             return;
         }
+        if (!auth) {
+            setError('Firebase authentication is not configured.');
+            return;
+        }
 
         setLoading(true);
 
@@ -97,10 +106,12 @@ export default function Login() {
 
             if (isSignUp) {
                 const cred = await createUserWithEmailAndPassword(auth, email, password);
-                // Store the name on the Firebase profile, then force a fresh
-                // ID token so it carries the updated `name` claim.
                 await updateProfile(cred.user, { displayName: fullName.trim() });
-                idToken = await cred.user.getIdToken(true);
+                await sendEmailVerification(cred.user);
+                await signOut(auth);
+                setIsSignUp(false);
+                setInfo(`Verification email sent to ${email}. Verify it, then sign in.`);
+                return;
             } else {
                 const cred = await signInWithEmailAndPassword(auth, email, password);
                 idToken = await cred.user.getIdToken();
@@ -119,6 +130,10 @@ export default function Login() {
     const handleGoogle = async () => {
         setError('');
         setInfo('');
+        if (!auth) {
+            setError('Firebase authentication is not configured.');
+            return;
+        }
         setGoogleLoading(true);
         try {
             const provider = new GoogleAuthProvider();
@@ -139,6 +154,10 @@ export default function Login() {
         setInfo('');
         if (!email.trim()) {
             setError('Enter your email above first, then click "Forgot password".');
+            return;
+        }
+        if (!auth) {
+            setError('Firebase authentication is not configured.');
             return;
         }
         setResetLoading(true);

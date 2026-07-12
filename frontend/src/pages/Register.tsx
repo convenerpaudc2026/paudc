@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { User, Building, FileText, CheckCircle2, Calendar } from 'lucide-react';
+import { User, Building, FileText, CheckCircle2, Calendar, Plane } from 'lucide-react';
 import { EmailPillInput, type EmailPillInputHandle } from '@/components/EmailPillInput';
 import { submitForm, isValidEmail, FormError } from '@/lib/googleForms';
 
@@ -410,6 +410,24 @@ export default function Register() {
                             )}
                         </CardContent>
                     </Card>
+
+                    {/* Visa letter cross-link */}
+                    <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-[#1B5E3B]/15 bg-[#F6F0E1] px-6 py-5 md:px-8">
+                        <div className="flex items-center gap-4">
+                            <div className="p-2.5 bg-[#1B5E3B]/10 rounded-xl">
+                                <Plane className="w-6 h-6 text-[#1B5E3B]" />
+                            </div>
+                            <div>
+                                <p className="text-base md:text-lg font-bold text-[#1B5E3B]">Travelling internationally?</p>
+                                <p className="text-sm text-[#1B5E3B]/70">Request an official visa invitation letter for your trip to Abuja.</p>
+                            </div>
+                        </div>
+                        <a href="/visa" className="w-full sm:w-auto">
+                            <Button className="w-full sm:w-auto h-12 px-8 bg-[#1B5E3B] hover:bg-[#0d301e] text-[#F6F0E1] font-bold rounded-xl whitespace-nowrap">
+                                Request a Visa Letter
+                            </Button>
+                        </a>
+                    </div>
                 </div>
             </section>
 

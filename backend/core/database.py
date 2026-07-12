@@ -106,7 +106,7 @@ class DatabaseManager:
                     engine_kwargs["pool_pre_ping"] = True 
                     logger.info("Using QueuePool with connection pooling for non-lambda environment")
 
-                self.engine = create_async_engine(db_url, **engine_kwargs)
+                self.engine = create_async_engine(db_url, hide_parameters=True, **engine_kwargs)
                 logger.info("Database engine created successfully")
 
                 self.async_session_maker = async_sessionmaker(
@@ -268,7 +268,8 @@ class DatabaseManager:
                     return columns
                     
             elif self.engine.dialect.name == "sqlite":
-                query_str = f"PRAGMA table_info('{escaped_table_name}')"
+                # Identifier is restricted to [A-Za-z0-9_] by _escape_table_name.
+                query_str = f"PRAGMA table_info('{escaped_table_name}')"  # nosec B608
                 query = text(query_str)
                 
                 async with self.engine.begin() as conn:
@@ -345,7 +346,8 @@ class DatabaseManager:
         nullable = column_info["nullable"]
         default = column_info["default"]
         
-        sql = f"ALTER TABLE {escaped_table_name} ADD COLUMN {escaped_column_name} {type_name}"
+        # Both identifiers are validated and type_name is mapped from SQLAlchemy metadata.
+        sql = f"ALTER TABLE {escaped_table_name} ADD COLUMN {escaped_column_name} {type_name}"  # nosec B608
         
         if not nullable:
             sql += " NOT NULL"

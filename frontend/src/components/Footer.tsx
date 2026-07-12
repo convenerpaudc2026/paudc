@@ -45,6 +45,16 @@ export default function Footer() {
                                     FAQ
                                 </Link>
                             </li>
+                            <li>
+                                <Link to="/invite" className="text-sm hover:text-[#C84B46] transition-colors">
+                                    Request an Invite
+                                </Link>
+                            </li>
+                            <li>
+                                <Link to="/visa" className="text-sm hover:text-[#C84B46] transition-colors">
+                                    Visa Letter
+                                </Link>
+                            </li>
                         </ul>
                     </div>
 

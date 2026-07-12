@@ -3,9 +3,14 @@ import logging
 from typing import Optional
 
 from core.auth import decode_access_token, IDTokenValidationError
+from core.config import settings
+from core.database import get_db
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from models.auth import User
 from schemas.auth import UserResponse
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
 
@@ -19,12 +24,16 @@ async def get_bearer_token(
     if credentials and credentials.scheme.lower() == "bearer":
         return credentials.credentials
 
+    cookie_token = request.cookies.get(settings.auth_cookie_name)
+    if cookie_token:
+        return cookie_token
+
     logger.debug(f"Authentication required for request: {request.method} {request.url}")
     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication credentials were not provided")
 
 
-async def get_current_user(token: str = Depends(get_bearer_token)) -> UserResponse:
-    """Dependency to get current authenticated user via JWT token."""
+async def resolve_authenticated_user(token: str, db: AsyncSession) -> UserResponse:
+    """Validate the token and reload authoritative identity and role data."""
     try:
         payload = decode_access_token(token)
     except IDTokenValidationError as exc:
@@ -36,19 +45,38 @@ async def get_current_user(token: str = Depends(get_bearer_token)) -> UserRespon
     if not user_id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication token")
 
-    last_login_raw = payload.get("last_login")
-
     # Log user hash instead of actual user ID to avoid exposing sensitive information
-    user_id_hash = hashlib.sha256(str(user_id).encode()).hexdigest()[:8] if user_id else "unknown"
-    logger.debug(f"Authentication token validated for user hash: %s", user_id_hash)
+    user_id_hash = hashlib.sha256(str(user_id).encode()).hexdigest()[:8] if user_id else 'unknown'
+    logger.debug('Authentication token validated for user hash: %s', user_id_hash)
 
-    return UserResponse(
-        id=user_id,
-        email=payload.get("email", ""),
-        name=payload.get("name"),
-        role=payload.get("role", "user"),
-        last_login=last_login_raw if isinstance(last_login_raw, str) else None,
-    )
+    user = await db.scalar(select(User).where(User.id == str(user_id)))
+    if user is None:
+        logger.warning('Authentication rejected because the user no longer exists')
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Authentication session is no longer valid')
+    return UserResponse.model_validate(user)
+
+
+async def get_current_user(
+    token: str = Depends(get_bearer_token),
+    db: AsyncSession = Depends(get_db),
+) -> UserResponse:
+    return await resolve_authenticated_user(token, db)
+
+
+async def get_optional_user(
+    request: Request,
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(bearer_scheme),
+    db: AsyncSession = Depends(get_db),
+) -> Optional[UserResponse]:
+    # Anonymous requests are allowed, but malformed or invalid tokens are not.
+    if credentials is None:
+        cookie_token = request.cookies.get(settings.auth_cookie_name)
+        if cookie_token:
+            return await resolve_authenticated_user(cookie_token, db)
+        return None
+    if credentials.scheme.lower() != 'bearer':
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid authentication scheme')
+    return await resolve_authenticated_user(credentials.credentials, db)
 
 
 async def get_admin_user(current_user: UserResponse = Depends(get_current_user)) -> UserResponse:

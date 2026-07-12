@@ -13,7 +13,7 @@ pip install -r requirements.txt
 This will install `firebase-admin` (added to requirements.txt).
 
 ### 2. Configure Firebase Credentials
-You have two options:
+You have two options. Never place a service-account key inside the repository.
 
 #### Option A: Environment Variable (Recommended for Production)
 Set the `FIREBASE_CREDENTIALS_JSON` environment variable with your Firebase service account JSON:
@@ -27,10 +27,10 @@ Or in `.env` file:
 FIREBASE_CREDENTIALS_JSON={"type":"service_account","project_id":"paudc-75c05",...}
 ```
 
-#### Option B: Credentials File (Development)
-Place your Firebase service account JSON at:
+#### Option B: Explicit Credentials File (Development)
+Store the service account JSON outside the repository and point to it explicitly:
 ```
-backend/firebase-credentials.json
+FIREBASE_CREDENTIALS_FILE=C:/secure/path/firebase-service-account.json
 ```
 
 ### 3. Get Firebase Service Account Credentials
@@ -55,8 +55,6 @@ backend/firebase-credentials.json
 **Response (Success):**
 ```json
 {
-  "access_token": "eyJ0eXAiOiJKV1QiLCJhbGc...",
-  "token_type": "bearer",
   "user": {
     "id": "123e4567-e89b-12d3-a456-426614174000",
     "email": "user@example.com",
@@ -89,12 +87,11 @@ const idToken = await user.getIdToken();
 ```javascript
 const response = await fetch('http://localhost:8000/api/v1/auth/firebase/login', {
   method: 'POST',
+  credentials: 'include',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ id_token: idToken })
 });
-
-const { access_token } = await response.json();
-// Store and use access_token for API requests
+// The backend establishes an HttpOnly session cookie.
 ```
 
 ## Database Changes
@@ -105,7 +102,8 @@ Added new columns to the `users` table:
 - `full_name` (String) - User's full name
 - `provider` (String) - Authentication provider (firebase, oidc, google, etc.)
 
-The auto-repair mechanism will add these columns on startup.
+Development startup can create missing tables and columns. Production schema
+changes must be applied through a reviewed migration.
 
 ## Flow Diagram
 
@@ -126,11 +124,11 @@ Frontend                         Backend
    |                            4. Create/Get
    |                            user in DB
    |                               |
-   | 5. Return JWT             |
-   |<------ access_token ---------|
+   | 5. Set HttpOnly cookie       |
+   |<------ Set-Cookie -----------|
    |                               |
-   | 6. Use JWT for API requests   |
-   |--------+ Auth Header +------->|
+   | 6. Send credentialed requests |
+   |-------- session cookie ------>|
 ```
 
 ## Security Notes
@@ -146,7 +144,7 @@ Frontend                         Backend
 ## Troubleshooting
 
 ### Firebase credentials not found
-- Ensure `FIREBASE_CREDENTIALS_JSON` is set or `firebase-credentials.json` exists
+- Ensure `FIREBASE_CREDENTIALS_JSON` or `FIREBASE_CREDENTIALS_FILE` is set
 - Check the environment variable syntax
 
 ### Invalid Firebase token

@@ -34,18 +34,17 @@ class StorageService:
                 result = response.json()
                 
                 if result.get("code") != 200:
-                    error_msg = result.get("message", "Unknown error")
-                    logger.warning(f"ObjectStorage service error: {error_msg}")
-                    raise ValueError(f"Storage service error: {error_msg}")
+                    logger.warning('ObjectStorage service returned an application error')
+                    raise ValueError('Storage service rejected the request')
                     
                 return result.get("data", {})
                 
         except httpx.HTTPStatusError as e:
-            logger.error(f"Storage service HTTP error: {e.response.status_code} - {e.response.text}")
-            raise ValueError(f"Storage service returned {e.response.status_code}")
+            logger.error('Storage service HTTP error: %s', e.response.status_code)
+            raise ValueError('Storage service request failed')
         except Exception as e:
-            logger.error(f"Failed to call ObjectStorage service: {e}")
-            raise ValueError("Internal storage service error")
+            logger.error('Storage service call failed: %s', type(e).__name__)
+            raise ValueError('Internal storage service error')
 
     async def create_bucket(self, request: Any) -> Dict[str, Any]:
         """Create a new bucket"""

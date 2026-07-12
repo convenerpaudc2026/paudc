@@ -7,6 +7,8 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
+from dependencies.auth import get_admin_user, get_optional_user
+from schemas.auth import UserResponse
 from services.schedules import SchedulesService
 
 logger = logging.getLogger(__name__)
@@ -79,10 +81,13 @@ async def query_schedules(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(20, ge=1, le=2000, description="Max number of records to return"),
     fields: str = Query(None, description="Comma-separated list of fields to return"),
+    current_user: Optional[UserResponse] = Depends(get_optional_user),
     db: AsyncSession = Depends(get_db),
 ):
     try:
-        query_dict = json.loads(query) if query else None
+        query_dict = json.loads(query) if query else {}
+        if not current_user or current_user.role != 'admin':
+            query_dict['is_public'] = True
         service = SchedulesService(db)
         result = await service.get_list(skip=skip, limit=limit, query=query_dict, sort=sort)
         return result
@@ -93,14 +98,20 @@ async def query_schedules(
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 @router.get("/{id}", response_model=SchedulesResponse)
-async def get_schedules(id: int, db: AsyncSession = Depends(get_db)):
+async def get_schedules(
+    id: int,
+    current_user: Optional[UserResponse] = Depends(get_optional_user),
+    db: AsyncSession = Depends(get_db),
+):
     service = SchedulesService(db)
     result = await service.get_by_id(id)
     if not result:
         raise HTTPException(status_code=404, detail="Schedules not found")
+    if not result.is_public and (not current_user or current_user.role != 'admin'):
+        raise HTTPException(status_code=404, detail='Schedule not found')
     return result
 
-@router.post("/batch", response_model=SchedulesListResponse, status_code=201)
+@router.post("/batch", response_model=SchedulesListResponse, status_code=201, dependencies=[Depends(get_admin_user)])
 async def create_schedules_batch(request: SchedulesBatchCreateRequest, db: AsyncSession = Depends(get_db)):
     service = SchedulesService(db)
     results = []
@@ -114,7 +125,7 @@ async def create_schedules_batch(request: SchedulesBatchCreateRequest, db: Async
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Batch create failed: {str(e)}")
 
-@router.delete("/batch")
+@router.delete("/batch", dependencies=[Depends(get_admin_user)])
 async def delete_schedules_batch(request: SchedulesBatchDeleteRequest, db: AsyncSession = Depends(get_db)):
     service = SchedulesService(db)
     deleted_count = 0
@@ -127,7 +138,7 @@ async def delete_schedules_batch(request: SchedulesBatchDeleteRequest, db: Async
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
-@router.delete("/{id}")
+@router.delete("/{id}", dependencies=[Depends(get_admin_user)])
 async def delete_schedule(id: int, db: AsyncSession = Depends(get_db)):
     service = SchedulesService(db)
     try:

@@ -1,11 +1,12 @@
 // File: src/lib/googleForms.ts
 // Service to submit forms to Google Apps Script
 
-const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwB1DIlqsdePiXjKosxvCGOTtG37gxQ4eFgSQ9cmNF3iiLkWAxpK2ecbyP1bbmLZ-_O/exec";
+import { getAPIBaseURL } from './config';
+
 const SUBMIT_TIMEOUT_MS = 15_000;
 
 export interface FormSubmission {
-  type: "registration" | "contact" | "lms_waitlist";
+  type: "registration" | "contact" | "lms_waitlist" | "visa";
   email: string;
   name?: string;
   phone?: string;
@@ -58,20 +59,24 @@ export async function submitForm(data: FormSubmission): Promise<void> {
     // URL-encoded form data is the only POST shape that works reliably
     // with Google Apps Script web apps from a browser without CORS issues.
     // The Apps Script reads it via e.parameter.payload.
-    const body = new URLSearchParams();
-    body.append("payload", JSON.stringify(data));
-
-    await fetch(GOOGLE_APPS_SCRIPT_URL, {
-      method: "POST",
-      mode: "no-cors",
-      body,
+    const response = await fetch(`${getAPIBaseURL()}/api/v1/forms/submit`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
       signal: controller.signal,
     });
+    if (!response.ok) {
+      throw new FormError('network', ERROR_MESSAGES.network);
+    }
 
     // no-cors responses are opaque — reaching this point means the request
     // left the browser. Real success/failure is verified server-side in the
     // Apps Script Executions log.
   } catch (error: unknown) {
+    if (error instanceof FormError) {
+      throw error;
+    }
     if (error instanceof DOMException && error.name === "AbortError") {
       throw new FormError("timeout", ERROR_MESSAGES.timeout);
     }

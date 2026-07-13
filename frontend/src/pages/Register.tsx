@@ -147,13 +147,13 @@ export default function Register() {
                 contactEmails: registrationType === 'institution' ? allContactEmails : undefined,
                 name,
                 phone,
-                institution,
+                institution: institution || undefined,
                 country,
-                team: formData.participant_role,
-                message: registrationType === 'institution'
+                team: formData.participant_role || undefined,
+                message: (registrationType === 'institution'
                     ? [formData.comments, formData.addressed_to ? `Addressed to: ${formData.addressed_to}` : ''].filter(Boolean).join('\n\n')
-                    : formData.comments,
-                addressedTo: registrationType === 'institution' ? formData.addressed_to : undefined,
+                    : formData.comments) || undefined,
+                addressedTo: registrationType === 'institution' ? formData.addressed_to || undefined : undefined,
             });
 
             toast({

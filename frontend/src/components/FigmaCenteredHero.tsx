@@ -54,7 +54,7 @@ export default function FigmaCenteredHero({ timeLeft }: FigmaCenteredHeroProps) 
             {/* ── Main content (Strictly left-aligned) ── */}
             <div className="
                 relative z-10 w-full max-w-7xl mx-auto flex flex-col
-                px-6 md:px-10 lg:px-14 py-12
+                px-6 md:px-10 lg:px-14 pt-28 pb-12 md:pt-32 md:pb-16
                 items-start text-left
             ">
 
@@ -63,7 +63,7 @@ export default function FigmaCenteredHero({ timeLeft }: FigmaCenteredHeroProps) 
                     <div className="flex items-center gap-1">
                         <Calendar className="h-2.5 w-2.5 text-[#C8A046] shrink-0" />
                         <span className="text-[7px] font-semibold uppercase tracking-[0.1px] text-[#1A1C1A]">
-                            December 5-13, 2026
+                            December 12-20, 2026
                         </span>
                     </div>
                     <span className="text-[7px] text-[#1A1C1A]/40">•</span>
@@ -87,7 +87,7 @@ export default function FigmaCenteredHero({ timeLeft }: FigmaCenteredHeroProps) 
                     <div className="flex items-center gap-1.5 rounded-full border border-[#DAC2AE40] bg-white/70 px-4 py-2">
                         <Calendar className="h-3.5 w-3.5 text-[#C8A046] shrink-0" />
                         <span className="text-[11px] font-bold uppercase tracking-[0.4px] text-[#1A1C1A]">
-                            December 5-13, 2026
+                            December 12-20, 2026
                         </span>
                     </div>
                     <div className="flex items-center gap-1.5 rounded-full border border-[#DAC2AE40] bg-white/70 px-4 py-2">

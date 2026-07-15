@@ -7,7 +7,7 @@ import { Clock } from 'lucide-react';
 export default function Schedule() {
   const scheduleData = [
     {
-      date: '2026-12-05',
+      date: '2026-12-12',
       day: 'Day 1: Arrival',
       events: [
         {
@@ -25,7 +25,7 @@ export default function Schedule() {
       ]
     },
     {
-      date: '2026-12-06',
+      date: '2026-12-13',
       day: 'Day 2: Opening Ceremony & PS Rounds 1-3',
       events: [
         {
@@ -55,7 +55,7 @@ export default function Schedule() {
       ]
     },
     {
-      date: '2026-12-07',
+      date: '2026-12-14',
       day: 'Day 3: Debate Rounds 1-3 & PS Round 4',
       events: [
         {
@@ -85,7 +85,7 @@ export default function Schedule() {
       ]
     },
     {
-      date: '2026-12-08',
+      date: '2026-12-15',
       day: 'Day 4: Debate Rounds 4-6 & Civic Panel',
       events: [
         {
@@ -115,7 +115,7 @@ export default function Schedule() {
       ]
     },
     {
-      date: '2026-12-09',
+      date: '2026-12-16',
       day: 'Day 5: Debate Rounds 7-9 & PS Round 5',
       events: [
         {
@@ -145,7 +145,7 @@ export default function Schedule() {
       ]
     },
     {
-      date: '2026-12-10',
+      date: '2026-12-17',
       day: 'Day 6: Free Day',
       events: [
         {
@@ -157,7 +157,7 @@ export default function Schedule() {
       ]
     },
     {
-      date: '2026-12-11',
+      date: '2026-12-18',
       day: 'Day 7: Out Rounds 1-3 & PS Out Round 1',
       events: [
         {
@@ -187,7 +187,7 @@ export default function Schedule() {
       ]
     },
     {
-      date: '2026-12-12',
+      date: '2026-12-19',
       day: 'Day 8: Semi-Finals & Grand Finale',
       events: [
         {
@@ -217,7 +217,7 @@ export default function Schedule() {
       ]
     },
     {
-      date: '2026-12-13',
+      date: '2026-12-20',
       day: 'Day 9: Departure',
       events: [
         {
@@ -234,7 +234,7 @@ export default function Schedule() {
     <div className="min-h-screen bg-gray-50">
       <SEO
         title="Schedule"
-        description="PAUDC 2026 tournament schedule. December 5-13, 2026 in Abuja, Nigeria. Full event itinerary and round times."
+        description="PAUDC 2026 tournament schedule. December 12-20, 2026 in Abuja, Nigeria. Full event itinerary and round times."
         canonical="https://www.paudc2026.com/schedule"
       />
       <Navbar />
@@ -246,7 +246,7 @@ export default function Schedule() {
             Tournament Schedule
           </h1>
           <p className="text-base md:text-xl lg:text-2xl text-white/90 max-w-3xl mx-auto">
-            December 5-13, 2026 • Veritas University, Abuja
+            December 12-20, 2026 • Veritas University, Abuja
           </p>
         </div>
       </section>

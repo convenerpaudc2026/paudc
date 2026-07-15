@@ -94,7 +94,7 @@ export const BLOG_POSTS: BlogPost[] = [
 <p>Hosting PAUDC 2026 here is a deliberate signal: the championship returns to the heart of Africa's largest democracy, at a moment when youth civic engagement has never been more important.</p>
 
 <h2>Getting There</h2>
-<p>Nnamdi Azikiwe International Airport (ABV) receives direct flights from Addis Ababa, Cairo, Dubai, London, and Johannesburg, among others. Most delegates will clear immigration in under an hour; the PAUDC 2026 team will have a designated welcome desk airside from December 4th.</p>
+<p>Nnamdi Azikiwe International Airport (ABV) receives direct flights from Addis Ababa, Cairo, Dubai, London, and Johannesburg, among others. Most delegates will clear immigration in under an hour; the PAUDC 2026 team will have a designated welcome desk airside from December 11th.</p>
 
 <h2>Where You'll Be Staying</h2>
 <p>All official accommodation is clustered in the Maitama and Wuse II districts, within a short shuttle ride of Veritas University, the tournament venue. Delegates will receive their specific hotel assignments in the November confirmation package.</p>

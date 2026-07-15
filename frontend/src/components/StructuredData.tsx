@@ -7,8 +7,8 @@ export function EventStructuredData() {
         "name": "Pan-African University Debating Championship 2026",
         "description": "Africa's premier intellectual arena bringing together over 1,000 young people for debate and dialogue",
         "image": "https://www.paudc2026.com/src/assets/paudc.png",
-        "startDate": "2026-12-05T09:00:00+01:00",
-        "endDate": "2026-12-13T17:00:00+01:00",
+        "startDate": "2026-12-12T09:00:00+01:00",
+        "endDate": "2026-12-20T17:00:00+01:00",
         "eventAttendanceMode": "OfflineEventAttendanceMode",
         "eventStatus": "ScheduledEvent",
         "location": {

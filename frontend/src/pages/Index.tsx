@@ -15,7 +15,7 @@ export default function Index() {
     });
 
     useEffect(() => {
-        const eventDate = new Date('2026-12-05T00:00:00').getTime();
+        const eventDate = new Date('2026-12-12T00:00:00').getTime();
 
         const timer = setInterval(() => {
             const now = new Date().getTime();
@@ -65,7 +65,7 @@ export default function Index() {
                     <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 mb-8 md:mb-12 text-sm md:text-lg font-medium">
                         <div className="flex items-center gap-2">
                             <Mic className="w-4 h-4 md:w-5 md:h-5 text-[#C84B46]" />
-                            <span>December 5-13, 2026</span>
+                            <span>December 12-20, 2026</span>
                         </div>
                         <div className="hidden md:block w-1 h-6 bg-white/30"></div>
                         <div className="flex items-center gap-2">

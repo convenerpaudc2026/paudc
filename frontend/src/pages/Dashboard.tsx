@@ -39,7 +39,7 @@ export default function Dashboard() {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
-    const targetDate = new Date("December 5, 2026 00:00:00").getTime();
+    const targetDate = new Date("December 12, 2026 00:00:00").getTime();
     const updateTimer = () => {
       const now = new Date().getTime();
       const difference = targetDate - now;
@@ -63,7 +63,7 @@ export default function Dashboard() {
     <div className="bg-[#f6f0e1] w-full min-h-screen relative overflow-x-hidden text-[#022512]">
       <SEO
         title="Pan-African University Debating Championship 2026"
-        description="PAUDC 2026 - Africa's premier intellectual arena. December 5-13, 2026 in Abuja, Nigeria. The Sound of Africa's Resolve."
+        description="PAUDC 2026 - Africa's premier intellectual arena. December 12-20, 2026 in Abuja, Nigeria. The Sound of Africa's Resolve."
         canonical="https://www.paudc2026.com/"
       />
       <EventStructuredData />

@@ -43,6 +43,7 @@ export default function Navbar() {
         // { name: 'Blog', path: '/blog' }, // hidden for now — restore when blog launches
         { name: 'FAQ', path: '/faq' },
         { name: 'Contact', path: '/contact' },
+        { name: 'Donate', path: '/donate' },
     ];
 
     const isActive = (path: string): boolean => location.pathname === path;

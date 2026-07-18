@@ -16,6 +16,7 @@ import AuthCallback from '@/pages/AuthCallback';
 import AuthError from '@/pages/AuthError';
 import Register from '@/pages/Register';
 import VisaRequest from '@/pages/VisaRequest';
+import Donate from '@/pages/Donate';
 import Login from '@/pages/Login';
 import LogoutCallback from '@/pages/LogoutCallback';
 import Dashboard from '@/pages/Dashboard';
@@ -47,6 +48,7 @@ const App = () => (
             <Route path="/schedule" element={<Schedule />} />
             <Route path="/speakers" element={<Speakers />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/donate" element={<Donate />} />
             <Route path="/resources" element={<Resources />} />
             <Route path="/legacy-lab" element={<LegacyLab />} />
             <Route path="/faq" element={<FAQ />} />

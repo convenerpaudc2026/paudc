@@ -19,8 +19,10 @@ import {
     Globe,
     BadgeCheck,
     CalendarDays,
+    Download,
 } from 'lucide-react';
 import { submitForm, isValidEmail, FormError } from '@/lib/googleForms';
+import visaPolicyDoc from '@/assets/docs/PAUDC Abuja Visa Policy Document.pdf?url';
 
 const ROLE_OPTIONS = [
     'Speaker / Debater',
@@ -265,6 +267,38 @@ export default function VisaRequest() {
                                         </li>
                                     </ul>
                                 </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Visa policy download */}
+                    <Card className="mt-6 md:mt-8 border border-[#1B5E3B]/15 shadow-lg bg-white/80 backdrop-blur-sm">
+                        <CardContent className="p-6 md:p-8">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+                                <div className="flex items-start gap-4">
+                                    <div className="p-3 bg-[#1B5E3B]/10 rounded-xl shrink-0">
+                                        <FileText className="w-6 h-6 md:w-7 md:h-7 text-[#1B5E3B]" />
+                                    </div>
+                                    <div>
+                                        <p className="text-base md:text-lg font-bold text-[#1B5E3B]">
+                                            PAUDC Abuja Visa Policy Document
+                                        </p>
+                                        <p className="text-sm text-[#1B5E3B]/70">
+                                            Read the full visa policy and requirements before you apply (PDF).
+                                        </p>
+                                    </div>
+                                </div>
+                                <a
+                                    href={visaPolicyDoc}
+                                    download="PAUDC Abuja Visa Policy Document.pdf"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-full sm:w-auto shrink-0"
+                                >
+                                    <Button className="w-full sm:w-auto h-12 px-6 bg-[#1B5E3B] hover:bg-[#0d301e] text-[#F6F0E1] font-bold rounded-xl whitespace-nowrap">
+                                        <Download className="w-5 h-5 mr-2" /> Download Policy
+                                    </Button>
+                                </a>
                             </div>
                         </CardContent>
                     </Card>

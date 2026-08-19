@@ -60,7 +60,13 @@ class PublicFormResponse(BaseModel):
 
 @router.post('/submit', response_model=PublicFormResponse)
 async def submit_public_form(data: PublicFormSubmission):
-    if not settings.google_apps_script_url:
+    # Visa requests can route to their own Apps Script / sheet when configured;
+    # every other form type falls back to the shared destination.
+    destination = settings.google_apps_script_url
+    if data.type == 'visa' and settings.visa_apps_script_url:
+        destination = settings.visa_apps_script_url
+
+    if not destination:
         logger.error('Public form destination is not configured')
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -70,7 +76,7 @@ async def submit_public_form(data: PublicFormSubmission):
     try:
         async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as client:
             response = await client.post(
-                settings.google_apps_script_url,
+                destination,
                 data={'payload': data.model_dump_json(exclude_none=True)},
             )
             response.raise_for_status()

@@ -57,6 +57,7 @@ class Settings(BaseSettings):
     api_key: Optional[str] = None
     google_apps_script_url: Optional[str] = None
     legacy_lab_apps_script_url: Optional[str] = None
+    visa_apps_script_url: Optional[str] = None
     
     # Admin User Initialization
     admin_user_id: Optional[str] = None
@@ -104,6 +105,7 @@ class Settings(BaseSettings):
         for name, form_url in (
             ('GOOGLE_APPS_SCRIPT_URL', self.google_apps_script_url),
             ('LEGACY_LAB_APPS_SCRIPT_URL', self.legacy_lab_apps_script_url),
+            ('VISA_APPS_SCRIPT_URL', self.visa_apps_script_url),
         ):
             if form_url:
                 parsed_form_url = urlparse(form_url)

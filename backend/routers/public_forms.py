@@ -83,3 +83,131 @@ async def submit_public_form(data: PublicFormSubmission):
 
     logger.info('Public %s form forwarded successfully', data.type)
     return PublicFormResponse()
+
+
+class LegacyLabAttachment(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+
+    filename: str = Field(min_length=1, max_length=255)
+    mimeType: str = Field(min_length=1, max_length=150)
+    # base64 of a file the frontend caps at ~1.3MB (~1.73MB encoded).
+    dataBase64: str = Field(min_length=1, max_length=2_000_000)
+
+
+class LegacyLabApplication(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+
+    # Section 1 — Applicant information
+    fullName: str = Field(min_length=1, max_length=200)
+    email: EmailStr
+    phone: str = Field(min_length=1, max_length=64)
+    country: str = Field(min_length=1, max_length=120)
+    city: str = Field(min_length=1, max_length=120)
+    institution: str = Field(min_length=1, max_length=200)
+    courseOfStudy: Optional[str] = Field(default=None, max_length=200)
+    levelOfStudy: str = Field(min_length=1, max_length=60)
+    applicantType: Literal['Individual', 'Team']
+
+    # Section 2 — Team information
+    teamName: Optional[str] = Field(default=None, max_length=200)
+    teamLead: Optional[str] = Field(default=None, max_length=200)
+    teamMembers: Optional[str] = Field(default=None, max_length=3000)
+    teamInstitutions: Optional[str] = Field(default=None, max_length=3000)
+
+    # Section 3 — Eligibility and availability
+    studentStatus: str = Field(min_length=1, max_length=60)
+    availableIncubation: str = Field(min_length=1, max_length=20)
+    availableShowcase: str = Field(min_length=1, max_length=20)
+    understandNoGuarantee: bool
+
+    # Section 4 — Project idea
+    projectTitle: str = Field(min_length=1, max_length=200)
+    thematicArea: str = Field(min_length=1, max_length=120)
+    ideaOneSentence: str = Field(min_length=1, max_length=1000)
+    problem: str = Field(min_length=1, max_length=4000)
+    affected: str = Field(min_length=1, max_length=4000)
+    solution: str = Field(min_length=1, max_length=4000)
+    whyItMatters: str = Field(min_length=1, max_length=4000)
+    alreadyStarted: Literal['Yes', 'No', 'Partly']
+    progressSoFar: Optional[str] = Field(default=None, max_length=4000)
+
+    # Section 5 — Pilot and support needed
+    pilotDescription: str = Field(min_length=1, max_length=4000)
+    pilotLocation: str = Field(min_length=1, max_length=300)
+    supportNeeded: list[str]
+    supportOther: Optional[str] = Field(default=None, max_length=300)
+    pilotBudget: str = Field(min_length=1, max_length=60)
+
+    # Section 6 — Impact and motivation
+    changeHoped: str = Field(min_length=1, max_length=4000)
+    beneficiaryReach: str = Field(min_length=1, max_length=40)
+    personalMotivation: str = Field(min_length=1, max_length=4000)
+
+    # Section 7 — Supporting material
+    links: Optional[str] = Field(default=None, max_length=2000)
+    attachment: Optional[LegacyLabAttachment] = None
+
+    # Section 8 — Declarations
+    declarationAccurate: bool
+    declarationOriginal: bool
+    declarationConsent: bool
+    declarationParticipate: bool
+
+    @field_validator('supportNeeded')
+    @classmethod
+    def validate_support_needed(cls, value: list[str]) -> list[str]:
+        if not value or len(value) > 10:
+            raise ValueError('supportNeeded must contain between 1 and 10 items')
+        if any(len(item) > 60 for item in value):
+            raise ValueError('supportNeeded values are too long')
+        return value
+
+    @model_validator(mode='after')
+    def validate_application(self):
+        required_true = (
+            'understandNoGuarantee', 'declarationAccurate', 'declarationOriginal',
+            'declarationConsent', 'declarationParticipate',
+        )
+        not_accepted = [name for name in required_true if not getattr(self, name)]
+        if not_accepted:
+            raise ValueError(f'Required confirmations missing: {", ".join(not_accepted)}')
+
+        if self.applicantType == 'Team':
+            missing = [f for f in ('teamName', 'teamLead', 'teamMembers') if not (getattr(self, f) or '').strip()]
+            if missing:
+                raise ValueError(f'Missing team fields: {", ".join(missing)}')
+
+        if self.alreadyStarted in ('Yes', 'Partly') and not (self.progressSoFar or '').strip():
+            raise ValueError('progressSoFar is required when work has already started')
+
+        if 'Other' in self.supportNeeded and not (self.supportOther or '').strip():
+            raise ValueError('supportOther is required when "Other" support is selected')
+
+        return self
+
+
+@router.post('/legacy-lab', response_model=PublicFormResponse)
+async def submit_legacy_lab(data: LegacyLabApplication):
+    if not settings.legacy_lab_apps_script_url:
+        logger.error('Legacy Lab form destination is not configured')
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail='Form service is temporarily unavailable',
+        )
+
+    try:
+        async with httpx.AsyncClient(timeout=20.0, follow_redirects=True) as client:
+            response = await client.post(
+                settings.legacy_lab_apps_script_url,
+                data={'payload': data.model_dump_json(exclude_none=True)},
+            )
+            response.raise_for_status()
+    except httpx.HTTPError as exc:
+        logger.error('Legacy Lab forwarding failed: %s', type(exc).__name__)
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail='Form submission could not be completed',
+        ) from exc
+
+    logger.info('Legacy Lab application forwarded successfully')
+    return PublicFormResponse()

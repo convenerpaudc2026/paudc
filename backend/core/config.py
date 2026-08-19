@@ -56,6 +56,7 @@ class Settings(BaseSettings):
     api_base_url: Optional[str] = None
     api_key: Optional[str] = None
     google_apps_script_url: Optional[str] = None
+    legacy_lab_apps_script_url: Optional[str] = None
     
     # Admin User Initialization
     admin_user_id: Optional[str] = None
@@ -100,10 +101,14 @@ class Settings(BaseSettings):
                 raise ValueError('DATABASE_URL must use a persistent database in production')
         if self.auth_cookie_samesite == 'none' and environment != 'production':
             raise ValueError('SameSite=None cookies require production HTTPS')
-        if self.google_apps_script_url:
-            parsed_form_url = urlparse(self.google_apps_script_url)
-            if parsed_form_url.scheme != 'https' or parsed_form_url.hostname != 'script.google.com':
-                raise ValueError('GOOGLE_APPS_SCRIPT_URL must be an HTTPS script.google.com URL')
+        for name, form_url in (
+            ('GOOGLE_APPS_SCRIPT_URL', self.google_apps_script_url),
+            ('LEGACY_LAB_APPS_SCRIPT_URL', self.legacy_lab_apps_script_url),
+        ):
+            if form_url:
+                parsed_form_url = urlparse(form_url)
+                if parsed_form_url.scheme != 'https' or parsed_form_url.hostname != 'script.google.com':
+                    raise ValueError(f'{name} must be an HTTPS script.google.com URL')
         return self
 
     # Pydantic v2 configuration

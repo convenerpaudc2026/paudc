@@ -131,6 +131,7 @@ app.add_middleware(
         RateLimitPolicy('POST', '/api/v1/auth/token/exchange', 20, 60),
         RateLimitPolicy('POST', '/api/v1/contact/', 5, 600),
         RateLimitPolicy('POST', '/api/v1/forms/submit', 5, 600),
+        RateLimitPolicy('POST', '/api/v1/forms/legacy-lab', 5, 600),
         RateLimitPolicy('POST', '/api/v1/entities/registrations/', 5, 3600),
         RateLimitPolicy('POST', '/api/v1/aihub/genTxt', 30, 60),
         RateLimitPolicy('POST', '/api/v1/aihub/genImg', 10, 60),

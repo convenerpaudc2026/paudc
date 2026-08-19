@@ -11,6 +11,7 @@ import Speakers from '@/pages/Speakers';
 import Contact from '@/pages/Contact';
 import Resources from '@/pages/Resources';
 import LegacyLab from '@/pages/LegacyLab';
+import LegacyLabApply from '@/pages/LegacyLabApply';
 import FAQ from '@/pages/FAQ';
 import AuthCallback from '@/pages/AuthCallback';
 import AuthError from '@/pages/AuthError';
@@ -51,6 +52,7 @@ const App = () => (
             <Route path="/donate" element={<Donate />} />
             <Route path="/resources" element={<Resources />} />
             <Route path="/legacy-lab" element={<LegacyLab />} />
+            <Route path="/legacy-lab/apply" element={<LegacyLabApply />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/blog" element={<BlogIndex />} />
             <Route path="/blog/:slug" element={<BlogPost />} />

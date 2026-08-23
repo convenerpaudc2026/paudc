@@ -55,6 +55,11 @@ export default function Footer() {
                                     Visa Letter
                                 </Link>
                             </li>
+                            <li>
+                                <Link to="/legacy-lab" className="text-sm hover:text-[#C84B46] transition-colors">
+                                    Legacy Lab
+                                </Link>
+                            </li>
                         </ul>
                     </div>
 

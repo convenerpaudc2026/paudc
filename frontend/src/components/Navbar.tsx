@@ -40,6 +40,7 @@ export default function Navbar() {
         { name: 'Team', path: '/team' },
         { name: 'Schedule', path: '/schedule' },
         { name: 'Civic Panel', path: '/speakers' },
+        { name: 'Legacy Lab', path: '/legacy-lab' },
         // { name: 'Blog', path: '/blog' }, // hidden for now — restore when blog launches
         { name: 'FAQ', path: '/faq' },
         { name: 'Contact', path: '/contact' },

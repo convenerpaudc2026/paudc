@@ -32,7 +32,7 @@ import {
 } from '@/lib/legacyLab';
 
 // ── Programme details (SET THESE before launch) ──────────────────────
-const APPLICATION_DEADLINE = ''; // TODO: e.g. '30 September 2026'. Empty renders "To be announced".
+const APPLICATION_DEADLINE = '26 September 2026'; // Empty renders "To be announced".
 const SUPPORT_CONTACT = ''; // TODO: support email or WhatsApp. Empty hides the support line.
 
 // Files are embedded in the JSON submission, which the backend caps at 2 MB.

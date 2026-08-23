@@ -177,6 +177,28 @@ export default function LegacyLab() {
                 </div>
             </section>
 
+            {/* Apply Call-out */}
+            <section className="py-12 md:py-20 bg-[#F6F0E1] px-4 sm:px-6 lg:px-8">
+                <div className="max-w-5xl mx-auto">
+                    <div className="rounded-3xl bg-[#1B5E3B] text-[#F6F0E1] p-8 md:p-14 shadow-2xl border-4 border-[#C8A046] text-center">
+                        <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#C8A046]/20 border border-[#C8A046]/40 text-xs md:text-sm font-semibold tracking-wide uppercase mb-6">
+                            <Lightbulb className="w-4 h-4" /> Call for Applications
+                        </span>
+                        <h2 className="text-2xl md:text-4xl font-black mb-4">Have an idea worth building?</h2>
+                        <p className="text-base md:text-lg text-[#F6F0E1]/90 max-w-2xl mx-auto mb-8 leading-relaxed">
+                            Apply to the Legacy Lab to receive mentorship and incubation, refine your idea, and pitch
+                            during PAUDC 2026 in Abuja. Top projects are eligible for seed support of up to
+                            <strong className="text-[#C8A046]"> $5,000</strong>. It takes about 15–20 minutes.
+                        </p>
+                        <a href="/legacy-lab/apply">
+                            <button className="px-10 py-4 bg-[#C8A046] text-[#022512] rounded-xl font-bold text-lg hover:bg-[#b08c3e] transition shadow-lg hover:-translate-y-1">
+                                Apply to the Legacy Lab
+                            </button>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
             {/* FAQ */}
             <section className="py-12 md:py-20 bg-white">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -197,28 +219,6 @@ export default function LegacyLab() {
                                 <p className="mt-3 text-sm md:text-base text-[#1B5E3B]/80 leading-relaxed">{faq.a}</p>
                             </details>
                         ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Apply Call-out */}
-            <section className="py-12 md:py-20 bg-[#F6F0E1] px-4 sm:px-6 lg:px-8">
-                <div className="max-w-5xl mx-auto">
-                    <div className="rounded-3xl bg-[#1B5E3B] text-[#F6F0E1] p-8 md:p-14 shadow-2xl border-4 border-[#C8A046] text-center">
-                        <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#C8A046]/20 border border-[#C8A046]/40 text-xs md:text-sm font-semibold tracking-wide uppercase mb-6">
-                            <Lightbulb className="w-4 h-4" /> Call for Applications
-                        </span>
-                        <h2 className="text-2xl md:text-4xl font-black mb-4">Have an idea worth building?</h2>
-                        <p className="text-base md:text-lg text-[#F6F0E1]/90 max-w-2xl mx-auto mb-8 leading-relaxed">
-                            Apply to the Legacy Lab to receive mentorship and incubation, refine your idea, and pitch
-                            during PAUDC 2026 in Abuja. Top projects are eligible for seed support of up to
-                            <strong className="text-[#C8A046]"> $5,000</strong>. It takes about 15–20 minutes.
-                        </p>
-                        <a href="/legacy-lab/apply">
-                            <button className="px-10 py-4 bg-[#C8A046] text-[#022512] rounded-xl font-bold text-lg hover:bg-[#b08c3e] transition shadow-lg hover:-translate-y-1">
-                                Apply to the Legacy Lab
-                            </button>
-                        </a>
                     </div>
                 </div>
             </section>

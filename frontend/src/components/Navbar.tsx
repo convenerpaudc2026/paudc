@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 import LOGO_URL from '../assets/paudc.png';
@@ -34,20 +34,31 @@ export default function Navbar() {
         return () => window.removeEventListener('scroll', handleScroll);
     }, [lastScrollY]);
 
-    const links = [
+    type NavLink = { name: string; path: string };
+    type NavGroup = { name: string; children: NavLink[] };
+    type NavItem = NavLink | NavGroup;
+
+    const links: NavItem[] = [
         { name: 'Home', path: '/' },
         { name: 'About', path: '/about' },
         { name: 'Team', path: '/team' },
-        { name: 'Schedule', path: '/schedule' },
-        { name: 'Civic Panel', path: '/speakers' },
-        { name: 'Legacy Lab', path: '/legacy-lab' },
+        {
+            name: 'Tournament',
+            children: [
+                { name: 'Schedule', path: '/schedule' },
+                { name: 'Civic Panel', path: '/speakers' },
+                { name: 'Legacy Lab', path: '/legacy-lab' },
+            ],
+        },
         // { name: 'Blog', path: '/blog' }, // hidden for now — restore when blog launches
         { name: 'FAQ', path: '/faq' },
         { name: 'Contact', path: '/contact' },
         { name: 'Donate', path: '/donate' },
     ];
 
+    const isGroup = (item: NavItem): item is NavGroup => 'children' in item;
     const isActive = (path: string): boolean => location.pathname === path;
+    const isGroupActive = (group: NavGroup): boolean => group.children.some((c) => isActive(c.path));
     const isDashboard = location.pathname === '/';
 
     // Navbar becomes solid white if: not on dashboard, scrolled down, or mobile menu is open
@@ -75,19 +86,50 @@ export default function Navbar() {
 
                     {/* ── Desktop Navigation ── */}
                     <div className="hidden lg:flex items-center gap-4 xl:gap-7 2xl:gap-10">
-                        <div className="flex gap-4 xl:gap-7 2xl:gap-9">
-                            {links.map((link) => (
-                                <Link
-                                    key={link.name}
-                                    to={link.path}
-                                    className={`text-[13px] xl:text-sm 2xl:text-base transition-colors duration-200 whitespace-nowrap ${isActive(link.path)
-                                            ? 'text-[#022512] font-bold'
-                                            : 'text-[#022512]/60 font-medium hover:text-[#022512]'
-                                        }`}
-                                >
-                                    {link.name}
-                                </Link>
-                            ))}
+                        <div className="flex items-center gap-4 xl:gap-7 2xl:gap-9">
+                            {links.map((link) =>
+                                isGroup(link) ? (
+                                    <div key={link.name} className="relative group">
+                                        <button
+                                            type="button"
+                                            className={`flex items-center gap-1 text-[13px] xl:text-sm 2xl:text-base transition-colors duration-200 whitespace-nowrap ${isGroupActive(link)
+                                                    ? 'text-[#022512] font-bold'
+                                                    : 'text-[#022512]/60 font-medium group-hover:text-[#022512]'
+                                                }`}
+                                        >
+                                            {link.name}
+                                            <ChevronDown className="w-3.5 h-3.5 transition-transform duration-200 group-hover:rotate-180" />
+                                        </button>
+                                        <div className="absolute left-1/2 -translate-x-1/2 top-full pt-3 z-50 opacity-0 invisible translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-200">
+                                            <div className="min-w-[190px] rounded-xl bg-white shadow-xl border border-gray-100 py-2">
+                                                {link.children.map((child) => (
+                                                    <Link
+                                                        key={child.name}
+                                                        to={child.path}
+                                                        className={`block px-4 py-2.5 text-sm transition-colors ${isActive(child.path)
+                                                                ? 'text-[#022512] font-bold bg-[#F6F0E1]/70'
+                                                                : 'text-[#022512]/70 font-medium hover:text-[#022512] hover:bg-[#F6F0E1]/50'
+                                                            }`}
+                                                    >
+                                                        {child.name}
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <Link
+                                        key={link.name}
+                                        to={link.path}
+                                        className={`text-[13px] xl:text-sm 2xl:text-base transition-colors duration-200 whitespace-nowrap ${isActive(link.path)
+                                                ? 'text-[#022512] font-bold'
+                                                : 'text-[#022512]/60 font-medium hover:text-[#022512]'
+                                            }`}
+                                    >
+                                        {link.name}
+                                    </Link>
+                                )
+                            )}
                         </div>
 
                         <div className="flex items-center gap-3 shrink-0">
@@ -121,24 +163,47 @@ export default function Navbar() {
             <div
                 className={`
                     lg:hidden absolute top-full left-0 w-full bg-white border-t border-gray-100 shadow-xl overflow-hidden transition-all duration-300 ease-in-out origin-top
-                    ${isOpen ? 'opacity-100 max-h-[500px]' : 'opacity-0 max-h-0'}
+                    ${isOpen ? 'opacity-100 max-h-[640px]' : 'opacity-0 max-h-0'}
                 `}
             >
                 <div className="px-6 py-6 space-y-2">
                     <div className="flex flex-col space-y-4">
-                        {links.map((link) => (
-                            <Link
-                                key={link.name}
-                                to={link.path}
-                                className={`block text-base transition-colors ${isActive(link.path)
-                                        ? 'text-[#022512] font-bold'
-                                        : 'text-[#022512]/70 font-medium hover:text-[#022512]'
-                                    }`}
-                                onClick={() => setIsOpen(false)}
-                            >
-                                {link.name}
-                            </Link>
-                        ))}
+                        {links.map((link) =>
+                            isGroup(link) ? (
+                                <div key={link.name} className="space-y-3">
+                                    <p className="text-xs font-bold uppercase tracking-wide text-[#022512]/50">
+                                        {link.name}
+                                    </p>
+                                    <div className="flex flex-col space-y-3 pl-3 border-l-2 border-[#C8A046]/40">
+                                        {link.children.map((child) => (
+                                            <Link
+                                                key={child.name}
+                                                to={child.path}
+                                                className={`block text-base transition-colors ${isActive(child.path)
+                                                        ? 'text-[#022512] font-bold'
+                                                        : 'text-[#022512]/70 font-medium hover:text-[#022512]'
+                                                    }`}
+                                                onClick={() => setIsOpen(false)}
+                                            >
+                                                {child.name}
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </div>
+                            ) : (
+                                <Link
+                                    key={link.name}
+                                    to={link.path}
+                                    className={`block text-base transition-colors ${isActive(link.path)
+                                            ? 'text-[#022512] font-bold'
+                                            : 'text-[#022512]/70 font-medium hover:text-[#022512]'
+                                        }`}
+                                    onClick={() => setIsOpen(false)}
+                                >
+                                    {link.name}
+                                </Link>
+                            )
+                        )}
 
                         <div className="pt-6 mt-2 border-t border-gray-100 flex flex-col space-y-3">
                             <a href="/lms" onClick={() => setIsOpen(false)}>

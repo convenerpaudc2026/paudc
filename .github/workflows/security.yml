@@ -49,7 +49,11 @@ jobs:
       # code never performs EC operations (app tokens use HS256; Firebase ID
       # tokens are verified with RS256 via `cryptography`), so it is not
       # reachable here. Revisit if `ecdsa` ships a fix or we drop python-jose.
-      - run: pip-audit -r requirements.txt --ignore-vuln PYSEC-2026-1325
+      # CVE-2026-85394: python-jose HS256/public-key confusion, exploitable only
+      # when jwt.decode() doesn't restrict algorithms. Both our decode calls do
+      # (core/auth.py: HS256 for app tokens, RS256 for Firebase), and there is
+      # no fix release. Revisit with the ecdsa exception above.
+      - run: pip-audit -r requirements.txt --ignore-vuln PYSEC-2026-1325 --ignore-vuln CVE-2026-85394
       - run: bandit -r core dependencies middlewares routers schemas services -ll
       - run: pytest -q
 

@@ -17,7 +17,8 @@ python-jose[cryptography]>=3.4.0,<4
 firebase-admin>=6.5.0
 
 # Database
-SQLAlchemy>=2.0.35
+# [asyncio] pulls in greenlet, which SQLAlchemy 2.1+ no longer installs by default.
+SQLAlchemy[asyncio]>=2.0.35
 aiosqlite==0.20.0
 alembic==1.13.1
 asyncpg>=0.30.0 

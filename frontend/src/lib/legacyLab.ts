@@ -6,7 +6,9 @@
 import { getAPIBaseURL } from './config';
 import { FormError, type FormErrorCode } from './googleForms';
 
-const SUBMIT_TIMEOUT_MS = 20_000;
+// Generous: covers a Render cold start, a ~1.7 MB attachment upload on a slow
+// connection, and the backend's own wait on Apps Script.
+const SUBMIT_TIMEOUT_MS = 60_000;
 
 const ERROR_MESSAGES: Record<FormErrorCode, string> = {
     offline:
@@ -84,6 +86,26 @@ export interface LegacyLabApplication {
     declarationParticipate: boolean;
 }
 
+// Turns a non-2xx backend response into an applicant-facing explanation,
+// rather than reporting every failure as "couldn't reach our servers".
+async function describeFailure(response: Response): Promise<FormError> {
+    if (response.status === 429) {
+        const minutes = Math.ceil(Number(response.headers.get('Retry-After')) / 60);
+        const wait = minutes > 0 ? `about ${minutes} minute${minutes === 1 ? '' : 's'}` : 'a few minutes';
+        return new FormError('network', `Too many submission attempts from your network. Please wait ${wait} and try again — your answers are still here.`);
+    }
+    if (response.status === 413) {
+        return new FormError('unknown', 'Your application is too large to send, usually because of the attached file. Please attach a smaller file or share a link instead.');
+    }
+    if (response.status === 422) {
+        // FastAPI validation errors: detail[].loc = ['body', '<field>', ...]
+        const body = await response.json().catch(() => null);
+        const field = body?.detail?.[0]?.loc?.[1];
+        return new FormError('unknown', `One of your answers wasn't accepted${typeof field === 'string' ? ` (${field})` : ''}. Please review your answers and try again.`);
+    }
+    return new FormError('network', 'Our application service is temporarily unavailable. Please try again in a few minutes — your answers are still here.');
+}
+
 export async function submitLegacyLabApplication(
     data: LegacyLabApplication,
 ): Promise<void> {
@@ -103,7 +125,7 @@ export async function submitLegacyLabApplication(
             signal: controller.signal,
         });
         if (!response.ok) {
-            throw new FormError('network', ERROR_MESSAGES.network);
+            throw await describeFailure(response);
         }
     } catch (error: unknown) {
         if (error instanceof FormError) {

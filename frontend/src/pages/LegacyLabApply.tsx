@@ -80,6 +80,16 @@ const BUDGET_OPTIONS = [
 ];
 const REACH_OPTIONS = ['1-25', '26-50', '51-100', '101-250', '251-500', '500+'];
 
+// Mirrors the backend's max_length limits (backend/routers/public_forms.py).
+// Anything longer is rejected there, so catch it here with a clear message.
+const MAX_LENGTH: Partial<Record<keyof FormState, number>> = {
+    fullName: 200, email: 254, phone: 64, city: 120, institution: 200, courseOfStudy: 200,
+    teamName: 200, teamLead: 200, teamMembers: 3000, teamInstitutions: 3000,
+    projectTitle: 200, ideaOneSentence: 1000, problem: 4000, affected: 4000, solution: 4000,
+    whyItMatters: 4000, progressSoFar: 4000, pilotDescription: 4000, pilotLocation: 300,
+    supportOther: 300, changeHoped: 4000, personalMotivation: 4000, links: 2000,
+};
+
 type StepId =
     | 'applicant'
     | 'team'
@@ -324,7 +334,14 @@ export default function LegacyLabApply() {
             const v = form[k];
             if (typeof v === 'string' && !v.trim()) e[k] = msg;
         };
+        const max = (...keys: (keyof FormState)[]) => keys.forEach((k) => {
+            const v = form[k];
+            const limit = MAX_LENGTH[k];
+            if (limit && typeof v === 'string' && v.length > limit && !e[k])
+                e[k] = `Please shorten this to ${limit.toLocaleString()} characters or fewer (currently ${v.length.toLocaleString()}).`;
+        });
         if (id === 'applicant') {
+            max('fullName', 'email', 'phone', 'city', 'institution', 'courseOfStudy');
             req('fullName', 'Full name is required.');
             if (!form.email.trim()) e.email = 'Email address is required.';
             else if (!isValidEmail(form.email)) e.email = 'Please enter a valid email address.';
@@ -339,6 +356,7 @@ export default function LegacyLabApply() {
             req('teamName', 'Team name is required.');
             req('teamLead', 'Team lead name is required.');
             req('teamMembers', 'Please list your other team members.');
+            max('teamName', 'teamLead', 'teamMembers', 'teamInstitutions');
         }
         if (id === 'eligibility') {
             req('studentStatus', 'Please select an option.');
@@ -357,6 +375,8 @@ export default function LegacyLabApply() {
             req('alreadyStarted', 'Please select an option.');
             if ((form.alreadyStarted === 'Yes' || form.alreadyStarted === 'Partly') && !form.progressSoFar.trim())
                 e.progressSoFar = 'Please tell us what you have done so far.';
+            max('projectTitle', 'ideaOneSentence', 'problem', 'affected', 'solution', 'whyItMatters');
+            if (form.alreadyStarted === 'Yes' || form.alreadyStarted === 'Partly') max('progressSoFar');
         }
         if (id === 'pilot') {
             req('pilotDescription', 'Please describe what a small pilot would look like.');
@@ -365,11 +385,17 @@ export default function LegacyLabApply() {
             if (form.supportNeeded.includes('Other') && !form.supportOther.trim())
                 e.supportOther = 'Please specify the other support you need.';
             req('pilotBudget', 'Please select an estimated budget.');
+            max('pilotDescription', 'pilotLocation');
+            if (form.supportNeeded.includes('Other')) max('supportOther');
         }
         if (id === 'impact') {
             req('changeHoped', 'Please describe the change you hope to create.');
             req('beneficiaryReach', 'Please select an estimated reach.');
             req('personalMotivation', 'Please tell us why this matters to you.');
+            max('changeHoped', 'personalMotivation');
+        }
+        if (id === 'supporting') {
+            max('links');
         }
         if (id === 'declarations') {
             if (!form.declarationAccurate) e.declarationAccurate = 'Required.';
@@ -445,7 +471,7 @@ export default function LegacyLabApply() {
                 ideaOneSentence: form.ideaOneSentence, problem: form.problem,
                 affected: form.affected, solution: form.solution, whyItMatters: form.whyItMatters,
                 alreadyStarted: form.alreadyStarted,
-                progressSoFar: form.progressSoFar || undefined,
+                progressSoFar: form.alreadyStarted === 'No' ? undefined : (form.progressSoFar || undefined),
                 pilotDescription: form.pilotDescription, pilotLocation: form.pilotLocation,
                 supportNeeded: form.supportNeeded,
                 supportOther: form.supportNeeded.includes('Other') ? (form.supportOther || undefined) : undefined,
@@ -756,7 +782,7 @@ export default function LegacyLabApply() {
                                             </label>
                                         )}
                                     </FieldShell>
-                                    <FieldShell label="Links to previous work, prototype, website, video or social media" hint="Optional. Add one link per line if you have several.">
+                                    <FieldShell label="Links to previous work, prototype, website, video or social media" hint="Optional. Add one link per line if you have several." error={errors.links}>
                                         <Textarea value={form.links} onChange={(e) => set('links', e.target.value)} placeholder={'https://...\nhttps://...'} className={`${inputBase} min-h-[100px]`} />
                                     </FieldShell>
                                 </div>

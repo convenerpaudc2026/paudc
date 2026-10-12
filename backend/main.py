@@ -115,15 +115,6 @@ async def sanitize_http_errors(request: Request, exc: HTTPException):
 
 # MODULE_MIDDLEWARE_START
 app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.allowed_cors_origins,
-    allow_credentials=True,
-    allow_methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allow_headers=['Authorization', 'Content-Type', 'Accept', 'X-Request-ID'],
-    expose_headers=['X-Request-ID'],
-    max_age=600,
-)
-app.add_middleware(
     RateLimitMiddleware,
     policies=(
         RateLimitPolicy('GET', '/api/v1/auth/login', 20, 60),
@@ -138,6 +129,17 @@ app.add_middleware(
     ),
 )
 app.add_middleware(RequestBodyLimitMiddleware, max_body_bytes=2 * 1024 * 1024)
+# CORS is added last so it wraps the limiters: their 429/413 responses must
+# carry CORS headers, or the browser hides them as a generic network failure.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.allowed_cors_origins,
+    allow_credentials=True,
+    allow_methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allow_headers=['Authorization', 'Content-Type', 'Accept', 'X-Request-ID'],
+    expose_headers=['X-Request-ID', 'Retry-After'],
+    max_age=600,
+)
 # MODULE_MIDDLEWARE_END
 
 @app.middleware('http')

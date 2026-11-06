@@ -251,10 +251,6 @@ export default function VisaRequest() {
                                     </p>
                                     <ul className="space-y-2 list-disc list-inside marker:text-[#C8A046]">
                                         <li>
-                                            An invitation letter supports — but does not guarantee — the issuance of a
-                                            visa. All decisions rest with the relevant embassy or consulate.
-                                        </li>
-                                        <li>
                                             Enter every detail <strong>exactly</strong> as it appears on your passport.
                                         </li>
                                         <li>

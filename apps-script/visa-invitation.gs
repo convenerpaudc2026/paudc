@@ -81,10 +81,7 @@ function sendConfirmation_(data) {
     'Dear ' + (data.name || 'Applicant') + ',\n\n' +
     'We have received your request for a PAUDC 2026 visa invitation letter. ' +
     'Your signed invitation letter will be emailed to you, typically within ' +
-    '5–7 working days.\n\n' +
-    'Please note that an invitation letter supports — but does not guarantee — ' +
-    'the issuance of a visa. All decisions rest with the relevant embassy or ' +
-    'consulate.\n\n— PAUDC 2026 Secretariat';
+    '5–7 working days.\n\n— PAUDC 2026 Secretariat';
   MailApp.sendEmail(data.email, 'PAUDC 2026 — visa letter request received', body);
 }
 

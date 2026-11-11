@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { User, Building, FileText, CheckCircle2, Calendar, Plane } from 'lucide-react';
+import { User, Building, FileText, CheckCircle2, Plane } from 'lucide-react';
 import { EmailPillInput, type EmailPillInputHandle } from '@/components/EmailPillInput';
 import { submitForm, isValidEmail, FormError } from '@/lib/googleForms';
 
@@ -216,7 +216,7 @@ export default function Register() {
                         <h2 className="text-2xl md:text-4xl font-bold text-[#1B5E3B]">Registration Policy</h2>
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-6 md:gap-8">
+                    <div className="max-w-2xl mx-auto">
                         <Card className="border border-[#1B5E3B]/20 shadow-lg bg-white/80 backdrop-blur-sm hover:border-[#1B5E3B] transition-colors">
                             <CardContent className="p-6 md:p-8">
                                 <h3 className="text-lg md:text-2xl font-bold text-[#1B5E3B] mb-4 md:mb-6 flex items-center gap-2 md:gap-3">
@@ -234,29 +234,6 @@ export default function Register() {
                                     </li>
 
                                 </ul>
-                            </CardContent>
-                        </Card>
-
-                        <Card className="border border-[#A4372C]/20 shadow-lg bg-white/80 backdrop-blur-sm hover:border-[#A4372C] transition-colors">
-                            <CardContent className="p-6 md:p-8">
-                                <h3 className="text-lg md:text-2xl font-bold text-[#A4372C] mb-4 md:mb-6 flex items-center gap-2 md:gap-3">
-                                    <div className="p-1.5 md:p-2 bg-[#A4372C]/10 rounded-lg"><Calendar className="w-5 h-5 md:w-6 md:h-6" /></div>
-                                    Registration Timeline
-                                </h3>
-                                <div className="space-y-4 md:space-y-6">
-                                    <div className="border-l-4 border-[#A4372C] pl-4 md:pl-6">
-                                        <p className="text-sm md:text-base font-bold text-[#A4372C] mb-1">Phase 1</p>
-                                        <p className="text-[#1B5E3B]/80 text-sm md:text-lg">May 1, 2026 - June 25, 2026</p>
-                                    </div>
-                                    <div className="border-l-4 border-[#A4372C] pl-4 md:pl-6">
-                                        <p className="text-sm md:text-base font-bold text-[#A4372C] mb-1">Phase 2</p>
-                                        <p className="text-[#1B5E3B]/80 text-sm md:text-lg">July 1, 2026 - August 31, 2026</p>
-                                    </div>
-                                    <div className="border-l-4 border-[#C8A046] pl-4 md:pl-6 pt-2">
-                                        <p className="text-sm md:text-base font-bold text-[#C8A046] mb-1">Payment Deadline</p>
-                                        <p className="text-[#1B5E3B]/80 text-sm md:text-lg">October 1, 2026</p>
-                                    </div>
-                                </div>
                             </CardContent>
                         </Card>
                     </div>

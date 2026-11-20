@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { User, Building, FileText, CheckCircle2, Plane } from 'lucide-react';
 import { EmailPillInput, type EmailPillInputHandle } from '@/components/EmailPillInput';
 import { submitForm, isValidEmail, FormError } from '@/lib/googleForms';
+import { trackMetaEvent, getUtmParams } from '@/lib/metaPixel';
 
 export default function Register() {
     const navigate = useNavigate();
@@ -156,11 +157,21 @@ export default function Register() {
                 addressedTo: registrationType === 'institution' ? formData.addressed_to || undefined : undefined,
             });
 
+            // Only reached once the server has accepted the registration:
+            // submitForm throws on validation, network or server errors.
+            trackMetaEvent('CompleteRegistration', {
+                content_name: registrationType === 'institution'
+                    ? 'Institution registration'
+                    : 'Individual registration',
+                ...getUtmParams(),
+            });
+
             toast({
                 title: "Registration Submitted",
                 description: "We've sent a confirmation email with further instructions.",
             });
-            setTimeout(() => navigate('/'), 2000);
+            // Keep any utm_ tags on the URL when leaving the form.
+            setTimeout(() => navigate({ pathname: '/', search: window.location.search }), 2000);
         } catch (error) {
             const isFormError = error instanceof FormError;
             const titleByCode: Record<string, string> = {

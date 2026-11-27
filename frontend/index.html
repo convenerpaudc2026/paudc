@@ -155,12 +155,13 @@
 
   <!-- Meta Pixel Code (base code lives in /public/meta-pixel.js: the CSP blocks inline scripts) -->
   <script src="/meta-pixel.js"></script>
-  <noscript><img height="1" width="1" style="display:none" alt=""
-      src="https://www.facebook.com/tr?id=1047937531649212&ev=PageView&noscript=1" /></noscript>
   <!-- End Meta Pixel Code -->
 </head>
 
 <body>
+  <!-- Meta Pixel no-JS fallback: <img> isn't allowed in a <noscript> inside <head> -->
+  <noscript><img height="1" width="1" style="display:none" alt=""
+      src="https://www.facebook.com/tr?id=1047937531649212&ev=PageView&noscript=1" /></noscript>
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
 </body>

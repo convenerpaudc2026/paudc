@@ -67,12 +67,15 @@ export async function submitForm(data: FormSubmission): Promise<void> {
       signal: controller.signal,
     });
     if (!response.ok) {
-      throw new FormError('network', ERROR_MESSAGES.network);
+      // A 5xx means our server was reached but the submission wasn't saved
+      // (e.g. the Google Sheet script failed), so don't blame the connection.
+      throw response.status >= 500
+        ? new FormError('unknown', ERROR_MESSAGES.unknown)
+        : new FormError('network', ERROR_MESSAGES.network);
     }
 
-    // no-cors responses are opaque — reaching this point means the request
-    // left the browser. Real success/failure is verified server-side in the
-    // Apps Script Executions log.
+    // Reaching this point means the backend confirmed the Apps Script saved
+    // the submission (it checks the script's reply, not just the status).
   } catch (error: unknown) {
     if (error instanceof FormError) {
       throw error;

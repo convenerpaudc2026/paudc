@@ -58,6 +58,61 @@ class PublicFormResponse(BaseModel):
     success: bool = True
 
 
+# Where an Apps Script web app's reply comes from: /exec redirects to googleusercontent.
+APPS_SCRIPT_RESPONSE_HOSTS = frozenset({'script.google.com', 'script.googleusercontent.com'})
+
+
+def apps_script_failure(response: httpx.Response) -> Optional[str]:
+    """Why an Apps Script reply means the submission was NOT saved, or None if it was.
+
+    Apps Script answers HTTP 200 even when the script fails: a caught error comes
+    back as {"success": false, "message": ...}, an uncaught one as an HTML error
+    page, and a deployment that needs sign-in redirects to a Google login page.
+    Treating every 200 as success let a broken sheet silently drop registrations
+    while applicants were told they had been received.
+    """
+    host = response.url.host
+    if host not in APPS_SCRIPT_RESPONSE_HOSTS:
+        return f'redirected to {host} (deployment access or authorization problem)'
+    try:
+        body = response.json()
+    except ValueError:
+        body = None
+    if isinstance(body, dict):
+        if body.get('success') is False:
+            detail = body.get('message') or body.get('error') or 'no message'
+            return f'script reported failure: {str(detail)[:300]}'
+        return None
+    if 'text/html' in response.headers.get('content-type', ''):
+        return 'script returned an HTML page instead of JSON (uncaught script error?)'
+    return None
+
+
+async def forward_to_apps_script(destination: str, data: BaseModel, timeout: float, label: str) -> None:
+    """POST a submission to an Apps Script web app; raise 502 unless it was really saved."""
+    try:
+        async with httpx.AsyncClient(timeout=timeout, follow_redirects=True) as client:
+            response = await client.post(
+                destination,
+                data={'payload': data.model_dump_json(exclude_none=True)},
+            )
+            response.raise_for_status()
+    except httpx.HTTPError as exc:
+        logger.error('%s forwarding failed: %s', label, type(exc).__name__)
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail='Form submission could not be completed',
+        ) from exc
+
+    failure = apps_script_failure(response)
+    if failure:
+        logger.error('%s was not saved by Apps Script: %s', label, failure)
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail='Form submission could not be completed',
+        )
+
+
 @router.post('/submit', response_model=PublicFormResponse)
 async def submit_public_form(data: PublicFormSubmission):
     # Visa requests can route to their own Apps Script / sheet when configured;
@@ -73,20 +128,7 @@ async def submit_public_form(data: PublicFormSubmission):
             detail='Form service is temporarily unavailable',
         )
 
-    try:
-        async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as client:
-            response = await client.post(
-                destination,
-                data={'payload': data.model_dump_json(exclude_none=True)},
-            )
-            response.raise_for_status()
-    except httpx.HTTPError as exc:
-        logger.error('Public form forwarding failed: %s', type(exc).__name__)
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail='Form submission could not be completed',
-        ) from exc
-
+    await forward_to_apps_script(destination, data, timeout=15.0, label=f'Public {data.type} form')
     logger.info('Public %s form forwarded successfully', data.type)
     return PublicFormResponse()
 
@@ -201,19 +243,8 @@ async def submit_legacy_lab(data: LegacyLabApplication):
             detail='Form service is temporarily unavailable',
         )
 
-    try:
-        async with httpx.AsyncClient(timeout=20.0, follow_redirects=True) as client:
-            response = await client.post(
-                settings.legacy_lab_apps_script_url,
-                data={'payload': data.model_dump_json(exclude_none=True)},
-            )
-            response.raise_for_status()
-    except httpx.HTTPError as exc:
-        logger.error('Legacy Lab forwarding failed: %s', type(exc).__name__)
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail='Form submission could not be completed',
-        ) from exc
-
+    await forward_to_apps_script(
+        settings.legacy_lab_apps_script_url, data, timeout=20.0, label='Legacy Lab application',
+    )
     logger.info('Legacy Lab application forwarded successfully')
     return PublicFormResponse()

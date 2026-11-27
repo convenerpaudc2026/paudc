@@ -12,7 +12,7 @@ emails a confirmation.
 |--------|---------------|----------------|---------|
 | `legacy-lab.gs` | `POST /api/v1/forms/legacy-lab` | `LEGACY_LAB_APPS_SCRIPT_URL` | Legacy Lab applications (`/legacy-lab/apply`) |
 | `visa-invitation.gs` | `POST /api/v1/forms/submit` (type = `visa`) | `VISA_APPS_SCRIPT_URL` | Visa letter requests (`/visa`) |
-| *(existing shared script)* | `POST /api/v1/forms/submit` (all other types) | `GOOGLE_APPS_SCRIPT_URL` | registration, contact, LMS waitlist |
+| `shared-forms.gs` | `POST /api/v1/forms/submit` (all other types) | `GOOGLE_APPS_SCRIPT_URL` | registration, contact, LMS waitlist |
 
 Routing note: visa requests go through the **shared** `/forms/submit` endpoint,
 but the backend sends them to `VISA_APPS_SCRIPT_URL` **when it is set**; if it is

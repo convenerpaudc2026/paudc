@@ -10,6 +10,8 @@ interface Speaker {
     bio: string[];
     /** Optional headshot in /public (e.g. '/speakers/baba-aye.jpg'); initials show until one is added. */
     photo?: string;
+    /** Required for openly licensed photos (e.g. CC BY-SA); omit for headshots supplied by the speaker. */
+    photoCredit?: { author: string; source: string; license: string; licenseUrl: string };
 }
 
 const PANEL_QUESTIONS = [
@@ -39,6 +41,13 @@ const SPEAKERS: Speaker[] = [
     {
         name: 'Dike Chukwumerije',
         role: 'Author, spoken word & performance poet',
+        photo: '/speakers/dike-chukwumerije.jpg',
+        photoCredit: {
+            author: 'Hassanabdul',
+            source: 'https://commons.wikimedia.org/wiki/File:Dike_Chukwumerije.jpg',
+            license: 'CC BY-SA 4.0',
+            licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/',
+        },
         bio: [
             'Dike Chukwumerije is a Nigerian author and spoken word poet whose work calls for national rebirth and a reawakening of social consciousness. Trained as a lawyer, he has published eight books, including the novel Urichindere, winner of the 2013 Association of Nigerian Authors (ANA) Prize for Prose Fiction. He won the maiden edition of The African Poet (Nigeria) Grand Slam, has hosted and directed the annual Night of the Spoken Word since 2013, and has toured his poetry-theatre production Made in Nigeria to cities across the country since 2016.',
             'His rendition of “The Wall and The Bridge” at the 23rd Nigerian Economic Summit in 2017 drew national attention, and in 2018 Vice President Yemi Osinbajo recited his poem “The Revolution Has No Tribe” in a speech on young Nigerians shaping the country’s future. In 2022 he sat on the judging panel of the Nigeria Prize for Literature. He is based in Abuja, where he is a long-standing member of the Abuja Literary Society.',
@@ -157,6 +166,19 @@ export default function Speakers() {
                                             <p key={i}>{paragraph}</p>
                                         ))}
                                     </div>
+                                    {speaker.photoCredit && (
+                                        <p className="mt-4 text-xs text-gray-500">
+                                            Photo:{' '}
+                                            <a href={speaker.photoCredit.source} target="_blank" rel="noopener noreferrer" className="underline hover:text-gray-700">
+                                                {speaker.photoCredit.author}, Wikimedia Commons
+                                            </a>
+                                            {' · '}
+                                            <a href={speaker.photoCredit.licenseUrl} target="_blank" rel="noopener noreferrer" className="underline hover:text-gray-700">
+                                                {speaker.photoCredit.license}
+                                            </a>
+                                            {' · cropped'}
+                                        </p>
+                                    )}
                                 </CardContent>
                             </Card>
                         ))}
